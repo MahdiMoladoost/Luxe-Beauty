@@ -2,6 +2,8 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
+Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
+
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
 - [x] Confirm repository admin/read/write access and default branch `main`.
@@ -12,20 +14,20 @@ Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocke
 - [x] Create required project-memory documents.
 - [x] Document target architecture and migration strategy.
 - [x] Mark legacy admin/customer/provider/auth routes as replacement targets.
-- [~] Create initial executable Prisma schema.
-- [ ] Validate Prisma schema in CI/runtime.
-- [ ] Complete a repository-wide secret scan and dependency audit.
+- [x] Create initial executable Prisma schema.
+- [x] Validate Prisma schema and committed migration against a clean PostgreSQL instance in CI.
+- [~] Complete repository-wide secret scanning and dependency auditing; production dependency audit passes, dedicated source/secret scanning is still open.
 
 ## Phase 1 — Infrastructure
-- [ ] Normalize package name/scripts/dependencies and lockfile.
-- [ ] Add `.env.example` with names/placeholders only.
-- [ ] PostgreSQL and Prisma client/migrations.
-- [ ] Redis connection and queue abstraction.
-- [ ] Worker process, retries and dead-letter queue.
-- [ ] MinIO/S3 storage adapter and buckets/namespaces.
-- [ ] Dockerfiles, Docker Compose, Nginx and health checks.
-- [ ] Structured logging and correlation IDs.
-- [ ] CI quality gates.
+- [x] Normalize package name, scripts, dependency versions and committed lockfile.
+- [x] Add `.env.example` with names/placeholders only.
+- [x] Add PostgreSQL, Prisma Client, baseline schema and committed migration foundation.
+- [~] Add Redis connection and BullMQ-compatible queue foundation; production queue services and monitoring remain open.
+- [~] Add worker process scaffold; retries, scheduled jobs and dead-letter handling remain open.
+- [~] Add MinIO development namespaces and S3-compatible environment contract; application storage adapter remains open.
+- [x] Add Dockerfile, Docker Compose, production-like Nginx and liveness/readiness endpoints; full runtime smoke test remains open.
+- [~] Add structured worker logs; request correlation middleware and full observability remain open.
+- [x] Add read-only reproducible CI gates for locked install, Prisma, migrations, lint, typecheck, unit tests, build, Compose, Docker image and production dependency audit.
 
 ## Phase 2 — Design system and public experience
 - [ ] RTL layout, licensed Persian font and theme tokens.
@@ -64,12 +66,12 @@ Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocke
 - [ ] Multi-service availability and actionable alternatives.
 
 ## Phase 6 — Booking, mock payment and ledger
-- [ ] Booking recipient model.
-- [ ] Transactional holds, TTL and idempotency.
-- [ ] Complete tested booking state machine.
+- [~] Booking recipient, booking, booking-item and transition persistence models exist; application workflows remain open.
+- [~] Idempotency/outbox persistence foundations exist; transactional booking holds and TTL remain open.
+- [~] Booking transition guard and initial unit coverage exist; complete use-case/state-machine integration tests remain open.
 - [ ] Instant/manual approval and expiry jobs.
 - [ ] Mock payment callbacks/webhooks/refunds/reconciliation.
-- [ ] Balanced immutable ledger postings.
+- [~] Ledger account/transaction/entry persistence and integer-toman helpers exist; posting services and balance invariants remain open.
 - [ ] Cancellation, delay, reschedule and no-show policies.
 - [ ] Attendance OTP, completion and dispute window.
 - [ ] Dispute workflow and financial hold.
@@ -101,7 +103,7 @@ Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocke
 - [ ] Neshan adapter and explicit development mode.
 - [ ] Address selection/geocoding/reverse/distance.
 - [ ] Radius/polygon service areas and privacy rules.
-- [ ] Persian normalization, PostgreSQL FTS and pg_trgm.
+- [~] Persian letter/digit/search normalization exists with unit tests; PostgreSQL FTS and pg_trgm remain open.
 - [ ] Autocomplete, ranking, filters and sponsored labels.
 - [ ] SEO geography/service pages and structured data.
 
@@ -114,19 +116,19 @@ Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocke
 
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development-only seed for nine cities and test roles.
-- [ ] Unit test matrix.
+- [~] Unit test matrix; foundational money, Persian normalization and booking-state tests pass.
 - [ ] Integration test matrix.
 - [ ] Playwright E2E matrix.
 - [ ] Security/permission/IDOR/rate/session/upload tests.
 - [ ] Accessibility automated and manual checks.
-- [ ] Production build, migration and Docker validation.
-- [ ] Dependency/security audit.
+- [x] Current foundation production build, clean migration deployment, Compose validation and Docker image build pass in CI.
+- [x] Current production dependency audit passes at high severity threshold after remediating Prisma, BullMQ/uuid and Next/PostCSS advisories.
 - [ ] Backup and restore test.
 - [ ] Operations/health/queue dashboards.
 - [ ] Persian README, installation, production, backup and restore docs.
-- [ ] External integration limitations report.
-- [ ] Draft PR description updated with final architecture, migrations, capabilities, tests, build, env, accounts, runbook and security.
-- [ ] All MR-001 through MR-071 requirements traced to code/tests/docs.
+- [x] External integration limitations and environment contract documented.
+- [x] Draft PR description updated with current architecture, migration, capabilities, tests, build, environment, runbook, security and limitations.
+- [~] MR-001 through MR-071 are documented and traceable; most implementation requirements remain open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
