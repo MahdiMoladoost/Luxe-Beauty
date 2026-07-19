@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - rebuild/full-platform
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: luxe
+          POSTGRES_PASSWORD: luxe_dev_password
+          POSTGRES_DB: luxe_beauty_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U luxe -d luxe_beauty_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      APP_ENV: test
+      APP_URL: http://localhost:5000
+      NEXT_PUBLIC_APP_URL: http://localhost:5000
+      DATABASE_URL: postgresql://luxe:luxe_dev_password@127.0.0.1:5432/luxe_beauty_test?schema=public
+      REDIS_URL: redis://127.0.0.1:6379
+      IDENTITY_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      SMS_PROVIDER: mock
+      MAP_PROVIDER: mock
+      STORAGE_PROVIDER: minio
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies and refresh lockfile
+        run: npm install --no-audit --no-fund
+
+      - name: Validate Prisma schema
+        run: npm run db:validate
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Upload generated lockfile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-lock-generated
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 3
