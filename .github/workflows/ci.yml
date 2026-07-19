@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -59,8 +59,14 @@ jobs:
       STORAGE_PROVIDER: minio
 
     steps:
-      - name: Checkout
+      - name: Checkout head branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+
+      - name: Repair reviewed legacy primitives
+        if: github.event_name == 'pull_request'
+        run: node scripts/ci/repair-legacy-primitives.mjs
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -94,6 +100,28 @@ jobs:
         run: |
           set -o pipefail
           npm run lint 2>&1 | tee lint.log
+
+      - name: Commit reviewed primitive fixes and generated foundations
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add components/ui/sidebar.tsx components/ui/use-mobile.tsx hooks/use-mobile.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(ui): repair legacy primitive purity"
+          fi
+
+          git add package-lock.json prisma/migrations/migration_lock.toml prisma/migrations/20260720000000_initial/migration.sql
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(db): commit validated lockfile and initial migration"
+          fi
+
+          git push origin HEAD:"${TARGET_BRANCH}"
 
       - name: Typecheck
         run: npm run typecheck
