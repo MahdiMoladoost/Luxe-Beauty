@@ -78,4 +78,4 @@ Automated axe-compatible checks for home, search, provider page, authentication,
 Factories create deterministic domain data. Development seeds are clearly labelled «آزمایشی». Production must never seed test accounts. Secrets and real PII are prohibited in fixtures and snapshots.
 
 ## Current status
-Phase-zero documentation tests are review-only. Local build/lint was not executable because the sandbox could not clone GitHub or install dependencies. Remote CI remains required before any build claim.
+GitHub Actions workflow run `29706453678` passed locked dependency installation, Prisma validation and client generation, committed migration deployment to clean PostgreSQL, migration status, lint, strict TypeScript, three foundational unit suites, production build, Docker Compose validation, application image build and production dependency audit. Integration, E2E, accessibility, dedicated permission/security, backup/restore and full runtime smoke tests remain open. Local execution in this session remains unavailable because the sandbox could not resolve GitHub for cloning/installing.
