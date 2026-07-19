@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next"
 import { Vazirmatn } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { BeautyMediaEnhancer } from "@/components/media/beauty-media-enhancer"
 import "./globals.css"
+import "./generated-images.css"
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
@@ -53,6 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="fa-IR" dir="rtl" className="bg-background" suppressHydrationWarning>
       <body className={`${vazirmatn.variable} font-sans antialiased`}>
+        <BeautyMediaEnhancer />
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
