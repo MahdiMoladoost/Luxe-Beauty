@@ -4,6 +4,7 @@
 
 create extension if not exists pgcrypto;
 create extension if not exists btree_gist;
+create extension if not exists citext;
 
 create type user_role as enum ('customer', 'salon_owner', 'staff', 'support', 'admin');
 create type account_status as enum ('pending', 'active', 'suspended', 'deleted');
@@ -263,14 +264,15 @@ create table slot_holds (
   service_ids uuid[] not null,
   quote_snapshot jsonb not null,
   expires_at timestamptz not null,
+  active boolean not null default true,
   created_at timestamptz not null default now(),
   check (starts_at < ends_at),
   check (customer_user_id is not null or anonymous_key is not null)
 );
-create index slot_holds_expiry_idx on slot_holds (expires_at);
+create index slot_holds_expiry_idx on slot_holds (expires_at) where active;
 alter table slot_holds add constraint slot_holds_no_overlap
   exclude using gist (staff_id with =, tstzrange(starts_at, ends_at, '[)') with &&)
-  where (expires_at > now());
+  where (active);
 
 create table bookings (
   id uuid primary key default gen_random_uuid(),
@@ -582,7 +584,7 @@ create trigger blog_posts_set_updated_at before update on blog_posts for each ro
 
 -- Production implementation notes:
 -- 1) Run booking hold + payment confirmation in database transactions with SELECT ... FOR UPDATE.
--- 2) Delete expired slot_holds using a scheduled worker; the application must still check expires_at on every read.
+-- 2) A scheduled worker must set expired slot_holds.active = false; every application read must also verify expires_at > now().
 -- 3) Store gateway secrets, SMS keys and encryption keys only in a secret manager/environment variables.
 -- 4) Add row-level authorization in the application or database; salon users must be scoped to their salon_id.
 -- 5) Partition audit_logs and notifications by month once volume requires it.
