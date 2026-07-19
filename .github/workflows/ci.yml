@@ -32,9 +32,32 @@ jobs:
         run: npm ci
 
       - name: TypeScript
-        run: npx tsc --noEmit
+        id: typecheck
+        continue-on-error: true
+        run: npx tsc --noEmit > typecheck.log 2>&1
 
       - name: Production build
+        id: build
+        if: steps.typecheck.outcome == 'success'
+        continue-on-error: true
         env:
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-        run: npm run build
+        run: npm run build > build.log 2>&1
+
+      - name: Upload diagnostics
+        if: always() && (steps.typecheck.outcome == 'failure' || steps.build.outcome == 'failure')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics
+          path: |
+            typecheck.log
+            build.log
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Report validation failure
+        if: steps.typecheck.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: |
+          if [ -f typecheck.log ]; then cat typecheck.log; fi
+          if [ -f build.log ]; then cat build.log; fi
+          exit 1
