@@ -91,7 +91,9 @@ jobs:
         run: npm run db:migrate:deploy
 
       - name: Lint
-        run: npm run lint
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee lint.log
 
       - name: Typecheck
         run: npm run typecheck
@@ -111,7 +113,7 @@ jobs:
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Upload generated lockfile and migration
+      - name: Upload generated foundations and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -120,5 +122,6 @@ jobs:
             package-lock.json
             prisma/migrations/migration_lock.toml
             prisma/migrations/20260720000000_initial/migration.sql
+            lint.log
           if-no-files-found: warn
           retention-days: 3
