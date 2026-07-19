@@ -2,161 +2,119 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { ArrowLeft, CheckCircle2, Loader2, Phone, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Phone, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react"
+import { isIranianMobile } from "@/lib/booking-engine"
+
+type ApiResult<T> = { ok: true; data: T } | { ok: false; error: { message: string } }
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const [mobile, setMobile] = useState("")
+  const [code, setCode] = useState("")
+  const [codeSent, setCodeSent] = useState(false)
+  const [demoCode, setDemoCode] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    // Simulate login
-    setTimeout(() => setIsLoading(false), 1500)
+  async function requestCode(event: React.FormEvent) {
+    event.preventDefault()
+    if (!isIranianMobile(mobile)) return setError("شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد.")
+    setLoading(true)
+    setError("")
+    try {
+      const response = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request", mobile }),
+      })
+      const result = (await response.json()) as ApiResult<{ demoCode?: string }>
+      if (!result.ok) throw new Error(result.error.message)
+      setCodeSent(true)
+      setDemoCode(result.data.demoCode ?? "")
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "ارسال کد تایید ناموفق بود.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function verifyCode(event: React.FormEvent) {
+    event.preventDefault()
+    if (code.length < 5) return setError("کد تایید را کامل وارد کنید.")
+    setLoading(true)
+    setError("")
+    try {
+      const response = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", mobile, code }),
+      })
+      const result = (await response.json()) as ApiResult<{ verified: boolean }>
+      if (!result.ok) throw new Error(result.error.message)
+      router.replace("/dashboard")
+      router.refresh()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "تایید کد ناموفق بود.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left Side - Form */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 md:px-8 lg:px-16">
-        <div className="mx-auto w-full max-w-md">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <span className="text-lg font-bold text-primary-foreground">س</span>
-            </div>
-            <span className="text-xl font-bold">سالن یاب</span>
+    <div className="grid min-h-screen bg-background lg:grid-cols-2">
+      <main className="flex items-center justify-center px-4 py-12 md:px-8">
+        <div className="w-full max-w-md">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-lg font-black text-primary-foreground">ل</div>
+            <div><p className="text-xl font-black text-foreground">لوکس بیوتی</p><p className="text-xs text-muted-foreground">رزرو آنلاین زیبایی</p></div>
           </Link>
 
-          <h1 className="mt-8 text-3xl font-bold">خوش آمدید</h1>
-          <p className="mt-2 text-muted-foreground">
-            برای ادامه وارد حساب کاربری خود شوید
-          </p>
+          <p className="mt-10 text-sm font-bold text-primary">ورود یا ثبت‌نام</p>
+          <h1 className="mt-2 text-3xl font-black text-foreground">با شماره موبایل ادامه دهید</h1>
+          <p className="mt-3 leading-7 text-muted-foreground">حساب جدید پس از اولین تایید شماره ایجاد می‌شود و نیازی به رمز عبور نیست.</p>
 
-          <Tabs defaultValue="phone" className="mt-8">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="phone">شماره موبایل</TabsTrigger>
-              <TabsTrigger value="email">ایمیل</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="phone" className="mt-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">شماره موبایل</Label>
-                  <div className="relative">
-                    <Phone className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                      id="phone"
-                      type="tel"
-                      placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                      className="pr-10"
-                      dir="ltr"
-                    />
-                  </div>
+          {!codeSent ? (
+            <form onSubmit={requestCode} className="mt-8 space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="mobile">شماره موبایل</Label>
+                <div className="relative">
+                  <Phone className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="mobile" dir="ltr" inputMode="numeric" maxLength={11} value={mobile} onChange={(event) => setMobile(event.target.value)} placeholder="09123456789" className="h-12 pr-10 text-left" autoComplete="tel" />
                 </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ارسال..." : "دریافت کد تایید"}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="email" className="mt-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">ایمیل</Label>
-                  <Input 
-                    id="email"
-                    type="email"
-                    placeholder="example@email.com"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">رمز عبور</Label>
-                    <Link href="/auth/forgot-password" className="text-sm text-accent hover:underline">
-                      فراموشی رمز عبور
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="رمز عبور"
-                      className="pl-10 pr-10"
-                      dir="ltr"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ورود..." : "ورود به حساب"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  یا
-                </span>
+              <Button type="submit" size="lg" className="w-full" disabled={loading}>{loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}دریافت کد تایید<ArrowLeft className="mr-2 h-4 w-4" /></Button>
+            </form>
+          ) : (
+            <form onSubmit={verifyCode} className="mt-8 space-y-5">
+              <div className="rounded-2xl bg-secondary p-4 text-sm text-muted-foreground"><CheckCircle2 className="ml-2 inline h-5 w-5 text-emerald-600" />کد تایید برای <strong dir="ltr" className="text-foreground">{mobile}</strong> ارسال شد.</div>
+              <div className="space-y-2">
+                <Label htmlFor="otp">کد تایید</Label>
+                <Input id="otp" dir="ltr" inputMode="numeric" maxLength={5} value={code} onChange={(event) => setCode(event.target.value)} placeholder="•••••" className="h-12 text-center text-xl tracking-[0.45em]" autoComplete="one-time-code" />
               </div>
-            </div>
+              {demoCode && <div className="rounded-xl border border-dashed border-amber-500/50 bg-amber-500/5 p-3 text-center text-sm text-amber-800">کد محیط توسعه: <strong dir="ltr">{demoCode}</strong></div>}
+              <Button type="submit" size="lg" className="w-full" disabled={loading}>{loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}تایید و ورود</Button>
+              <button type="button" className="w-full text-sm font-bold text-primary" onClick={() => { setCodeSent(false); setCode(""); setDemoCode(""); setError("") }}>ویرایش شماره موبایل</button>
+            </form>
+          )}
 
-            <div className="mt-6 grid gap-3">
-              <Button variant="outline" className="w-full">
-                <svg className="ml-2 h-5 w-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                ورود با گوگل
-              </Button>
-            </div>
-          </div>
+          {error && <div role="alert" className="mt-5 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            حساب کاربری ندارید؟{" "}
-            <Link href="/auth/register" className="font-medium text-accent hover:underline">
-              ثبت نام کنید
-            </Link>
-          </p>
+          <p className="mt-7 text-center text-xs leading-6 text-muted-foreground">با ادامه، <Link href="/terms" className="font-bold text-primary">قوانین استفاده</Link> و <Link href="/privacy" className="font-bold text-primary">حریم خصوصی</Link> را می‌پذیرید.</p>
+          <div className="mt-7 grid grid-cols-2 gap-3 border-t border-border pt-6"><Button variant="outline" asChild><Link href="/salon-dashboard">ورود سالن‌داران</Link></Button><Button variant="outline" asChild><Link href="/staff-dashboard">پنل آرایشگر</Link></Button></div>
         </div>
-      </div>
+      </main>
 
-      {/* Right Side - Image */}
-      <div className="hidden flex-1 bg-secondary lg:block">
-        <div className="relative flex h-full items-center justify-center p-12">
-          <div className="max-w-lg text-center">
-            <h2 className="text-4xl font-bold">
-              بهترین آرایشگاه‌ها را پیدا کنید
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              با سالن یاب، نوبت‌دهی آنلاین آرایشگاه هیچوقت به این راحتی نبوده است.
-              از میان هزاران سالن، بهترین را انتخاب کنید.
-            </p>
-          </div>
+      <aside className="hidden items-center justify-center bg-gradient-to-br from-primary/20 via-rose-500/10 to-secondary p-12 lg:flex">
+        <div className="max-w-lg rounded-3xl border border-white/40 bg-background/65 p-8 backdrop-blur-xl">
+          <ShieldCheck className="h-12 w-12 text-primary" />
+          <h2 className="mt-6 text-4xl font-black leading-tight text-foreground">رزرو شفاف، بدون تماس و هماهنگی تکراری</h2>
+          <p className="mt-5 text-lg leading-9 text-muted-foreground">خدمت، قیمت، متخصص و زمان آزاد را ببینید؛ بیعانه را امن پرداخت کنید و تایید نوبت را دریافت کنید.</p>
         </div>
-      </div>
+      </aside>
     </div>
   )
 }

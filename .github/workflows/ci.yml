@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - agent/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generated media integrity
+        id: media
+        continue-on-error: true
+        run: node scripts/validate-generated-media.mjs > media-validation.log 2>&1
+
+      - name: TypeScript
+        id: typecheck
+        if: steps.media.outcome == 'success'
+        continue-on-error: true
+        run: npx tsc --noEmit > typecheck.log 2>&1
+
+      - name: Production build
+        id: build
+        if: steps.media.outcome == 'success' && steps.typecheck.outcome == 'success'
+        continue-on-error: true
+        env:
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+        run: npm run build > build.log 2>&1
+
+      - name: Upload diagnostics
+        if: always() && (steps.media.outcome == 'failure' || steps.typecheck.outcome == 'failure' || steps.build.outcome == 'failure')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics
+          path: |
+            media-validation.log
+            media-debug-*.b64
+            media-debug-*.webp
+            typecheck.log
+            build.log
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Report validation failure
+        if: steps.media.outcome == 'failure' || steps.typecheck.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: |
+          if [ -f media-validation.log ]; then cat media-validation.log; fi
+          if [ -f typecheck.log ]; then cat typecheck.log; fi
+          if [ -f build.log ]; then cat build.log; fi
+          exit 1

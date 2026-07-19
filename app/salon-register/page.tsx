@@ -1,194 +1,124 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
+import { ArrowLeft, BarChart3, Check, CheckCircle2, Loader2, Upload, UsersRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, Upload, Check } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { cities, serviceCategories } from "@/lib/mock-data"
 
-const cities = [
-  "تهران", "اصفهان", "شیراز", "مشهد", "تبریز", "کرج", "اهواز", "قم"
-]
+const salonTypes = ["زنانه", "مردانه", "خانوادگی", "مرکز تخصصی پوست", "مجموعه اسپا"]
+
+type Result = { ok: true; data: { application: { trackingCode: string } } } | { ok: false; error: { message: string; fields?: Record<string, string> } }
 
 export default function SalonRegisterPage() {
+  const [form, setForm] = useState({ salonName: "", ownerName: "", ownerMobile: "", city: "", area: "", address: "", salonType: "", staffCount: 1, instagram: "", description: "" })
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [documentName, setDocumentName] = useState("")
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [fields, setFields] = useState<Record<string, string>>({})
+  const [trackingCode, setTrackingCode] = useState("")
+
+  function toggleService(id: string) {
+    setSelectedServices((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  }
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault()
+    setLoading(true)
+    setError("")
+    setFields({})
+    try {
+      const response = await fetch("/api/salon-applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, services: selectedServices, acceptedTerms, documentName }),
+      })
+      const result = (await response.json()) as Result
+      if (!result.ok) {
+        setFields(result.error.fields ?? {})
+        throw new Error(result.error.message)
+      }
+      setTrackingCode(result.data.application.trackingCode)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "ثبت درخواست ناموفق بود.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-secondary/30">
       <Header />
-      
-      <main className="flex-1 bg-secondary/20">
-        <section className="px-4 py-12">
-          <div className="container mx-auto max-w-3xl">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold">ثبت آرایشگاه در سالن یاب</h1>
-              <p className="mt-2 text-muted-foreground">
-                آرایشگاه خود را ثبت کنید و به هزاران مشتری جدید دسترسی پیدا کنید
-              </p>
-            </div>
+      <main className="mx-auto max-w-7xl px-4 pb-20 pt-28 lg:px-8">
+        <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div>
+            <p className="text-sm font-bold text-primary">همکاری با لوکس بیوتی</p>
+            <h1 className="mt-3 text-4xl font-black text-foreground">سالن خود را ثبت و عملیات را هوشمند کنید</h1>
+            <p className="mt-4 max-w-3xl leading-8 text-muted-foreground">مدیریت نوبت، پرسنل، مشتریان، مالی، نمونه‌کار و بازاریابی را از یک پنل انجام دهید. ثبت اولیه رایگان است و انتشار پروفایل پس از بررسی مدارک انجام می‌شود.</p>
 
-            <div className="mt-8 rounded-2xl border border-border bg-card p-8">
-              <form className="space-y-8">
-                {/* Basic Info */}
-                <div>
-                  <h2 className="text-lg font-semibold">اطلاعات پایه</h2>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">نام آرایشگاه *</label>
-                      <Input placeholder="مثال: سالن زیبایی گلریز" />
+            <section className="mt-8 rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
+              {trackingCode ? (
+                <div className="py-14 text-center"><CheckCircle2 className="mx-auto h-16 w-16 text-emerald-600" /><h2 className="mt-5 text-2xl font-black text-foreground">درخواست سالن ثبت شد</h2><p className="mt-2 text-muted-foreground">پس از بررسی اولیه با مدیر سالن تماس گرفته می‌شود.</p><p dir="ltr" className="mx-auto mt-4 w-fit rounded-xl bg-secondary px-5 py-3 text-xl font-black text-primary">{trackingCode}</p><Button className="mt-6" asChild><Link href="/salon-dashboard">مشاهده نمونه پنل سالن</Link></Button></div>
+              ) : (
+                <form onSubmit={submit} className="space-y-8">
+                  <div>
+                    <h2 className="text-xl font-black text-foreground">اطلاعات سالن و مدیر</h2>
+                    <div className="mt-5 grid gap-5 md:grid-cols-2">
+                      <Field label="نام سالن" error={fields.salonName}><Input value={form.salonName} onChange={(event) => setForm({ ...form, salonName: event.target.value })} placeholder="مثال: سالن زیبایی لوکس" /></Field>
+                      <Field label="نام مدیر" error={fields.ownerName}><Input value={form.ownerName} onChange={(event) => setForm({ ...form, ownerName: event.target.value })} /></Field>
+                      <Field label="شماره موبایل مدیر" error={fields.ownerMobile}><Input dir="ltr" maxLength={11} className="text-left" value={form.ownerMobile} onChange={(event) => setForm({ ...form, ownerMobile: event.target.value })} placeholder="09123456789" /></Field>
+                      <Field label="نوع سالن" error={fields.salonType}><select className="h-10 w-full rounded-md border border-input bg-background px-3" value={form.salonType} onChange={(event) => setForm({ ...form, salonType: event.target.value })}><option value="">انتخاب کنید</option>{salonTypes.map((type) => <option key={type}>{type}</option>)}</select></Field>
+                      <Field label="شهر" error={fields.city}><select className="h-10 w-full rounded-md border border-input bg-background px-3" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })}><option value="">انتخاب شهر</option>{cities.map((city) => <option key={city.id} value={city.name}>{city.name}</option>)}</select></Field>
+                      <Field label="منطقه"><Input value={form.area} onChange={(event) => setForm({ ...form, area: event.target.value })} /></Field>
+                      <Field label="تعداد پرسنل" error={fields.staffCount}><Input type="number" min={1} value={form.staffCount} onChange={(event) => setForm({ ...form, staffCount: Math.max(1, Number(event.target.value)) })} /></Field>
+                      <Field label="اینستاگرام سالن"><Input dir="ltr" className="text-left" placeholder="@username" value={form.instagram} onChange={(event) => setForm({ ...form, instagram: event.target.value })} /></Field>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">نوع سالن *</label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="انتخاب کنید" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="female">زنانه</SelectItem>
-                          <SelectItem value="male">مردانه</SelectItem>
-                          <SelectItem value="unisex">یونیسکس</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">شهر *</label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="انتخاب شهر" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cities.map(city => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">منطقه</label>
-                      <Input placeholder="مثال: ولیعصر" />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-medium">آدرس کامل *</label>
-                      <Input placeholder="آدرس دقیق سالن را وارد کنید" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">شماره تماس *</label>
-                      <Input placeholder="۰۲۱-۱۲۳۴۵۶۷۸" dir="ltr" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">اینستاگرام</label>
-                      <Input placeholder="@username" dir="ltr" />
-                    </div>
+                    <Field label="آدرس کامل" error={fields.address} className="mt-5"><Input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} /></Field>
                   </div>
-                </div>
 
-                {/* Owner Info */}
-                <div className="border-t border-border pt-8">
-                  <h2 className="text-lg font-semibold">اطلاعات مالک</h2>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">نام و نام خانوادگی *</label>
-                      <Input placeholder="نام کامل مالک سالن" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">شماره موبایل *</label>
-                      <Input placeholder="۰۹۱۲۳۴۵۶۷۸۹" dir="ltr" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">ایمیل</label>
-                      <Input placeholder="email@example.com" dir="ltr" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">کد ملی *</label>
-                      <Input placeholder="۰۰۱۲۳۴۵۶۷۸" dir="ltr" />
-                    </div>
+                  <div className="border-t border-border pt-7">
+                    <h2 className="text-xl font-black text-foreground">نوع خدمات</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">حداقل یک گروه خدمت انتخاب کنید.</p>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">{serviceCategories.map((category) => { const selected = selectedServices.includes(category.id); return <button key={category.id} type="button" onClick={() => toggleService(category.id)} className={`flex items-center gap-3 rounded-xl border p-3 text-right ${selected ? "border-primary bg-primary/5" : "border-border"}`}><span className="text-xl">{category.icon}</span><span className="flex-1 text-sm font-bold text-foreground">{category.name}</span><span className={`flex h-5 w-5 items-center justify-center rounded-full border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>{selected && <Check className="h-3 w-3" />}</span></button> })}</div>
+                    {fields.services && <p className="mt-2 text-xs text-destructive">{fields.services}</p>}
                   </div>
-                </div>
 
-                {/* Description */}
-                <div className="border-t border-border pt-8">
-                  <h2 className="text-lg font-semibold">معرفی سالن</h2>
-                  <div className="mt-4 space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">توضیحات سالن</label>
-                      <Textarea 
-                        placeholder="درباره سالن، سابقه کار و خدمات ویژه خود بنویسید..."
-                        rows={4}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">آپلود تصاویر سالن</label>
-                      <div className="flex flex-wrap gap-4">
-                        <div className="flex h-32 w-32 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-border transition-colors hover:border-accent">
-                          <div className="text-center">
-                            <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-                            <span className="mt-1 text-xs text-muted-foreground">آپلود</span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">حداقل ۳ تصویر از فضای سالن</p>
-                    </div>
+                  <div className="border-t border-border pt-7">
+                    <h2 className="text-xl font-black text-foreground">معرفی و مدارک</h2>
+                    <label className="mt-4 block text-sm font-medium text-foreground">توضیحات سالن<Textarea rows={5} className="mt-2" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="سابقه، مزیت‌ها و خدمات ویژه…" /></label>
+                    <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground"><Upload className="h-5 w-5 text-primary" /><span>{documentName || "انتخاب مدرک یا تصویر، اختیاری — بارگذاری واقعی در محیط تولید باید به فضای ذخیره امن متصل شود"}</span><input type="file" className="hidden" onChange={(event) => setDocumentName(event.target.files?.[0]?.name ?? "")} /></label>
                   </div>
-                </div>
 
-                {/* Services */}
-                <div className="border-t border-border pt-8">
-                  <h2 className="text-lg font-semibold">خدمات ارائه شده</h2>
-                  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
-                    {["کوتاهی مو", "رنگ و هایلایت", "کراتین", "مانیکور و پدیکور", "آرایش عروس", "اصلاح صورت", "مراقبت پوست", "اکستنشن مژه", "تاتو ابرو"].map(service => (
-                      <label key={service} className="flex items-center gap-2">
-                        <Checkbox />
-                        <span className="text-sm">{service}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Terms */}
-                <div className="border-t border-border pt-8">
-                  <div className="flex items-start gap-2">
-                    <Checkbox id="terms" className="mt-1" />
-                    <label htmlFor="terms" className="text-sm leading-relaxed text-muted-foreground">
-                      با{" "}
-                      <Link href="/terms" className="text-accent hover:underline">
-                        قوانین و مقررات
-                      </Link>
-                      {" "}سالن یاب برای صاحبان آرایشگاه موافقم و تایید می‌کنم که اطلاعات وارد شده صحیح است.
-                    </label>
-                  </div>
-                </div>
-
-                <Button size="lg" className="w-full">
-                  ثبت درخواست
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                </Button>
-              </form>
-            </div>
-
-            {/* Benefits */}
-            <div className="mt-12 rounded-2xl border border-border bg-card p-8">
-              <h2 className="text-xl font-semibold">چرا در سالن یاب ثبت کنید؟</h2>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {[
-                  "دسترسی به هزاران مشتری جدید",
-                  "سیستم نوبت‌دهی آنلاین ۲۴ ساعته",
-                  "نمایش نمونه‌کارها و پورتفولیو",
-                  "گزارش‌های آماری و مالی",
-                  "پشتیبانی اختصاصی",
-                  "افزایش اعتبار با نظرات مشتریان",
-                ].map(benefit => (
-                  <div key={benefit} className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span>{benefit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  <label className="flex items-start gap-3 rounded-xl bg-secondary p-4"><input type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} className="mt-1 h-4 w-4" /><span className="text-sm leading-7 text-muted-foreground">صحت اطلاعات را تایید می‌کنم و <Link href="/terms" className="font-bold text-primary">قوانین همکاری و حریم خصوصی</Link> را می‌پذیرم.</span></label>
+                  {fields.acceptedTerms && <p className="text-xs text-destructive">{fields.acceptedTerms}</p>}
+                  {error && <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+                  <Button type="submit" size="lg" className="w-full" disabled={loading}>{loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}ارسال درخواست بررسی<ArrowLeft className="mr-2 h-4 w-4" /></Button>
+                </form>
+              )}
+            </section>
           </div>
+
+          <aside className="space-y-4 lg:pt-28">
+            {[
+              { title: "مدیریت نوبت ۲۴ ساعته", description: "تقویم، رزرو دستی، ظرفیت پرسنل و جلوگیری از تداخل", icon: UsersRound },
+              { title: "CRM و بازگشت مشتری", description: "سابقه خدمات، یادآوری، باشگاه مشتریان و کمپین", icon: CheckCircle2 },
+              { title: "گزارش مالی و عملکرد", description: "درآمد، کمیسیون، تسویه و عملکرد هر خدمت و پرسنل", icon: BarChart3 },
+            ].map((benefit) => <div key={benefit.title} className="rounded-2xl border border-border bg-card p-5"><benefit.icon className="h-6 w-6 text-primary" /><h2 className="mt-3 font-black text-foreground">{benefit.title}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{benefit.description}</p></div>)}
+            <div className="rounded-2xl bg-primary p-5 text-primary-foreground"><h2 className="font-black">قبل از انتشار چه بررسی می‌شود؟</h2><ul className="mt-3 space-y-2 text-sm leading-6 opacity-90"><li>• هویت مدیر و اطلاعات تماس</li><li>• آدرس و تصاویر واقعی سالن</li><li>• مدارک و مجوزهای لازم</li><li>• قوانین رزرو و اطلاعات مالی</li></ul></div>
+          </aside>
         </section>
       </main>
-
       <Footer />
     </div>
   )
+}
+
+function Field({ label, error, className = "", children }: { label: string; error?: string; className?: string; children: React.ReactNode }) {
+  return <label className={`block text-sm font-medium text-foreground ${className}`}>{label}<div className="mt-2">{children}</div>{error && <p className="mt-1 text-xs text-destructive">{error}</p>}</label>
 }
