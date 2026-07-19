@@ -1,0 +1,178 @@
+:root {
+  --beauty-hero-image: none;
+  --beauty-section-image: none;
+}
+
+.beauty-page-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image:
+    linear-gradient(90deg, rgba(39, 24, 28, 0.9) 0%, rgba(56, 35, 40, 0.7) 45%, rgba(46, 27, 32, 0.34) 100%),
+    var(--beauty-section-image);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.beauty-page-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 25%, rgba(255, 226, 214, 0.3), transparent 34%),
+    linear-gradient(180deg, transparent 60%, rgba(21, 12, 15, 0.24));
+}
+
+body[data-beauty-route="home"] .beauty-page-hero {
+  min-height: min(780px, calc(100vh - 4rem));
+  display: flex;
+  align-items: center;
+  background-image:
+    linear-gradient(90deg, rgba(34, 20, 24, 0.94) 0%, rgba(49, 29, 34, 0.75) 43%, rgba(31, 17, 21, 0.2) 100%),
+    var(--beauty-hero-image);
+  background-position: center;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero > .absolute {
+  display: none;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero h1,
+body[data-beauty-route="home"] .beauty-page-hero .gradient-text,
+body[data-beauty-route="home"] .beauty-page-hero .text-foreground {
+  color: white !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero .text-center {
+  text-align: right;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero h1,
+body[data-beauty-route="home"] .beauty-page-hero p {
+  margin-inline: 0;
+  max-width: 720px;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero .mx-auto.mt-10 {
+  margin-inline: 0;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero .grid .text-center {
+  text-align: center;
+}
+
+body[data-beauty-route="home"] .beauty-page-hero .inline-flex {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+}
+
+body:not([data-beauty-route="home"]) .beauty-page-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+body:not([data-beauty-route="home"]) .beauty-page-hero > .container > .text-center h1,
+body:not([data-beauty-route="home"]) .beauty-page-hero > .container > .text-center > p,
+body:not([data-beauty-route="home"]) .beauty-page-hero > div > .text-center h1,
+body:not([data-beauty-route="home"]) .beauty-page-hero > div > .text-center > p {
+  color: white !important;
+  text-shadow: 0 2px 24px rgba(20, 10, 14, 0.36);
+}
+
+.beauty-service-card {
+  position: relative !important;
+  isolation: isolate;
+  min-height: 220px;
+  justify-content: flex-end !important;
+  overflow: hidden;
+  border: 0 !important;
+  background-image:
+    linear-gradient(180deg, rgba(23, 12, 16, 0.04) 20%, rgba(25, 13, 17, 0.9) 100%),
+    var(--beauty-card-image) !important;
+  background-position: center !important;
+  background-size: cover !important;
+  box-shadow: 0 18px 45px -24px rgba(49, 24, 34, 0.6);
+}
+
+.beauty-service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(130deg, rgba(255, 218, 205, 0.12), transparent 48%);
+  transition: background-color 220ms ease;
+}
+
+.beauty-service-card:hover::after {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.beauty-service-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.beauty-service-card > div {
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: white !important;
+  backdrop-filter: blur(12px);
+}
+
+.beauty-service-card span {
+  color: white !important;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.32);
+}
+
+.beauty-generated-image {
+  object-fit: cover;
+  filter: saturate(0.98) contrast(1.025);
+  transform: translateZ(0);
+  transition: transform 500ms ease, filter 300ms ease;
+}
+
+.group:hover .beauty-generated-image,
+a:hover .beauty-generated-image {
+  transform: scale(1.035);
+  filter: saturate(1.04) contrast(1.035);
+}
+
+@media (max-width: 767px) {
+  body[data-beauty-route="home"] .beauty-page-hero {
+    min-height: auto;
+    background-position: 62% center;
+  }
+
+  body[data-beauty-route="home"] .beauty-page-hero .text-center {
+    text-align: center;
+  }
+
+  body[data-beauty-route="home"] .beauty-page-hero h1,
+  body[data-beauty-route="home"] .beauty-page-hero p,
+  body[data-beauty-route="home"] .beauty-page-hero .mx-auto.mt-10 {
+    margin-inline: auto;
+  }
+
+  .beauty-service-card {
+    min-height: 180px;
+    padding: 1rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beauty-generated-image,
+  .beauty-service-card {
+    transition: none !important;
+  }
+}
