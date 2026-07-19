@@ -47,11 +47,12 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const verifiedMobile = body.mobile as string
   const ticket: Ticket = {
     id: randomUUID(),
     trackingCode: `TK-${Date.now().toString(36).slice(-6).toUpperCase()}`,
     requesterName: body.requesterName.trim(),
-    mobile: body.mobile,
+    mobile: verifiedMobile,
     type: body.type.trim(),
     subject: body.subject.trim(),
     message: body.message.trim(),
