@@ -2,12 +2,12 @@ const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹"
 const ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩"
 
 const ARABIC_TO_PERSIAN_LETTERS: Readonly<Record<string, string>> = {
-  ي: "ی",
-  ى: "ی",
-  ئ: "ی",
-  ك: "ک",
-  ة: "ه",
- ۀ: "ه",
+  "ي": "ی",
+  "ى": "ی",
+  "ئ": "ی",
+  "ك": "ک",
+  "ة": "ه",
+  "ۀ": "ه",
 }
 
 export function toLatinDigits(value: string): string {
@@ -37,7 +37,7 @@ export function normalizePersianText(value: string): string {
 export function normalizeSearchText(value: string): string {
   return normalizePersianText(value)
     .toLocaleLowerCase("fa-IR")
-    .replace(/[ـ]/g, "")
+    .replace(/ـ/g, "")
     .replace(/[\p{P}\p{S}]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim()
