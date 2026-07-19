@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto"
 import { readFileSync, writeFileSync } from "node:fs"
 
+const SPRITE_REPAIR = { part: 1, offset: 2906, value: "i" }
+
 const media = [
   {
     name: "hero",
@@ -31,6 +33,12 @@ const media = [
 
 for (const item of media) {
   const chunks = item.parts.map((path) => readFileSync(path, "utf8").trim())
+  if (item.slug === "sprite") {
+    const source = chunks[SPRITE_REPAIR.part]
+    chunks[SPRITE_REPAIR.part] =
+      source.slice(0, SPRITE_REPAIR.offset) + SPRITE_REPAIR.value + source.slice(SPRITE_REPAIR.offset)
+  }
+
   const base64 = chunks.join("")
   const buffer = Buffer.from(base64, "base64")
   const signature = `${buffer.subarray(0, 4).toString("ascii")}:${buffer.subarray(8, 12).toString("ascii")}`
