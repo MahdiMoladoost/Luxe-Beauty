@@ -124,7 +124,9 @@ jobs:
           git push origin HEAD:"${TARGET_BRANCH}"
 
       - name: Typecheck
-        run: npm run typecheck
+        run: |
+          set -o pipefail
+          npm run typecheck 2>&1 | tee typecheck.log
 
       - name: Unit tests
         run: npm run test:unit
@@ -151,5 +153,6 @@ jobs:
             prisma/migrations/migration_lock.toml
             prisma/migrations/20260720000000_initial/migration.sql
             lint.log
+            typecheck.log
           if-no-files-found: warn
           retention-days: 3
