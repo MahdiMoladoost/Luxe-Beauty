@@ -18,6 +18,8 @@ const SPRITE_PARTS = [
   "/generated/sprite-06.b64",
 ]
 
+const SPRITE_REPAIR = { part: 1, offset: 2906, value: "i" } as const
+
 type BeautyMedia = {
   hero: string
   tiles: string[]
@@ -30,7 +32,15 @@ async function readParts(paths: string[]) {
   responses.forEach((response) => {
     if (!response.ok) throw new Error(`Unable to load generated media: ${response.url}`)
   })
-  return (await Promise.all(responses.map((response) => response.text()))).join("")
+  return (await Promise.all(responses.map((response) => response.text()))).map((part) => part.trim())
+}
+
+function repairSpriteParts(parts: string[]) {
+  const repaired = [...parts]
+  const source = repaired[SPRITE_REPAIR.part]
+  repaired[SPRITE_REPAIR.part] =
+    source.slice(0, SPRITE_REPAIR.offset) + SPRITE_REPAIR.value + source.slice(SPRITE_REPAIR.offset)
+  return repaired
 }
 
 function loadImage(source: string) {
@@ -76,7 +86,9 @@ async function cutSprite(source: string) {
 function getBeautyMedia() {
   if (!mediaPromise) {
     mediaPromise = Promise.all([readParts(HERO_PARTS), readParts(SPRITE_PARTS)]).then(
-      async ([heroBase64, spriteBase64]) => {
+      async ([heroParts, spriteParts]) => {
+        const heroBase64 = heroParts.join("")
+        const spriteBase64 = repairSpriteParts(spriteParts).join("")
         const hero = `data:image/webp;base64,${heroBase64}`
         const sprite = `data:image/webp;base64,${spriteBase64}`
         const tiles = await cutSprite(sprite)
