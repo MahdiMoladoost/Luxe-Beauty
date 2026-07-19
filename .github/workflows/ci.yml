@@ -141,7 +141,9 @@ jobs:
         run: docker build --target runtime --tag luxe-beauty-ci:${{ github.sha }} .
 
       - name: Production dependency audit
-        run: npm audit --omit=dev --audit-level=high
+        run: |
+          set -o pipefail
+          npm audit --omit=dev --audit-level=high 2>&1 | tee audit.log
 
       - name: Upload generated foundations and diagnostics
         if: always()
@@ -154,5 +156,6 @@ jobs:
             prisma/migrations/20260720000000_initial/migration.sql
             lint.log
             typecheck.log
+            audit.log
           if-no-files-found: warn
           retention-days: 3
