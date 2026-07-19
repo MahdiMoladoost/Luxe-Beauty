@@ -95,7 +95,7 @@ export function Header() {
             <Input value={query} onChange={(event) => setQuery(event.target.value)} onFocus={() => setSearchOpen(true)} placeholder="نام سالن، خدمت، آرایشگر یا منطقه را جستجو کنید…" className="h-11 rounded-xl bg-secondary/60 pr-10" />
           </form>
           {searchOpen && query.trim() && (
-            <div className="absolute inset-x-0 top-13 overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-xl">
+            <div className="absolute inset-x-0 top-[3.25rem] overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-xl">
               {suggestions.length ? suggestions.map((item) => <Link key={`${item.type}-${item.label}`} href={item.href} onClick={() => setSearchOpen(false)} className="flex items-center justify-between rounded-xl px-3 py-3 hover:bg-secondary"><span><strong className="block text-sm text-foreground">{item.label}</strong><small className="text-muted-foreground">{item.meta}</small></span><span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">{item.type}</span></Link>) : <button type="submit" onClick={() => router.push(`/salons?q=${encodeURIComponent(query)}`)} className="w-full rounded-xl p-4 text-sm text-muted-foreground hover:bg-secondary">جستجوی «{query}» در همه سالن‌ها</button>}
             </div>
           )}
