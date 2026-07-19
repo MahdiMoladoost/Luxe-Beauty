@@ -1,0 +1,757 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DELETION_REQUESTED
+  DELETED
+}
+
+enum IdentityStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  UNAVAILABLE
+}
+
+enum ProviderType {
+  LICENSED_SALON
+  SINGLE_SALON
+  MULTI_BRANCH_GROUP
+  INDEPENDENT_PROFESSIONAL
+  HOME_SERVICE_PROFESSIONAL
+  HOME_STUDIO_PROFESSIONAL
+  HYBRID_PROFESSIONAL
+  OTHER
+}
+
+enum ProviderStatus {
+  DRAFT
+  PENDING_REVIEW
+  NEEDS_CORRECTION
+  APPROVED
+  REJECTED
+  SUSPENDED
+  EXPIRED
+}
+
+enum AffiliationStatus {
+  REQUESTED_BY_PROVIDER
+  REQUESTED_BY_PROFESSIONAL
+  PENDING_COUNTERPART
+  ACTIVE
+  TERMINATION_REQUESTED
+  ENDED
+  REJECTED
+  DISPUTED
+}
+
+enum PriceModel {
+  FIXED
+  STARTING_FROM
+  RANGE
+  AFTER_CONSULTATION
+  CALCULATED
+  PACKAGE
+  VARIANT
+  ADDON
+  BY_LOCATION
+}
+
+enum BookingStatus {
+  DRAFT
+  AWAITING_IDENTITY
+  HOLDING_SLOT
+  AWAITING_PAYMENT
+  PAYMENT_PENDING
+  AWAITING_PROVIDER_APPROVAL
+  CONFIRMED
+  REJECTED
+  EXPIRED
+  RESCHEDULE_PROPOSED
+  RESCHEDULED
+  CUSTOMER_CANCELLED
+  PROVIDER_CANCELLED
+  CHECKED_IN
+  IN_SERVICE
+  COMPLETED_BY_PROVIDER
+  AWAITING_CUSTOMER_DISPUTE_WINDOW
+  FINALIZED
+  CUSTOMER_NO_SHOW
+  PROVIDER_NO_SHOW
+  DISPUTED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentPurpose {
+  BOOKING
+  SUBSCRIPTION
+  SMS_PACKAGE
+  ADVERTISING
+  FEATURED_PLACEMENT
+  PLATFORM_SERVICE
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+  REFUND_PENDING
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  REVENUE
+  EXPENSE
+  EQUITY
+  CLEARING
+}
+
+enum LedgerTransactionStatus {
+  DRAFT
+  POSTED
+  REVERSED
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+enum FileVisibility {
+  PUBLIC
+  PRIVATE
+  QUARANTINED
+}
+
+enum FileScanStatus {
+  PENDING
+  CLEAN
+  REJECTED
+  FAILED
+  NOT_REQUIRED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PUBLISHED
+  FAILED
+  DEAD_LETTER
+}
+
+model User {
+  id               String         @id @default(uuid()) @db.Uuid
+  mobileNormalized String         @unique @db.VarChar(16)
+  status           UserStatus     @default(PENDING)
+  identityStatus   IdentityStatus @default(UNVERIFIED)
+  locale           String         @default("fa-IR") @db.VarChar(16)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  deletedAt        DateTime?      @db.Timestamptz(6)
+
+  profile              UserProfile?
+  sensitiveIdentity    SensitiveIdentity?
+  sessions             Session[]
+  userRoles            UserRole[]
+  ownedProviders       ProviderOrganization[] @relation("ProviderOwner")
+  professionalProfile  ProfessionalProfile?
+  serviceRecipients    ServiceRecipient[]
+  customerBookings     Booking[] @relation("BookingCustomer")
+  uploadedFiles        FileAsset[] @relation("FileOwner")
+  auditEvents          AuditLog[] @relation("AuditActor")
+
+  @@index([status, createdAt])
+}
+
+model UserProfile {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @db.Uuid
+  firstName       String?  @db.VarChar(100)
+  lastName        String?  @db.VarChar(100)
+  normalizedName  String?  @db.VarChar(220)
+  birthDate       DateTime? @db.Date
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SensitiveIdentity {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @unique @db.Uuid
+  nationalIdHmac        String   @unique @db.VarChar(128)
+  encryptedNationalId   String   @db.Text
+  encryptionKeyVersion  String   @db.VarChar(50)
+  verifiedAt            DateTime? @db.Timestamptz(6)
+  createdAt             DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime @updatedAt @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @db.Uuid
+  tokenHash          String   @unique @db.VarChar(128)
+  deviceIdHash       String?  @db.VarChar(128)
+  ipHash             String?  @db.VarChar(128)
+  userAgentSummary   String?  @db.VarChar(300)
+  twoFactorVerifiedAt DateTime? @db.Timestamptz(6)
+  expiresAt          DateTime @db.Timestamptz(6)
+  lastSeenAt         DateTime @default(now()) @db.Timestamptz(6)
+  revokedAt          DateTime? @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt, expiresAt])
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique @db.VarChar(100)
+  nameFa      String   @db.VarChar(150)
+  description String?  @db.Text
+  system      Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  permissions RolePermission[]
+  assignments UserRole[]
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique @db.VarChar(150)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  roleId    String   @db.Uuid
+  scopeType String   @default("PLATFORM") @db.VarChar(40)
+  scopeId   String?  @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  revokedAt DateTime? @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, roleId, scopeType, scopeId])
+  @@index([scopeType, scopeId, revokedAt])
+}
+
+model AuditLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  actorUserId   String?  @db.Uuid
+  action        String   @db.VarChar(160)
+  resourceType  String   @db.VarChar(100)
+  resourceId    String?  @db.VarChar(100)
+  scopeType     String?  @db.VarChar(50)
+  scopeId       String?  @db.VarChar(100)
+  reason        String?  @db.Text
+  correlationId String   @db.VarChar(100)
+  metadata      Json?
+  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+
+  actor User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([resourceType, resourceId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([correlationId])
+}
+
+model Province {
+  id             String   @id @default(uuid()) @db.Uuid
+  nameFa         String   @db.VarChar(100)
+  normalizedName String   @unique @db.VarChar(120)
+  slug           String   @unique @db.VarChar(140)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6)
+
+  cities City[]
+}
+
+model City {
+  id             String   @id @default(uuid()) @db.Uuid
+  provinceId     String   @db.Uuid
+  nameFa         String   @db.VarChar(100)
+  normalizedName String   @db.VarChar(120)
+  slug           String   @unique @db.VarChar(140)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6)
+
+  province     Province       @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  districts    District[]
+  neighborhoods Neighborhood[]
+  branches     Branch[]
+
+  @@unique([provinceId, normalizedName])
+  @@index([active, nameFa])
+}
+
+model District {
+  id             String   @id @default(uuid()) @db.Uuid
+  cityId         String   @db.Uuid
+  nameFa         String   @db.VarChar(100)
+  normalizedName String   @db.VarChar(120)
+  slug           String   @unique @db.VarChar(160)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+
+  city          City           @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  neighborhoods Neighborhood[]
+  branches      Branch[]
+
+  @@unique([cityId, normalizedName])
+}
+
+model Neighborhood {
+  id             String   @id @default(uuid()) @db.Uuid
+  cityId         String   @db.Uuid
+  districtId     String?  @db.Uuid
+  nameFa         String   @db.VarChar(100)
+  normalizedName String   @db.VarChar(120)
+  slug           String   @unique @db.VarChar(180)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+
+  city       City      @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  district   District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  branches   Branch[]
+
+  @@unique([cityId, normalizedName])
+}
+
+model ProviderOrganization {
+  id                 String         @id @default(uuid()) @db.Uuid
+  ownerUserId        String         @db.Uuid
+  type               ProviderType
+  status             ProviderStatus @default(DRAFT)
+  nameFa             String         @db.VarChar(180)
+  normalizedName     String         @db.VarChar(220)
+  slug               String         @unique @db.VarChar(220)
+  verificationAt     DateTime?      @db.Timestamptz(6)
+  bookingEnabled     Boolean        @default(false)
+  version            Int            @default(1)
+  createdAt          DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime       @updatedAt @db.Timestamptz(6)
+  deletedAt          DateTime?      @db.Timestamptz(6)
+
+  owner         User                      @relation("ProviderOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  branches      Branch[]
+  affiliations  ProfessionalAffiliation[]
+  offerings     ServiceOffering[]
+  bookings      Booking[]
+  files         FileAsset[]
+
+  @@index([status, bookingEnabled])
+  @@index([normalizedName])
+}
+
+model Branch {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  cityId          String   @db.Uuid
+  districtId      String?  @db.Uuid
+  neighborhoodId  String?  @db.Uuid
+  nameFa          String   @db.VarChar(180)
+  slug            String   @unique @db.VarChar(220)
+  latitude        Decimal? @db.Decimal(10, 7)
+  longitude       Decimal? @db.Decimal(10, 7)
+  addressVerified Boolean  @default(false)
+  active          Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+  deletedAt       DateTime? @db.Timestamptz(6)
+
+  organization ProviderOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  city         City                 @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  district     District?            @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  neighborhood Neighborhood?        @relation(fields: [neighborhoodId], references: [id], onDelete: SetNull)
+  affiliations ProfessionalAffiliation[]
+  offerings    ServiceOffering[]
+  bookings     Booking[]
+
+  @@index([organizationId, active])
+  @@index([cityId, neighborhoodId, active])
+}
+
+model ProfessionalProfile {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @db.Uuid
+  displayNameFa  String   @db.VarChar(180)
+  normalizedName String   @db.VarChar(220)
+  bio            String?  @db.Text
+  verified       Boolean  @default(false)
+  active         Boolean  @default(false)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6)
+
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  affiliations ProfessionalAffiliation[]
+  offerings    ServiceOffering[]
+  bookingItems BookingItem[]
+
+  @@index([normalizedName, active])
+}
+
+model ProfessionalAffiliation {
+  id             String            @id @default(uuid()) @db.Uuid
+  professionalId String            @db.Uuid
+  organizationId String            @db.Uuid
+  branchId       String?           @db.Uuid
+  status         AffiliationStatus @default(PENDING_COUNTERPART)
+  requestedBy    String            @db.VarChar(30)
+  startsAt       DateTime?         @db.Timestamptz(6)
+  endsAt         DateTime?         @db.Timestamptz(6)
+  permissions    Json?
+  createdAt      DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime          @updatedAt @db.Timestamptz(6)
+
+  professional ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  organization ProviderOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  branch       Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([professionalId, status])
+  @@index([organizationId, branchId, status])
+}
+
+model ServiceCategory {
+  id             String   @id @default(uuid()) @db.Uuid
+  parentId       String?  @db.Uuid
+  nameFa         String   @db.VarChar(160)
+  nameEn         String?  @db.VarChar(160)
+  normalizedName String   @db.VarChar(180)
+  slug           String   @unique @db.VarChar(200)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6)
+
+  parent   ServiceCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children ServiceCategory[] @relation("CategoryTree")
+  services StandardService[]
+
+  @@index([parentId, active])
+  @@index([normalizedName])
+}
+
+model StandardService {
+  id              String   @id @default(uuid()) @db.Uuid
+  categoryId      String   @db.Uuid
+  titleFa         String   @db.VarChar(180)
+  titleEn         String?  @db.VarChar(180)
+  normalizedTitle String   @db.VarChar(220)
+  slug            String   @unique @db.VarChar(220)
+  description     String?  @db.Text
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+
+  category  ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  offerings ServiceOffering[]
+
+  @@index([categoryId, active])
+  @@index([normalizedTitle])
+}
+
+model ServiceOffering {
+  id                 String     @id @default(uuid()) @db.Uuid
+  providerId         String     @db.Uuid
+  branchId           String?    @db.Uuid
+  professionalId     String?    @db.Uuid
+  standardServiceId  String     @db.Uuid
+  titleFa            String     @db.VarChar(180)
+  priceModel         PriceModel
+  priceMinToman      BigInt?
+  priceMaxToman      BigInt?
+  baseDurationMinute Int
+  preparationMinute  Int        @default(0)
+  cleanupMinute      Int        @default(0)
+  bufferBeforeMinute Int        @default(0)
+  bufferAfterMinute  Int        @default(0)
+  audienceRules      Json
+  bookingPolicy      Json
+  pricingRules       Json?
+  active             Boolean    @default(false)
+  published          Boolean    @default(false)
+  version            Int        @default(1)
+  createdAt          DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime   @updatedAt @db.Timestamptz(6)
+  deletedAt          DateTime?  @db.Timestamptz(6)
+
+  provider        ProviderOrganization @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  branch          Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  professional    ProfessionalProfile? @relation(fields: [professionalId], references: [id], onDelete: SetNull)
+  standardService StandardService      @relation(fields: [standardServiceId], references: [id], onDelete: Restrict)
+  bookingItems    BookingItem[]
+
+  @@index([providerId, branchId, active, published])
+  @@index([standardServiceId, active, published])
+  @@index([professionalId, active])
+}
+
+model ServiceRecipient {
+  id             String   @id @default(uuid()) @db.Uuid
+  customerUserId String   @db.Uuid
+  firstName      String   @db.VarChar(100)
+  lastName       String   @db.VarChar(100)
+  birthDate      DateTime? @db.Date
+  genderCode     String?  @db.VarChar(30)
+  relationLabel  String?  @db.VarChar(60)
+  contactMobile  String?  @db.VarChar(16)
+  accessibilityNeeds String? @db.Text
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6)
+  deletedAt      DateTime? @db.Timestamptz(6)
+
+  customer User      @relation(fields: [customerUserId], references: [id], onDelete: Restrict)
+  bookings Booking[]
+
+  @@index([customerUserId, deletedAt])
+}
+
+model Booking {
+  id                    String        @id @default(uuid()) @db.Uuid
+  customerUserId        String        @db.Uuid
+  recipientId           String        @db.Uuid
+  providerId            String        @db.Uuid
+  branchId              String?       @db.Uuid
+  status                BookingStatus @default(DRAFT)
+  currency              String        @default("TOMAN") @db.VarChar(10)
+  subtotalToman         BigInt        @default(0)
+  discountToman         BigInt        @default(0)
+  travelFeeToman        BigInt        @default(0)
+  platformFeeToman      BigInt        @default(0)
+  totalToman            BigInt        @default(0)
+  priceSnapshot         Json
+  policySnapshot        Json
+  questionnaireSnapshot Json?
+  legalAcceptanceSnapshot Json?
+  idempotencyKey        String        @unique @db.VarChar(160)
+  approvalDeadlineAt    DateTime?     @db.Timestamptz(6)
+  disputeWindowEndsAt   DateTime?     @db.Timestamptz(6)
+  version               Int           @default(1)
+  createdAt             DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime      @updatedAt @db.Timestamptz(6)
+  cancelledAt           DateTime?     @db.Timestamptz(6)
+  finalizedAt           DateTime?     @db.Timestamptz(6)
+
+  customer    User                 @relation("BookingCustomer", fields: [customerUserId], references: [id], onDelete: Restrict)
+  recipient   ServiceRecipient     @relation(fields: [recipientId], references: [id], onDelete: Restrict)
+  provider    ProviderOrganization @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  branch      Branch?              @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  items       BookingItem[]
+  transitions BookingTransition[]
+  payments    Payment[]
+
+  @@index([customerUserId, status, createdAt])
+  @@index([providerId, branchId, status, createdAt])
+}
+
+model BookingItem {
+  id                  String   @id @default(uuid()) @db.Uuid
+  bookingId           String   @db.Uuid
+  offeringId          String   @db.Uuid
+  professionalId      String?  @db.Uuid
+  startsAt            DateTime @db.Timestamptz(6)
+  endsAt              DateTime @db.Timestamptz(6)
+  occupiedFrom        DateTime @db.Timestamptz(6)
+  occupiedUntil       DateTime @db.Timestamptz(6)
+  travelBeforeMinute  Int      @default(0)
+  travelAfterMinute   Int      @default(0)
+  unitPriceToman      BigInt
+  quantity            Int      @default(1)
+  priceSnapshot       Json
+  durationSnapshot    Json
+  createdAt           DateTime @default(now()) @db.Timestamptz(6)
+
+  booking      Booking              @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  offering     ServiceOffering      @relation(fields: [offeringId], references: [id], onDelete: Restrict)
+  professional ProfessionalProfile? @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+
+  @@index([professionalId, occupiedFrom, occupiedUntil])
+  @@index([bookingId, startsAt])
+}
+
+model BookingTransition {
+  id            String        @id @default(uuid()) @db.Uuid
+  bookingId     String        @db.Uuid
+  fromStatus    BookingStatus?
+  toStatus      BookingStatus
+  actorUserId   String?       @db.Uuid
+  reasonCode    String?       @db.VarChar(100)
+  reason        String?       @db.Text
+  metadata      Json?
+  correlationId String        @db.VarChar(100)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId, createdAt])
+  @@index([correlationId])
+}
+
+model Payment {
+  id             String         @id @default(uuid()) @db.Uuid
+  bookingId      String?        @db.Uuid
+  purpose        PaymentPurpose
+  providerKey    String         @db.VarChar(60)
+  providerRef    String?        @unique @db.VarChar(180)
+  status         PaymentStatus  @default(CREATED)
+  amountToman    BigInt
+  idempotencyKey String         @unique @db.VarChar(160)
+  metadata       Json?
+  succeededAt    DateTime?      @db.Timestamptz(6)
+  failedAt       DateTime?      @db.Timestamptz(6)
+  createdAt      DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime       @updatedAt @db.Timestamptz(6)
+
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, status])
+  @@index([purpose, status, createdAt])
+}
+
+model LedgerAccount {
+  id          String            @id @default(uuid()) @db.Uuid
+  code        String            @unique @db.VarChar(120)
+  nameFa      String            @db.VarChar(180)
+  type        LedgerAccountType
+  ownerType   String?           @db.VarChar(40)
+  ownerId     String?           @db.Uuid
+  currency    String            @default("TOMAN") @db.VarChar(10)
+  active      Boolean           @default(true)
+  createdAt   DateTime          @default(now()) @db.Timestamptz(6)
+
+  entries LedgerEntry[]
+
+  @@index([ownerType, ownerId, active])
+}
+
+model LedgerTransaction {
+  id             String                  @id @default(uuid()) @db.Uuid
+  status         LedgerTransactionStatus @default(DRAFT)
+  referenceType  String                  @db.VarChar(60)
+  referenceId    String?                 @db.VarChar(100)
+  idempotencyKey String                  @unique @db.VarChar(160)
+  description    String?                 @db.Text
+  correlationId  String                  @db.VarChar(100)
+  postedAt       DateTime?               @db.Timestamptz(6)
+  reversedById   String?                 @unique @db.Uuid
+  createdAt      DateTime                @default(now()) @db.Timestamptz(6)
+
+  entries    LedgerEntry[]
+  reversedBy LedgerTransaction? @relation("LedgerReversal", fields: [reversedById], references: [id], onDelete: Restrict)
+  reverses   LedgerTransaction? @relation("LedgerReversal")
+
+  @@index([referenceType, referenceId])
+  @@index([status, createdAt])
+}
+
+model LedgerEntry {
+  id            String          @id @default(uuid()) @db.Uuid
+  transactionId String          @db.Uuid
+  accountId     String          @db.Uuid
+  direction     LedgerDirection
+  amountToman   BigInt
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
+
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  account     LedgerAccount     @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([accountId, createdAt])
+  @@index([transactionId])
+}
+
+model IdempotencyRecord {
+  id             String   @id @default(uuid()) @db.Uuid
+  scope          String   @db.VarChar(100)
+  key            String   @db.VarChar(160)
+  requestHash    String   @db.VarChar(128)
+  responseStatus Int?
+  responseBody   Json?
+  resourceType   String?  @db.VarChar(80)
+  resourceId     String?  @db.VarChar(100)
+  expiresAt      DateTime? @db.Timestamptz(6)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  completedAt    DateTime? @db.Timestamptz(6)
+
+  @@unique([scope, key])
+  @@index([expiresAt])
+}
+
+model OutboxEvent {
+  id            String       @id @default(uuid()) @db.Uuid
+  aggregateType String       @db.VarChar(80)
+  aggregateId   String       @db.VarChar(100)
+  eventType     String       @db.VarChar(160)
+  payload       Json
+  dedupeKey     String?      @unique @db.VarChar(180)
+  status        OutboxStatus @default(PENDING)
+  attempts      Int          @default(0)
+  availableAt   DateTime     @default(now()) @db.Timestamptz(6)
+  publishedAt   DateTime?    @db.Timestamptz(6)
+  lastErrorCode String?      @db.VarChar(100)
+  createdAt     DateTime     @default(now()) @db.Timestamptz(6)
+
+  @@index([status, availableAt])
+  @@index([aggregateType, aggregateId])
+}
+
+model FileAsset {
+  id               String          @id @default(uuid()) @db.Uuid
+  ownerUserId      String?         @db.Uuid
+  providerId       String?         @db.Uuid
+  namespace        String          @db.VarChar(60)
+  objectKey        String          @unique @db.VarChar(500)
+  visibility       FileVisibility  @default(QUARANTINED)
+  originalFileName String?         @db.VarChar(255)
+  mimeType         String          @db.VarChar(150)
+  sizeBytes        BigInt
+  contentHash      String          @db.VarChar(128)
+  scanStatus       FileScanStatus  @default(PENDING)
+  retentionUntil   DateTime?       @db.Timestamptz(6)
+  metadata         Json?
+  createdAt        DateTime        @default(now()) @db.Timestamptz(6)
+  deletedAt        DateTime?       @db.Timestamptz(6)
+
+  owner    User?                 @relation("FileOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  provider ProviderOrganization? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+  @@index([ownerUserId, namespace, deletedAt])
+  @@index([providerId, namespace, deletedAt])
+  @@index([scanStatus, createdAt])
+}
