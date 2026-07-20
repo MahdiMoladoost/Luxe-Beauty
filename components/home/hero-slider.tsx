@@ -1,186 +1,94 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Link from "next/link"
-import {
-  CalendarCheck2,
-  ChevronLeft,
-  ChevronRight,
-  MapPinned,
-  Search,
-  Star,
-  Store,
-  UsersRound,
-} from "lucide-react"
+import { Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-const slides = [
-  {
-    image: "/hero/slide-1.webp",
-    eyebrow: "رزرو سریع و مطمئن",
-    title: "زیبایی را ساده‌تر رزرو کن",
-    description: "سالن‌ها و متخصصان برتر را مقایسه کن، نمونه‌کارها را ببین و بهترین زمان را آنلاین رزرو کن.",
-  },
-  {
-    image: "/hero/slide-2.webp",
-    eyebrow: "همه‌چیز در چند دقیقه",
-    title: "نوبت دلخواهت همیشه در دسترس است",
-    description: "از اولین زمان آزاد تا نوبت‌های فوری و تخفیف‌های امروز، همه را یک‌جا پیدا کن.",
-  },
-  {
-    image: "/hero/slide-3.webp",
-    eyebrow: "انتخابی مطمئن‌تر",
-    title: "قبل از رزرو، نتیجه را ببین",
-    description: "امتیازها، نظرهای واقعی و نمونه‌کار متخصصان را ببین و با اطمینان انتخاب کن.",
-  },
-]
-
 const stats = [
-  { value: "+۵,۰۰۰", label: "سالن و متخصص", icon: Store },
-  { value: "+۱۵۰,۰۰۰", label: "رزرو موفق", icon: CalendarCheck2 },
-  { value: "۳۱", label: "استان فعال", icon: MapPinned },
-  { value: "۴.۸", label: "میانگین رضایت", icon: Star },
+  { value: "+۵,۰۰۰", label: "سالن و متخصص" },
+  { value: "+۱۵۰,۰۰۰", label: "رزرو موفق" },
+  { value: "۳۱", label: "استان فعال" },
+  { value: "۴.۸", label: "میانگین رضایت" },
 ]
 
 export function HeroSlider() {
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % slides.length)
-    }, 6000)
-
-    return () => window.clearInterval(timer)
-  }, [])
-
-  const goToPrevious = () => {
-    setActiveIndex((current) => (current - 1 + slides.length) % slides.length)
-  }
-
-  const goToNext = () => {
-    setActiveIndex((current) => (current + 1) % slides.length)
-  }
-
   return (
-    <section className="relative h-[720px] overflow-hidden bg-[#b9796e] sm:h-[650px] lg:h-[620px]">
-      {slides.map((slide, index) => (
-        <div
-          key={slide.image}
-          className={`absolute inset-0 transition-opacity duration-1000 ${index === activeIndex ? "opacity-100" : "pointer-events-none opacity-0"}`}
-          aria-hidden={index !== activeIndex}
-        >
-          <img
-            src={slide.image}
-            alt=""
-            className="h-full w-full object-cover object-center [image-rendering:auto] [filter:contrast(1.08)_saturate(1.08)]"
-            fetchPriority={index === 0 ? "high" : "auto"}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#3a201c]/85 via-[#6c433c]/48 to-[#4b2c27]/5" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2e1916]/45 via-transparent to-[#2e1916]/10" />
-          <div className="absolute inset-0 bg-[#b76f62]/10 mix-blend-multiply" />
-        </div>
-      ))}
+    <section className="relative overflow-hidden bg-[#fffaf8]">
+      <div className="relative mx-auto h-[560px] max-w-[1920px] overflow-hidden lg:h-[590px]">
+        <img
+          src="/hero/slide-3.webp"
+          alt="خدمات زیبایی لوکس بیوتی برای بانوان و آقایان"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          fetchPriority="high"
+        />
 
-      <div className="relative z-10 mx-auto h-full max-w-[1500px] px-4 sm:px-6 lg:px-10">
-        <div className="flex h-full items-center pb-32 pt-10 sm:pb-36">
-          <div className="mr-auto w-full max-w-[590px] rounded-[2.25rem] border border-white/20 bg-[#2e1916]/32 p-5 text-right text-white shadow-[0_30px_90px_rgba(42,20,17,0.22)] backdrop-blur-md sm:p-7 lg:p-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-4 py-2 text-xs font-black text-white shadow-sm backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.12)]" />
-              {slides[activeIndex].eyebrow}
-            </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/18 via-white/8 to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-[58%] bg-gradient-to-r from-white/96 via-white/78 to-transparent" />
 
-            <h1 className="mt-5 text-balance text-3xl font-black leading-[1.25] text-white sm:text-4xl lg:text-[3.25rem]">
-              {slides[activeIndex].title}
+        <div className="relative z-10 mx-auto flex h-full max-w-[1500px] items-center px-5 pb-16 pt-8 lg:px-10">
+          <div className="w-full max-w-[520px] text-right">
+            <span className="inline-flex items-center rounded-full border border-[#eadbd6] bg-white/88 px-3.5 py-2 text-[11px] font-bold text-[#9b5d52] shadow-sm backdrop-blur-xl">
+              رزرو آنلاین خدمات زیبایی
+            </span>
+
+            <h1 className="mt-5 text-balance text-4xl font-black leading-[1.28] text-[#201b19] sm:text-5xl lg:text-[3.4rem]">
+              انتخاب ظریف، رزرو مطمئن
             </h1>
 
-            <p className="mt-4 max-w-lg text-sm leading-7 text-white/78 sm:text-base">
-              {slides[activeIndex].description}
+            <p className="mt-4 max-w-md text-sm leading-8 text-[#625b58] sm:text-base">
+              نمونه‌کارها، امتیازها و زمان‌های آزاد سالن‌ها و متخصصان را مقایسه کن و بدون تماس نوبت بگیر.
             </p>
 
-            <div className="mt-7 rounded-[1.6rem] border border-white/30 bg-white/92 p-2.5 shadow-[0_18px_55px_rgba(35,18,15,0.18)] backdrop-blur-xl">
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#f7f3f2] px-4 text-[#4c4543]">
-                  <Search className="h-5 w-5 shrink-0 text-[#9a6a61]" />
+            <div className="mt-7 max-w-[500px] rounded-[1.35rem] border border-[#e9dfdc] bg-white/90 p-2 shadow-[0_16px_45px_rgba(82,52,45,0.1)] backdrop-blur-xl">
+              <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#faf8f7] px-4">
+                  <Search className="h-4.5 w-4.5 shrink-0 text-[#a16a60]" />
                   <Input
-                    aria-label="جست‌وجوی سالن یا خدمت"
+                    aria-label="جست‌وجوی سالن، متخصص یا خدمت"
                     placeholder="نام سالن، متخصص یا خدمت..."
-                    className="h-12 border-0 bg-transparent px-0 text-[#332c2a] shadow-none placeholder:text-[#89817e] focus-visible:ring-0"
+                    className="h-11 border-0 bg-transparent px-0 text-sm shadow-none placeholder:text-[#958d89] focus-visible:ring-0"
                   />
                 </div>
                 <Link href="/salons" className="shrink-0">
-                  <Button className="h-12 w-full rounded-2xl bg-[#a45f53] px-8 text-white shadow-lg shadow-[#713e35]/25 hover:bg-[#925247] sm:w-auto">
+                  <Button className="h-11 rounded-2xl bg-[#a45f53] px-7 text-sm font-black text-white shadow-sm hover:bg-[#925247]">
                     جست‌وجو
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Link href="/salons?availability=today" className="rounded-full border border-white/20 bg-white/13 px-4 py-2 text-xs font-bold text-white backdrop-blur transition hover:bg-white/22">
-                نوبت‌های امروز
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold">
+              <Link href="/salons?availability=today" className="rounded-full border border-[#eadbd6] bg-white/82 px-3.5 py-2 text-[#554e4b] backdrop-blur hover:bg-white">
+                نوبت امروز
               </Link>
-              <Link href="/salons?offer=discount" className="rounded-full border border-white/20 bg-white/13 px-4 py-2 text-xs font-bold text-white backdrop-blur transition hover:bg-white/22">
+              <Link href="/salons?offer=discount" className="rounded-full border border-[#eadbd6] bg-white/82 px-3.5 py-2 text-[#554e4b] backdrop-blur hover:bg-white">
                 تخفیف‌های فعال
               </Link>
-              <Link href="/salon-register" className="inline-flex items-center gap-2 rounded-full border border-[#f1c8bf]/50 bg-[#fff4f1]/90 px-4 py-2 text-xs font-black text-[#8f5147] shadow-sm backdrop-blur transition hover:bg-white">
-                <UsersRound className="h-4 w-4" />
+              <Link href="/salon-register" className="rounded-full border border-[#deb7ae] bg-[#fff5f2]/88 px-3.5 py-2 text-[#98594e] backdrop-blur hover:bg-white">
                 همکاری با لوکس بیوتی
               </Link>
             </div>
           </div>
         </div>
+
+        <svg aria-hidden="true" className="absolute -bottom-px left-0 z-20 h-[54px] w-full" viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path className="fill-background" d="M0 42C215 72 389 68 565 43C757 16 925 15 1104 46C1236 68 1343 67 1440 52V80H0V42Z" />
+        </svg>
       </div>
 
-      <button
-        type="button"
-        aria-label="اسلاید قبلی"
-        onClick={goToPrevious}
-        className="absolute left-5 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-[#2f1a17]/25 text-white shadow-xl backdrop-blur-lg transition hover:bg-[#2f1a17]/45 md:flex"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="اسلاید بعدی"
-        onClick={goToNext}
-        className="absolute right-5 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-[#2f1a17]/25 text-white shadow-xl backdrop-blur-lg transition hover:bg-[#2f1a17]/45 md:flex"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      <div className="absolute bottom-[118px] left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 sm:bottom-[124px]">
-        {slides.map((slide, index) => (
-          <button
-            key={slide.image}
-            type="button"
-            aria-label={`نمایش اسلاید ${index + 1}`}
-            onClick={() => setActiveIndex(index)}
-            className={`h-2.5 rounded-full border border-white/45 transition-all ${index === activeIndex ? "w-9 bg-white" : "w-2.5 bg-white/35 hover:bg-white/60"}`}
-          />
-        ))}
-      </div>
-
-      <div className="absolute bottom-5 left-1/2 z-40 w-[min(1120px,calc(100%-28px))] -translate-x-1/2 sm:bottom-6">
-        <div className="grid grid-cols-2 overflow-hidden rounded-[2rem] border border-white/65 bg-white/82 shadow-[0_22px_60px_rgba(51,28,24,0.16)] backdrop-blur-2xl md:grid-cols-4">
+      <div className="relative z-30 mx-auto -mt-7 max-w-[980px] px-4 pb-4">
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-[#eadfdc] bg-white/92 shadow-[0_12px_32px_rgba(67,43,37,0.08)] backdrop-blur-xl md:grid-cols-4">
           {stats.map((stat, index) => (
-            <div key={stat.label} className={`flex items-center justify-center gap-3 px-3 py-4 sm:px-5 ${index > 0 ? "md:border-r md:border-[#e8d9d5]" : ""} ${index > 1 ? "border-t border-[#e8d9d5] md:border-t-0" : index === 1 ? "border-r border-[#e8d9d5] md:border-r" : ""}`}>
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fff4f1] to-[#f1d9d3] text-[#9c5b50] shadow-inner">
-                <stat.icon className={`h-5 w-5 ${stat.label === "میانگین رضایت" ? "fill-[#c88749] text-[#c88749]" : ""}`} />
-              </span>
-              <span className="text-right">
-                <span className="block text-xl font-black tabular-nums text-[#2d2523] sm:text-2xl">{stat.value}</span>
-                <span className="mt-0.5 block text-[11px] font-bold text-[#817876] sm:text-xs">{stat.label}</span>
-              </span>
+            <div
+              key={stat.label}
+              className={`px-4 py-3.5 text-center ${index % 2 === 1 ? "border-r border-[#eee5e2]" : ""} ${index >= 2 ? "border-t border-[#eee5e2] md:border-t-0" : ""} ${index > 0 ? "md:border-r md:border-[#eee5e2]" : ""}`}
+            >
+              <div className="text-lg font-black tabular-nums text-[#2e2826] sm:text-xl">{stat.value}</div>
+              <div className="mt-0.5 text-[11px] font-medium text-[#827a76]">{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
-
-      <svg aria-hidden="true" className="absolute -bottom-px left-0 z-20 h-[88px] w-full" viewBox="0 0 1440 120" preserveAspectRatio="none">
-        <path className="fill-background" d="M0 62C195 117 363 109 532 67C729 18 897 20 1077 70C1212 108 1322 104 1440 73V120H0V62Z" />
-      </svg>
     </section>
   )
 }
