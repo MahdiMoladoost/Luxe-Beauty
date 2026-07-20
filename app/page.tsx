@@ -72,7 +72,7 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
-      <main className="flex-1 pt-16 2xl:pt-[72px]">
+      <main className="flex-1 pt-16">
         <HeroSlider />
 
         <section className="relative z-30 -mt-1 pb-10">
