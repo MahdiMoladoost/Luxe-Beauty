@@ -32,7 +32,10 @@ describe("RBAC", () => {
   })
 
   it("blocks privileged operations until the initial password is changed", () => {
-    const actor = principal({ mustChangePassword: true, permissions: ["platform.access"] })
+    const actor = principal({
+      mustChangePassword: true,
+      permissions: ["platform.access", "security.change-own-password"],
+    })
     expect(() => assertPermission(actor, "platform.access")).toThrowError(/رمز عبور اولیه/)
     expect(() => assertPermission(actor, "security.change-own-password")).not.toThrow()
   })
