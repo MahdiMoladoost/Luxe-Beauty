@@ -52,6 +52,11 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://localhost:5000
       DATABASE_URL: postgresql://luxe:luxe_dev_password@127.0.0.1:5432/luxe_beauty_test?schema=public
       REDIS_URL: redis://127.0.0.1:6379
+      AUTH_SECRET: ci-auth-secret-not-used-outside-actions-123456
+      PASSWORD_PEPPER: ci-password-pepper-not-used-outside-actions-123456
+      SESSION_COOKIE_NAME: luxe_session
+      OTP_RESEND_COOLDOWN_SECONDS: 60
+      SEED_SUPER_ADMIN_INITIAL_PASSWORD: CiBootstrapPassword123
       IDENTITY_PROVIDER: mock
       PAYMENT_PROVIDER: mock
       SMS_PROVIDER: mock
@@ -83,6 +88,9 @@ jobs:
       - name: Verify migration status
         run: npx prisma migrate status
 
+      - name: Seed system RBAC and bootstrap test super admin
+        run: npm run db:seed
+
       - name: Lint
         run: |
           set -o pipefail
@@ -95,6 +103,9 @@ jobs:
 
       - name: Unit tests
         run: npm run test:unit
+
+      - name: Integration tests
+        run: npm run test:integration
 
       - name: Production build
         run: npm run build

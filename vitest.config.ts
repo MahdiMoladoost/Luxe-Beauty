@@ -6,5 +6,6 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     passWithNoTests: false,
     reporters: ["default"],
+    fileParallelism: false,
   },
 })
