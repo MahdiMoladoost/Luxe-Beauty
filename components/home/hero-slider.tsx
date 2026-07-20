@@ -48,7 +48,7 @@ export function HeroSlider() {
   }
 
   return (
-    <section className="relative h-[520px] overflow-hidden bg-[#fff8f5] sm:h-[540px] lg:h-[570px]">
+    <section className="relative h-[480px] overflow-hidden bg-[#fff8f5] sm:h-[500px] lg:h-[520px]">
       {slides.map((slide, index) => (
         <div
           key={slide.image}
@@ -67,44 +67,44 @@ export function HeroSlider() {
       ))}
 
       <div className="relative z-10 mx-auto h-full max-w-[1500px] px-4 sm:px-6 lg:px-10">
-        <div className="flex h-full items-center pb-14 pt-8">
-          <div className="w-full max-w-xl text-right lg:mr-4">
+        <div className="flex h-full items-center pb-14 pt-6">
+          <div className="mr-auto w-full max-w-xl text-right">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#edd6cf] bg-white/90 px-4 py-2 text-xs font-bold text-[#a9695e] shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               {slides[activeIndex].eyebrow}
             </div>
 
-            <h1 className="mt-5 text-balance text-4xl font-black leading-[1.25] text-[#171717] sm:text-5xl lg:text-[3.4rem]">
+            <h1 className="mt-4 text-balance text-3xl font-black leading-[1.25] text-[#171717] sm:text-4xl lg:text-5xl">
               {slides[activeIndex].title}
             </h1>
 
-            <p className="mt-4 max-w-lg text-sm leading-7 text-[#555] sm:text-base">
+            <p className="mt-3 max-w-lg text-sm leading-7 text-[#555] sm:text-base">
               {slides[activeIndex].description}
             </p>
 
-            <div className="mt-7 rounded-3xl border border-white/80 bg-white/88 p-2.5 shadow-[0_18px_50px_rgba(105,73,63,0.12)] backdrop-blur-md">
+            <div className="mt-6 rounded-3xl border border-white/80 bg-white/90 p-2.5 shadow-[0_18px_50px_rgba(105,73,63,0.12)] backdrop-blur-md">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#f7f7f8] px-4">
                   <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
                   <Input
                     aria-label="جست‌وجوی سالن یا خدمت"
                     placeholder="نام سالن، متخصص یا خدمت..."
-                    className="h-12 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+                    className="h-11 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
                   />
                 </div>
                 <Link href="/salons" className="shrink-0">
-                  <Button className="h-12 w-full rounded-2xl px-7 shadow-lg shadow-primary/20 sm:w-auto">
+                  <Button className="h-11 w-full rounded-2xl px-7 shadow-lg shadow-primary/20 sm:w-auto">
                     جست‌وجو
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Link href="/salons?availability=today" className="rounded-full bg-white/85 px-4 py-2 text-xs font-bold text-foreground shadow-sm backdrop-blur hover:bg-white">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Link href="/salons?availability=today" className="rounded-full bg-white/90 px-4 py-2 text-xs font-bold text-foreground shadow-sm backdrop-blur hover:bg-white">
                 نوبت‌های امروز
               </Link>
-              <Link href="/salons?offer=discount" className="rounded-full bg-white/85 px-4 py-2 text-xs font-bold text-foreground shadow-sm backdrop-blur hover:bg-white">
+              <Link href="/salons?offer=discount" className="rounded-full bg-white/90 px-4 py-2 text-xs font-bold text-foreground shadow-sm backdrop-blur hover:bg-white">
                 تخفیف‌های فعال
               </Link>
               <Link href="/salon-register" className="inline-flex items-center gap-2 rounded-full border border-[#dca99d] bg-[#fff6f3]/90 px-4 py-2 text-xs font-black text-[#a45f53] shadow-sm backdrop-blur transition hover:bg-white">
@@ -133,7 +133,7 @@ export function HeroSlider() {
         <ChevronRight className="h-5 w-5" />
       </button>
 
-      <div className="absolute bottom-16 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+      <div className="absolute bottom-14 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
         {slides.map((slide, index) => (
           <button
             key={slide.image}
@@ -147,12 +147,12 @@ export function HeroSlider() {
 
       <svg
         aria-hidden="true"
-        className="absolute -bottom-px left-0 z-20 h-[82px] w-full"
+        className="absolute -bottom-px left-0 z-20 h-[76px] w-full"
         viewBox="0 0 1440 120"
         preserveAspectRatio="none"
       >
         <path
-          fill="hsl(var(--background))"
+          className="fill-background"
           d="M0 69C166 126 327 115 486 69C664 18 798 24 963 76C1129 128 1281 118 1440 61V120H0V69Z"
         />
       </svg>
