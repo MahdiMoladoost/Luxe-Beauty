@@ -1,8 +1,10 @@
 import { z } from "zod"
 
 import { AuthError } from "@/lib/auth/errors"
+import { rbacApiPermissionMatrix } from "@/lib/auth/protected-routes"
 import { authRepository } from "@/lib/auth/repository"
-import type { PermissionScope, SessionPrincipal } from "@/lib/auth/types"
+import { createAuditedPermission, createAuditedRole } from "@/lib/auth/rbac-write"
+import type { PermissionScope, RequestContext, SessionPrincipal } from "@/lib/auth/types"
 
 export const permissionKeySchema = z
   .string()
@@ -56,23 +58,31 @@ const createPermissionSchema = z.object({
 })
 
 export async function listRoles(principal: SessionPrincipal) {
-  assertPermission(principal, "role.read")
+  assertPermission(principal, rbacApiPermissionMatrix["GET /api/admin/rbac/roles"])
   return authRepository.listRoles()
 }
 
-export async function createCustomRole(principal: SessionPrincipal, rawInput: unknown) {
-  assertPermission(principal, "role.manage")
+export async function createCustomRole(
+  principal: SessionPrincipal,
+  rawInput: unknown,
+  context: RequestContext,
+) {
+  assertPermission(principal, rbacApiPermissionMatrix["POST /api/admin/rbac/roles"])
   const input = createRoleSchema.parse(rawInput)
-  return authRepository.createCustomRole(input)
+  return createAuditedRole(principal, input, context)
 }
 
 export async function listPermissions(principal: SessionPrincipal) {
-  assertPermission(principal, "permission.read")
+  assertPermission(principal, rbacApiPermissionMatrix["GET /api/admin/rbac/permissions"])
   return authRepository.listPermissions()
 }
 
-export async function createCustomPermission(principal: SessionPrincipal, rawInput: unknown) {
-  assertPermission(principal, "permission.manage")
+export async function createCustomPermission(
+  principal: SessionPrincipal,
+  rawInput: unknown,
+  context: RequestContext,
+) {
+  assertPermission(principal, rbacApiPermissionMatrix["POST /api/admin/rbac/permissions"])
   const input = createPermissionSchema.parse(rawInput)
-  return authRepository.createCustomPermission(input)
+  return createAuditedPermission(principal, input, context)
 }

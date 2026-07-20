@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     assertTrustedMutation(request)
     const principal = await requirePrincipalFromRequest(request)
-    const role = await createCustomRole(principal, await request.json())
+    const role = await createCustomRole(principal, await request.json(), context)
     return apiSuccess(role, 201)
   } catch (error) {
     return apiError(error, context.correlationId)

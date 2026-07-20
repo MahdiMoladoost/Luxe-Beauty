@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     assertTrustedMutation(request)
     const principal = await requirePrincipalFromRequest(request)
-    const permission = await createCustomPermission(principal, await request.json())
+    const permission = await createCustomPermission(principal, await request.json(), context)
     return apiSuccess(permission, 201)
   } catch (error) {
     return apiError(error, context.correlationId)
