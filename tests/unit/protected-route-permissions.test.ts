@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
 
 import { assertPermission } from "@/lib/auth/rbac"
-import { panelPermissionMatrix, rbacApiPermissionMatrix } from "@/lib/auth/protected-routes"
+import {
+  panelPermissionMatrix,
+  rbacApiPermissionMatrix,
+  verificationApiPermissionMatrix,
+} from "@/lib/auth/protected-routes"
 import type { SessionPrincipal } from "@/lib/auth/types"
 
 function principal(permissions: string[]): SessionPrincipal {
@@ -22,9 +26,10 @@ function principal(permissions: string[]): SessionPrincipal {
 const policies = {
   ...panelPermissionMatrix,
   ...rbacApiPermissionMatrix,
+  ...verificationApiPermissionMatrix,
 }
 
-describe("protected panel and RBAC API permission matrix", () => {
+describe("protected panel and API permission matrix", () => {
   for (const [route, permission] of Object.entries(policies)) {
     it(`denies ${route} without ${permission}`, () => {
       expect(() => assertPermission(principal([]), permission)).toThrowError(/دسترسی لازم/)
