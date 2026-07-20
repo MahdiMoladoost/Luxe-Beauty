@@ -42,7 +42,7 @@ export function HeroSlider() {
             <div className="mt-7 max-w-[500px] rounded-[1.35rem] border border-[#e9dfdc] bg-white/90 p-2 shadow-[0_16px_45px_rgba(82,52,45,0.1)] backdrop-blur-xl">
               <div className="flex items-center gap-2">
                 <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-[#faf8f7] px-4">
-                  <Search className="h-4.5 w-4.5 shrink-0 text-[#a16a60]" />
+                  <Search className="h-[18px] w-[18px] shrink-0 text-[#a16a60]" />
                   <Input
                     aria-label="جست‌وجوی سالن، متخصص یا خدمت"
                     placeholder="نام سالن، متخصص یا خدمت..."
