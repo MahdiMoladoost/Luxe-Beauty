@@ -13,7 +13,6 @@ import {
   Menu,
   MessageCircle,
   Search,
-  Sparkles,
   UserRound,
   Wallet,
   X,
@@ -41,17 +40,17 @@ const menus: MegaMenu[] = [
   {
     label: "خدمات",
     href: "/salons",
-    description: "خدمت موردنظر را انتخاب کنید و زمان‌های آزاد را مقایسه کنید.",
+    description: "دسته‌بندی‌های اصلی خدمات زیبایی",
     sections: [
       {
-        title: "گروه خدمات",
+        title: "دسته‌بندی خدمات",
         links: [
           { label: "بانوان", href: "/salons?audience=women" },
           { label: "آقایان", href: "/salons?audience=men" },
           { label: "کودکان", href: "/salons?audience=children" },
           { label: "خدمات در منزل", href: "/salons?service=home" },
           { label: "عروس و داماد", href: "/salons?service=wedding" },
-          { label: "مشاهده همه خدمات", href: "/salons" },
+          { label: "همه خدمات", href: "/salons" },
         ],
       },
     ],
@@ -59,7 +58,7 @@ const menus: MegaMenu[] = [
   {
     label: "سالن‌ها و متخصصان",
     href: "/salons",
-    description: "سالن‌ها و متخصصان را بر اساس امتیاز و نمونه‌کار مقایسه کنید.",
+    description: "پیدا کردن بهترین ارائه‌دهندگان",
     sections: [
       {
         title: "سالن‌ها",
@@ -76,7 +75,7 @@ const menus: MegaMenu[] = [
         links: [
           { label: "متخصصان برتر", href: "/salons?provider=specialist&sort=top" },
           { label: "متخصصان مستقل", href: "/salons?provider=independent" },
-          { label: "مراکز خدمات در منزل", href: "/salons?provider=home-service" },
+          { label: "خدمات در منزل", href: "/salons?provider=home-service" },
         ],
       },
     ],
@@ -84,15 +83,15 @@ const menus: MegaMenu[] = [
   {
     label: "نوبت امروز",
     href: "/salons?availability=today",
-    description: "نوبت‌های خالی امروز و سریع‌ترین زمان‌های آزاد را ببینید.",
+    description: "سریع‌ترین زمان‌های قابل رزرو",
     sections: [
       {
         title: "رزرو سریع",
         links: [
           { label: "نوبت‌های خالی امروز", href: "/salons?availability=today" },
           { label: "نوبت فوری", href: "/salons?availability=urgent" },
-          { label: "اولین زمان‌های آزاد", href: "/salons?sort=first-available" },
-          { label: "نوبت‌های آخر هفته", href: "/salons?availability=weekend" },
+          { label: "اولین زمان آزاد", href: "/salons?sort=first-available" },
+          { label: "آخر هفته", href: "/salons?availability=weekend" },
         ],
       },
     ],
@@ -100,7 +99,7 @@ const menus: MegaMenu[] = [
   {
     label: "تخفیف‌ها",
     href: "/salons?offer=discount",
-    description: "تخفیف‌های فعال و پکیج‌های به‌صرفه را مقایسه کنید.",
+    description: "پیشنهادهای اقتصادی و ویژه",
     sections: [
       {
         title: "پیشنهادها",
@@ -108,7 +107,6 @@ const menus: MegaMenu[] = [
           { label: "تخفیف‌های امروز", href: "/salons?offer=today" },
           { label: "اولین رزرو", href: "/salons?offer=first-booking" },
           { label: "ساعات کم‌تقاضا", href: "/salons?offer=off-peak" },
-          { label: "پیشنهادهای ویژه", href: "/salons?offer=special" },
           { label: "پکیج‌ها", href: "/salons?offer=packages" },
         ],
       },
@@ -117,7 +115,7 @@ const menus: MegaMenu[] = [
   {
     label: "شهرها",
     href: "/salons",
-    description: "سالن‌ها و متخصصان شهرهای مختلف را مشاهده کنید.",
+    description: "جست‌وجوی خدمات در شهرهای مختلف",
     sections: [
       {
         title: "شهرهای محبوب",
@@ -128,7 +126,6 @@ const menus: MegaMenu[] = [
           { label: "اصفهان", href: "/salons?city=اصفهان" },
           { label: "شیراز", href: "/salons?city=شیراز" },
           { label: "تبریز", href: "/salons?city=تبریز" },
-          { label: "مشاهده همه شهرها", href: "/salons" },
         ],
       },
     ],
@@ -136,7 +133,7 @@ const menus: MegaMenu[] = [
   {
     label: "نمونه‌کارها",
     href: "/portfolio",
-    description: "نمونه‌کارها را پیش از انتخاب سالن یا متخصص مرور کنید.",
+    description: "مشاهده نتیجه کار پیش از انتخاب",
     sections: [
       {
         title: "دسته‌بندی‌ها",
@@ -154,16 +151,16 @@ const menus: MegaMenu[] = [
   {
     label: "مجله",
     href: "/magazine",
-    description: "راهنماهای مراقبت، آرایش و انتخاب سالن را بخوانید.",
+    description: "راهنماهای کاربردی زیبایی",
     sections: [
       {
-        title: "مجله زیبایی",
+        title: "موضوعات",
         links: [
           { label: "مراقبت مو", href: "/magazine?category=hair" },
           { label: "ناخن", href: "/magazine?category=nails" },
           { label: "آرایش و میکاپ", href: "/magazine?category=makeup" },
           { label: "مراقبت پوست", href: "/magazine?category=skin-care" },
-          { label: "راهنمای انتخاب سالن", href: "/magazine?category=salon-guide" },
+          { label: "انتخاب سالن", href: "/magazine?category=salon-guide" },
         ],
       },
     ],
@@ -171,10 +168,10 @@ const menus: MegaMenu[] = [
   {
     label: "پشتیبانی",
     href: "/contact",
-    description: "برای رزرو، تغییر زمان، بازپرداخت یا شکایت راهنمایی بگیرید.",
+    description: "راهنمای رزرو و پیگیری",
     sections: [
       {
-        title: "راهنما و پیگیری",
+        title: "راهنما",
         links: [
           { label: "راهنمای رزرو", href: "/support/booking-guide" },
           { label: "پیگیری نوبت", href: "/dashboard/appointments" },
@@ -196,16 +193,7 @@ const accountLinks = [
   { label: "علاقه‌مندی‌ها", href: "/dashboard/favorites", icon: Heart },
 ]
 
-const mobileLinks = [
-  { label: "خدمات", href: "/salons" },
-  { label: "سالن‌ها و متخصصان", href: "/salons" },
-  { label: "نوبت امروز", href: "/salons?availability=today" },
-  { label: "تخفیف‌ها", href: "/salons?offer=discount" },
-  { label: "شهرها", href: "/salons" },
-  { label: "نمونه‌کارها", href: "/portfolio" },
-  { label: "مجله", href: "/magazine" },
-  { label: "پشتیبانی", href: "/contact" },
-]
+const mobileLinks = menus.map((item) => ({ label: item.label, href: item.href }))
 
 const bottomLinks = [
   { label: "خانه", href: "/", icon: Home },
@@ -218,12 +206,12 @@ const bottomLinks = [
 function Brand() {
   return (
     <Link href="/" aria-label="لوکس بیوتی، صفحه اصلی" className="flex shrink-0 items-center gap-2.5">
-      <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-white/80 ring-1 ring-white/90 shadow-[0_8px_24px_rgba(133,75,65,0.13)] backdrop-blur">
-        <img src="/luxe-beauty-mark.svg" alt="" className="h-9 w-9 object-contain" />
+      <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-[#ead8d3]">
+        <img src="/luxe-beauty-mark.svg" alt="" className="h-8 w-8 object-contain" />
       </span>
       <span className="leading-none">
-        <span className="block whitespace-nowrap text-base font-black text-foreground">لوکس بیوتی</span>
-        <span dir="ltr" className="mt-1 block text-[9px] tracking-[0.18em] text-[#b87569]">LUXE BEAUTY</span>
+        <span className="block whitespace-nowrap text-[15px] font-black text-[#25201e]">لوکس بیوتی</span>
+        <span dir="ltr" className="mt-1 block text-[8px] tracking-[0.18em] text-[#bd7d70]">LUXE BEAUTY</span>
       </span>
     </Link>
   )
@@ -231,12 +219,7 @@ function Brand() {
 
 function IconLink({ href, label, children }: { href: string; label: string; children: ReactNode }) {
   return (
-    <Link
-      href={href}
-      aria-label={label}
-      title={label}
-      className="flex h-10 w-10 items-center justify-center rounded-full text-[#5f626b] transition hover:bg-white/80 hover:text-[#9d5e52] hover:shadow-sm"
-    >
+    <Link href={href} aria-label={label} title={label} className="flex h-9 w-9 items-center justify-center rounded-full text-[#686b73] transition hover:bg-[#f7efec] hover:text-[#9b5d52]">
       {children}
     </Link>
   )
@@ -278,13 +261,11 @@ export function Header() {
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-50 bg-white/65 shadow-[0_10px_35px_rgba(55,35,30,0.06)] backdrop-blur-2xl"
+        className="fixed inset-x-0 top-0 z-50 border-b border-[#ece6e3] bg-white/88 shadow-[0_5px_24px_rgba(52,37,32,0.045)] backdrop-blur-2xl"
         onMouseLeave={() => setActiveLabel(null)}
       >
-        <div className="mx-auto hidden h-16 max-w-[1880px] grid-cols-[190px_minmax(0,1fr)_190px] items-center gap-3 px-5 xl:grid 2xl:px-8">
-          <div className="flex items-center justify-start">
-            <Brand />
-          </div>
+        <div className="mx-auto hidden h-16 max-w-[1720px] grid-cols-[180px_minmax(0,1fr)_180px] items-center gap-4 px-5 xl:grid 2xl:px-8">
+          <div className="justify-self-start"><Brand /></div>
 
           <nav className="flex min-w-0 items-center justify-center gap-0.5" aria-label="منوی اصلی">
             {menus.map((item) => {
@@ -297,53 +278,46 @@ export function Header() {
                   onMouseEnter={() => setActiveLabel(item.label)}
                   onFocus={() => setActiveLabel(item.label)}
                   onClick={() => setActiveLabel(active ? null : item.label)}
-                  className={`relative flex h-10 shrink-0 items-center gap-1 rounded-full px-2.5 text-[11px] font-bold transition 2xl:px-3.5 2xl:text-xs ${
-                    active
-                      ? "bg-white/85 text-[#8f5147] shadow-sm"
-                      : "text-[#5e626b] hover:bg-white/55 hover:text-[#8f5147]"
+                  className={`flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-[11px] font-bold transition 2xl:px-3.5 2xl:text-xs ${
+                    active ? "bg-[#f7efec] text-[#91564c]" : "text-[#60636b] hover:bg-[#faf6f4] hover:text-[#91564c]"
                   }`}
                 >
                   {item.label}
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${active ? "rotate-180" : ""}`} />
-                  {active && <span className="absolute -bottom-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-[#c78376]" />}
+                  <ChevronDown className={`h-3 w-3 transition-transform ${active ? "rotate-180" : ""}`} />
                 </button>
               )
             })}
           </nav>
 
           <div className="flex items-center justify-end gap-0.5">
-            <IconLink href="/salons" label="جست‌وجو"><Search className="h-5 w-5" /></IconLink>
-            <IconLink href="/dashboard/favorites" label="علاقه‌مندی‌ها"><Heart className="h-5 w-5" /></IconLink>
+            <IconLink href="/salons" label="جست‌وجو"><Search className="h-[19px] w-[19px]" /></IconLink>
+            <IconLink href="/dashboard/favorites" label="علاقه‌مندی‌ها"><Heart className="h-[19px] w-[19px]" /></IconLink>
 
             {authenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-10 gap-1.5 rounded-full bg-white/55 px-3 text-[#6d443d] hover:bg-white/85">
+                  <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-full px-3 text-xs text-[#6b4942] hover:bg-[#f7efec]">
                     <UserRound className="h-4 w-4" />
                     حساب من
-                    <ChevronDown className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-3xl border-white/70 bg-white/85 p-2 shadow-2xl backdrop-blur-2xl">
+                <DropdownMenuContent align="end" className="w-56 rounded-2xl border-[#ece2df] bg-white/96 p-2 shadow-xl backdrop-blur-xl">
                   <DropdownMenuLabel>حساب کاربری</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {accountLinks.map((item) => (
-                    <DropdownMenuItem key={item.label} asChild className="rounded-2xl py-2.5">
+                    <DropdownMenuItem key={item.label} asChild className="rounded-xl py-2.5">
                       <Link href={item.href}><item.icon className="h-4 w-4" />{item.label}</Link>
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" onSelect={() => void logout()} className="rounded-2xl py-2.5">
+                  <DropdownMenuItem variant="destructive" onSelect={() => void logout()} className="rounded-xl py-2.5">
                     <LogOut className="h-4 w-4" />خروج
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Link href="/auth/login">
-                <Button
-                  size="sm"
-                  className="h-10 gap-2 rounded-full border border-white/80 bg-white/75 px-4 font-black text-[#93564b] shadow-[0_8px_24px_rgba(130,73,63,0.12)] backdrop-blur hover:bg-white"
-                >
+                <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full border-[#e6c8c1] bg-white/80 px-3.5 text-xs font-black text-[#92574c] shadow-none hover:bg-[#fff6f3]">
                   <UserRound className="h-4 w-4" />
                   ورود / ثبت‌نام
                 </Button>
@@ -354,69 +328,53 @@ export function Header() {
 
         <div className="mx-auto flex h-16 items-center justify-between px-3 xl:hidden">
           <div className="flex min-w-0 items-center gap-2">
-            <button
-              type="button"
-              aria-label={mobileOpen ? "بستن منو" : "باز کردن منو"}
-              onClick={() => setMobileOpen((value) => !value)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/55 hover:bg-white/85"
-            >
-              {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <button type="button" aria-label={mobileOpen ? "بستن منو" : "باز کردن منو"} onClick={() => setMobileOpen((value) => !value)} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-[#f7efec]">
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <Brand />
           </div>
           <div className="flex items-center gap-1">
             <IconLink href="/salons" label="جست‌وجو"><Search className="h-5 w-5" /></IconLink>
-            <Link href={authenticated ? "/dashboard" : "/auth/login"} aria-label="حساب کاربری" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-[#a45f53] shadow-sm">
-              <UserRound className="h-5 w-5" />
+            <Link href={authenticated ? "/dashboard" : "/auth/login"} aria-label="حساب کاربری" className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f8efec] text-[#98594e]">
+              <UserRound className="h-4.5 w-4.5" />
             </Link>
           </div>
         </div>
 
-        <svg aria-hidden="true" className="pointer-events-none absolute -bottom-[18px] left-0 h-5 w-full drop-shadow-[0_6px_7px_rgba(68,42,36,0.04)]" viewBox="0 0 1440 24" preserveAspectRatio="none">
-          <path className="fill-white/65" d="M0 0H1440V8C1220 24 1020 4 806 12C568 21 331 25 0 9V0Z" />
-        </svg>
-
         {activeMenu && (
-          <div className="absolute inset-x-0 top-full hidden pt-6 xl:block">
-            <div className="mx-auto max-w-[1180px] px-5">
-              <div className="grid grid-cols-[280px_minmax(0,1fr)] gap-3 rounded-[2rem] border border-white/80 bg-white/78 p-3 shadow-[0_28px_80px_rgba(58,35,30,0.16)] backdrop-blur-2xl">
-                <div className="relative overflow-hidden rounded-[1.55rem] bg-gradient-to-br from-[#8f5147] via-[#b87366] to-[#d69a8e] p-6 text-white">
-                  <Sparkles className="absolute -left-3 -top-3 h-24 w-24 text-white/10" />
-                  <p className="relative text-xs font-black text-white/75">راهنمای انتخاب لوکس بیوتی</p>
-                  <h2 className="relative mt-3 text-2xl font-black">{activeMenu.label}</h2>
-                  <p className="relative mt-3 text-sm leading-7 text-white/80">{activeMenu.description}</p>
-                  <Link
-                    href={activeMenu.href}
-                    onClick={() => setActiveLabel(null)}
-                    className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-black text-[#8f5147] shadow-lg"
-                  >
+          <div className="absolute inset-x-0 top-full hidden pt-3 xl:block">
+            <div className="mx-auto max-w-[980px] px-4">
+              <div className="rounded-[1.5rem] border border-[#eae1de] bg-white/96 p-5 shadow-[0_24px_65px_rgba(58,39,33,0.13)] backdrop-blur-2xl">
+                <div className="flex items-center justify-between gap-4 border-b border-[#eee7e4] pb-4">
+                  <div>
+                    <h2 className="text-base font-black text-[#312b29]">{activeMenu.label}</h2>
+                    <p className="mt-1 text-xs text-[#817a77]">{activeMenu.description}</p>
+                  </div>
+                  <Link href={activeMenu.href} onClick={() => setActiveLabel(null)} className="inline-flex items-center gap-1.5 rounded-full bg-[#f8efec] px-3.5 py-2 text-xs font-black text-[#92574c] hover:bg-[#f3e5e1]">
                     مشاهده همه
-                    <ArrowUpLeft className="h-4 w-4" />
+                    <ArrowUpLeft className="h-3.5 w-3.5" />
                   </Link>
                 </div>
 
-                <div className={`grid gap-3 ${activeMenu.sections.length > 1 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
+                <div className={`mt-4 grid gap-6 ${activeMenu.sections.length > 1 ? "md:grid-cols-2" : "grid-cols-1"}`}>
                   {activeMenu.sections.map((section) => (
-                    <div key={section.title} className="rounded-[1.55rem] border border-[#eadbd6] bg-gradient-to-b from-white/90 to-[#fff8f6]/80 p-5">
-                      <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-[#c78376]" />
-                        <h3 className="text-sm font-black text-[#3f332f]">{section.title}</h3>
-                      </div>
-                      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <section key={section.title}>
+                      <h3 className="text-xs font-black text-[#3c3532]">{section.title}</h3>
+                      <ul className="mt-3 grid gap-x-5 gap-y-1 sm:grid-cols-2">
                         {section.links.map((link) => (
                           <li key={link.label}>
                             <Link
                               href={link.href}
                               onClick={() => setActiveLabel(null)}
-                              className="group flex items-center justify-between gap-2 rounded-2xl border border-transparent bg-white/75 px-3.5 py-3 text-sm font-bold text-[#66616a] transition hover:border-[#e9c8c0] hover:bg-white hover:text-[#92574c] hover:shadow-sm"
+                              className="group flex items-center justify-between rounded-lg px-2 py-2 text-[13px] font-medium text-[#6f6966] transition hover:bg-[#fbf6f4] hover:text-[#92574c]"
                             >
                               <span>{link.label}</span>
-                              <ArrowUpLeft className="h-3.5 w-3.5 opacity-0 transition group-hover:opacity-100" />
+                              <ArrowUpLeft className="h-3 w-3 opacity-0 transition group-hover:opacity-100" />
                             </Link>
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </section>
                   ))}
                 </div>
               </div>
@@ -427,25 +385,19 @@ export function Header() {
 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 xl:hidden">
-          <button type="button" aria-label="بستن منو" className="absolute inset-0 bg-[#2b1714]/35 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute bottom-16 right-0 top-16 flex w-[min(88vw,360px)] flex-col border-l border-white/60 bg-white/82 shadow-2xl backdrop-blur-2xl">
-            <div className="border-b border-[#eadbd6] p-4">
-              {authenticated ? (
-                <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-2xl bg-[#fff4f1] p-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#a45f53] text-white"><UserRound className="h-5 w-5" /></span>
-                  <span><span className="block text-sm font-bold">حساب من</span><span className="block text-xs text-muted-foreground">داشبورد و نوبت‌ها</span></span>
-                </Link>
-              ) : (
-                <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full rounded-2xl bg-[#a45f53]">ورود / ثبت‌نام</Button>
-                </Link>
-              )}
+          <button type="button" aria-label="بستن منو" className="absolute inset-0 bg-[#241916]/25 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute bottom-16 right-0 top-16 flex w-[min(86vw,340px)] flex-col border-l border-[#eee5e2] bg-white/96 shadow-2xl backdrop-blur-xl">
+            <div className="border-b border-[#eee5e2] p-4">
+              <Link href={authenticated ? "/dashboard" : "/auth/login"} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-xl bg-[#fbf5f3] p-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#a45f53] text-white"><UserRound className="h-4.5 w-4.5" /></span>
+                <span className="text-sm font-black">{authenticated ? "حساب من" : "ورود / ثبت‌نام"}</span>
+              </Link>
             </div>
             <nav className="flex-1 overflow-y-auto p-3" aria-label="منوی موبایل">
-              <ul className="space-y-1">
+              <ul className="space-y-0.5">
                 {mobileLinks.map((item) => (
                   <li key={item.label}>
-                    <Link href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center rounded-2xl px-4 py-3 text-sm font-bold text-foreground hover:bg-[#fff4f1] hover:text-[#92574c]">
+                    <Link href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center rounded-xl px-4 py-3 text-sm font-bold text-[#4f4946] hover:bg-[#fbf5f3] hover:text-[#92574c]">
                       {item.label}
                     </Link>
                   </li>
@@ -453,8 +405,8 @@ export function Header() {
               </ul>
             </nav>
             {authenticated && (
-              <div className="border-t border-[#eadbd6] p-3">
-                <button type="button" onClick={() => void logout()} className="flex w-full items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-destructive hover:bg-destructive/10">
+              <div className="border-t border-[#eee5e2] p-3">
+                <button type="button" onClick={() => void logout()} className="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-destructive hover:bg-destructive/10">
                   <LogOut className="h-4 w-4" />خروج از حساب
                 </button>
               </div>
@@ -463,7 +415,7 @@ export function Header() {
         </div>
       )}
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 grid h-16 grid-cols-5 border-t border-white/70 bg-white/80 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-2xl xl:hidden" aria-label="دسترسی سریع موبایل">
+      <nav className="fixed inset-x-0 bottom-0 z-50 grid h-16 grid-cols-5 border-t border-[#eee5e2] bg-white/94 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl xl:hidden" aria-label="دسترسی سریع موبایل">
         {bottomLinks.map((item, index) => (
           <Link key={item.label} href={item.href} className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold ${index === 0 ? "text-[#a45f53]" : "text-muted-foreground hover:text-foreground"}`}>
             <item.icon className="h-5 w-5" />
