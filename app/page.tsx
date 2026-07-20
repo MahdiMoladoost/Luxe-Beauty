@@ -75,89 +75,77 @@ export default function HomePage() {
       <main className="flex-1 pt-16">
         <HeroSlider />
 
-        <section className="relative z-30 -mt-1 pb-10">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-4 md:grid-cols-4 lg:px-8">
-            {[
-              { value: "+۵,۰۰۰", label: "سالن و متخصص" },
-              { value: "+۱۵۰,۰۰۰", label: "رزرو موفق" },
-              { value: "۳۱", label: "استان فعال" },
-              { value: "۴.۸", label: "میانگین رضایت" },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-2xl border border-border/70 bg-card px-4 py-4 text-center shadow-sm">
-                <div className="text-2xl font-black tabular-nums text-foreground">{stat.value}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="py-14 sm:py-16">
+        <section className="relative overflow-hidden py-16 sm:py-20">
+          <div className="pointer-events-none absolute right-[-10rem] top-[-6rem] h-80 w-80 rounded-full bg-[#f3ddd7]/50 blur-3xl" />
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
-                <span className="text-sm font-black text-primary">انتخاب سریع</span>
-                <h2 className="mt-2 text-3xl font-black text-foreground">خدمات محبوب</h2>
-                <p className="mt-2 text-sm text-muted-foreground">خدمت موردنظر را انتخاب کنید و زمان‌های آزاد را ببینید.</p>
+                <span className="inline-flex rounded-full bg-[#fff1ed] px-3 py-1.5 text-xs font-black text-[#a45f53]">انتخاب سریع</span>
+                <h2 className="mt-3 text-3xl font-black text-foreground sm:text-4xl">خدمات محبوب</h2>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">خدمت موردنظر را انتخاب کنید و زمان‌های آزاد بهترین متخصصان را ببینید.</p>
               </div>
-              <Link href="/salons" className="inline-flex items-center gap-2 text-sm font-bold text-primary">
+              <Link href="/salons" className="inline-flex items-center gap-2 text-sm font-black text-[#a45f53]">
                 مشاهده همه خدمات
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <div className="mt-9 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
               {services.map((service) => (
                 <Link
                   key={service.name}
                   href={service.href}
-                  className="group rounded-3xl border border-border bg-card p-5 text-center transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
+                  className="group relative overflow-hidden rounded-[1.75rem] border border-[#eadbd6] bg-white/80 p-5 text-center shadow-[0_12px_35px_rgba(78,49,42,0.05)] transition duration-300 hover:-translate-y-1.5 hover:border-[#dfb7ae] hover:shadow-[0_22px_50px_rgba(117,71,61,0.12)]"
                 >
-                  <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                  <span className="absolute -left-8 -top-8 h-24 w-24 rounded-full bg-[#fff1ed] transition group-hover:scale-125" />
+                  <span className="relative mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fff5f2] to-[#efd7d1] text-[#a45f53] shadow-inner transition group-hover:from-[#ad665a] group-hover:to-[#c9897d] group-hover:text-white">
                     <service.icon className="h-6 w-6" />
                   </span>
-                  <span className="mt-4 block text-sm font-black text-foreground">{service.name}</span>
-                  <span className="mt-1 block text-[11px] text-muted-foreground">{service.count}</span>
+                  <span className="relative mt-4 block text-sm font-black text-foreground">{service.name}</span>
+                  <span className="relative mt-1 block text-[11px] text-muted-foreground">{service.count}</span>
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="border-y border-border/70 bg-secondary/35 py-14 sm:py-16">
+        <section className="border-y border-[#eadbd6]/70 bg-gradient-to-b from-[#fffaf8] to-[#fff5f1] py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid gap-5 lg:grid-cols-3">
-              {benefits.map((benefit) => (
-                <div key={benefit.title} className="rounded-3xl border border-border/70 bg-background p-6 shadow-sm">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              {benefits.map((benefit, index) => (
+                <div key={benefit.title} className="relative overflow-hidden rounded-[2rem] border border-white bg-white/75 p-7 shadow-[0_18px_45px_rgba(82,48,41,0.07)] backdrop-blur">
+                  <span className="absolute left-5 top-4 text-6xl font-black text-[#f4e4df]">۰{index + 1}</span>
+                  <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-[#a45f53] text-white shadow-lg shadow-[#a45f53]/20">
                     <benefit.icon className="h-6 w-6" />
                   </span>
-                  <h3 className="mt-5 text-lg font-black text-foreground">{benefit.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{benefit.description}</p>
+                  <h3 className="relative mt-5 text-lg font-black text-foreground">{benefit.title}</h3>
+                  <p className="relative mt-2 text-sm leading-7 text-muted-foreground">{benefit.description}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-14 sm:py-16">
+        <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <span className="text-sm font-black text-primary">پیشنهاد لوکس بیوتی</span>
-                <h2 className="mt-2 text-3xl font-black text-foreground">سالن‌های منتخب</h2>
+                <span className="inline-flex rounded-full bg-[#fff1ed] px-3 py-1.5 text-xs font-black text-[#a45f53]">پیشنهاد لوکس بیوتی</span>
+                <h2 className="mt-3 text-3xl font-black text-foreground sm:text-4xl">سالن‌های منتخب</h2>
               </div>
-              <Link href="/salons" className="hidden items-center gap-2 text-sm font-bold text-primary sm:flex">
+              <Link href="/salons" className="hidden items-center gap-2 text-sm font-black text-[#a45f53] sm:flex">
                 مشاهده همه
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
+            <div className="mt-9 grid gap-5 md:grid-cols-3">
               {salons.map((salon) => (
-                <Link key={salon.name} href="/salons" className="group overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-                  <div className="relative h-52 overflow-hidden">
-                    <img src={salon.image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                    <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-black text-foreground shadow-sm backdrop-blur">
+                <Link key={salon.name} href="/salons" className="group overflow-hidden rounded-[2rem] border border-[#eadbd6] bg-white shadow-[0_14px_40px_rgba(75,45,39,0.07)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_rgba(75,45,39,0.14)]">
+                  <div className="relative h-56 overflow-hidden">
+                    <img src={salon.image} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#2f1a17]/45 via-transparent to-transparent" />
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1.5 text-xs font-black text-foreground shadow-sm backdrop-blur-xl">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                       {salon.rating}
                     </span>
@@ -173,14 +161,15 @@ export default function HomePage() {
         </section>
 
         <section className="px-4 pb-16 lg:px-8">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 overflow-hidden rounded-[2rem] border border-[#ecd6cf] bg-gradient-to-l from-[#fff4f0] via-white to-[#fff9f7] px-6 py-9 text-center md:flex-row md:text-right lg:px-10">
-            <div>
-              <span className="text-xs font-black text-[#a45f53]">برای صاحبان کسب‌وکار زیبایی</span>
-              <h2 className="mt-2 text-2xl font-black text-foreground">خدماتت را به هزاران مشتری معرفی کن</h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">صفحه حرفه‌ای بساز، نمونه‌کار منتشر کن و نوبت‌ها را آنلاین مدیریت کن.</p>
+          <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 overflow-hidden rounded-[2.25rem] border border-[#e7c9c1] bg-gradient-to-l from-[#9d5c51] via-[#b97569] to-[#d69c91] px-6 py-10 text-center text-white shadow-[0_25px_70px_rgba(112,64,54,0.2)] md:flex-row md:text-right lg:px-10">
+            <Sparkles className="absolute -left-5 -top-5 h-36 w-36 text-white/10" />
+            <div className="relative">
+              <span className="text-xs font-black text-white/70">برای صاحبان کسب‌وکار زیبایی</span>
+              <h2 className="mt-2 text-2xl font-black">خدماتت را به هزاران مشتری معرفی کن</h2>
+              <p className="mt-2 text-sm leading-7 text-white/75">صفحه حرفه‌ای بساز، نمونه‌کار منتشر کن و نوبت‌ها را آنلاین مدیریت کن.</p>
             </div>
-            <Link href="/salon-register" className="shrink-0">
-              <Button size="lg" className="h-12 gap-2 rounded-2xl px-7 shadow-lg shadow-primary/20">
+            <Link href="/salon-register" className="relative shrink-0">
+              <Button size="lg" className="h-12 gap-2 rounded-2xl bg-white px-7 font-black text-[#8f5147] shadow-xl hover:bg-[#fff5f2]">
                 <Store className="h-5 w-5" />
                 ثبت سالن یا متخصص
               </Button>
