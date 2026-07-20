@@ -306,7 +306,7 @@ function Brand() {
       <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
         <Sparkles className="h-5 w-5" />
       </span>
-      <span className="hidden text-lg font-black tracking-tight text-foreground sm:block">لوکس بیوتی</span>
+      <span className="hidden text-lg font-black tracking-tight text-foreground sm:block xl:hidden 2xl:block">لوکس بیوتی</span>
     </Link>
   )
 }
@@ -392,7 +392,7 @@ export function Header() {
         className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/95 shadow-sm backdrop-blur-xl"
         onMouseLeave={() => setActiveMenuLabel(null)}
       >
-        <div className="mx-auto hidden h-16 max-w-[1600px] items-center justify-between gap-4 px-5 lg:flex xl:px-8">
+        <div className="mx-auto hidden h-16 max-w-[1600px] items-center justify-between gap-3 px-4 xl:flex 2xl:px-8">
           <div className="flex shrink-0 items-center gap-3">
             <Brand />
             <DropdownMenu>
@@ -404,7 +404,7 @@ export function Header() {
                   <MapPin className="h-4 w-4 shrink-0 text-primary" />
                   <span className="leading-tight">
                     <span className="block font-semibold text-foreground">{selectedCity}</span>
-                    <span className="block text-[10px] text-muted-foreground">انتخاب شهر و محله</span>
+                    <span className="hidden text-[10px] text-muted-foreground 2xl:block">انتخاب شهر و محله</span>
                   </span>
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
@@ -527,7 +527,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 lg:hidden">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 xl:hidden">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -576,7 +576,7 @@ export function Header() {
         </div>
 
         {activeMenu && (
-          <div className="absolute inset-x-0 top-full hidden border-t border-border bg-card shadow-xl shadow-foreground/5 lg:block">
+          <div className="absolute inset-x-0 top-full hidden border-t border-border bg-card shadow-xl shadow-foreground/5 xl:block">
             <div className="mx-auto grid max-w-7xl grid-cols-[minmax(250px,0.8fr)_2fr] gap-10 px-8 py-7">
               <div className="rounded-2xl bg-primary/5 p-5">
                 <span className="text-xs font-bold text-primary">{activeMenu.eyebrow}</span>
@@ -617,7 +617,7 @@ export function Header() {
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 xl:hidden">
           <button
             type="button"
             aria-label="بستن منو"
@@ -684,7 +684,7 @@ export function Header() {
       )}
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 grid h-16 grid-cols-5 border-t border-border bg-background/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 grid h-16 grid-cols-5 border-t border-border bg-background/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl xl:hidden"
         aria-label="دسترسی سریع موبایل"
       >
         {bottomNavigation.map((item, index) => (
@@ -700,8 +700,6 @@ export function Header() {
           </Link>
         ))}
       </nav>
-
-      <div className="hidden h-12 lg:block" aria-hidden="true" />
     </>
   )
 }
