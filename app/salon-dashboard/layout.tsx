@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { assertPermission } from "@/lib/auth/rbac"
+import { panelPermissionMatrix } from "@/lib/auth/protected-routes"
 import { requirePrincipalFromServerCookies } from "@/lib/auth/session-cookie"
 import type { SessionPrincipal } from "@/lib/auth/types"
 
@@ -17,7 +18,7 @@ export default async function ProviderDashboardLayout({ children }: Readonly<{ c
   if (principal.mustChangePassword) redirect("/auth/change-password")
 
   try {
-    assertPermission(principal, "provider.panel.access")
+    assertPermission(principal, panelPermissionMatrix["/salon-dashboard"])
   } catch {
     redirect("/auth/login?error=forbidden")
   }
