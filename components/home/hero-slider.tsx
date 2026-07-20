@@ -3,6 +3,7 @@ import { Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { heroImage } from "./hero-image"
 
 const stats = [
   { value: "+۵,۰۰۰", label: "سالن و متخصص" },
@@ -16,7 +17,7 @@ export function HeroSlider() {
     <section className="relative overflow-hidden bg-[#fffaf8]">
       <div className="relative mx-auto h-[560px] max-w-[1920px] overflow-hidden lg:h-[590px]">
         <img
-          src="/hero/slide-3.webp"
+          src={heroImage}
           alt="خدمات زیبایی لوکس بیوتی برای بانوان و آقایان"
           className="absolute inset-0 h-full w-full object-cover object-center"
           fetchPriority="high"
