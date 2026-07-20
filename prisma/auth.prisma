@@ -1,0 +1,51 @@
+// Authentication persistence introduced by migration 20260720010000_auth_rbac.
+// Session extension columns remain queried through the repository's reviewed raw SQL
+// because the base Session model predates this domain split.
+
+model LoginCredential {
+  userId              String    @id @db.Uuid
+  passwordHash        String    @db.VarChar(255)
+  passwordAlgorithm   String    @default("scrypt-v1") @db.VarChar(40)
+  mustChangePassword  Boolean   @default(false)
+  twoFactorRequired   Boolean   @default(true)
+  failedAttempts      Int       @default(0)
+  lockedUntil         DateTime? @db.Timestamptz(6)
+  passwordChangedAt   DateTime? @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([lockedUntil])
+}
+
+model OtpChallenge {
+  id                  String    @id @default(uuid()) @db.Uuid
+  userId              String?   @db.Uuid
+  mobileNormalized    String    @db.VarChar(16)
+  purpose             String    @db.VarChar(40)
+  codeHash            String    @db.VarChar(128)
+  attemptCount        Int       @default(0)
+  maxAttempts         Int
+  expiresAt           DateTime  @db.Timestamptz(6)
+  resendAfter         DateTime  @db.Timestamptz(6)
+  consumedAt          DateTime? @db.Timestamptz(6)
+  invalidatedAt       DateTime? @db.Timestamptz(6)
+  requestedIpHash     String?   @db.VarChar(128)
+  userAgentSummary    String?   @db.VarChar(300)
+  createdAt           DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([mobileNormalized, purpose, createdAt(sort: Desc)], map: "OtpChallenge_mobile_purpose_created_idx")
+  @@index([userId, purpose, createdAt(sort: Desc)], map: "OtpChallenge_user_purpose_created_idx")
+  @@index([expiresAt, consumedAt, invalidatedAt], map: "OtpChallenge_expiry_idx")
+}
+
+model AuthRateLimit {
+  keyHash         String    @db.VarChar(128)
+  action          String    @db.VarChar(80)
+  windowStartedAt DateTime  @db.Timestamptz(6)
+  attemptCount    Int       @default(0)
+  blockedUntil    DateTime? @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@id([keyHash, action])
+  @@index([blockedUntil])
+}
