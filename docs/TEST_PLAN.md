@@ -19,6 +19,8 @@ No mandatory test is deleted or skipped merely to make CI green. Quarantined tes
 ## Unit tests
 - Persian/Arabic/Latin normalization.
 - Money arithmetic and rounding-free integer calculations.
+- Authentication OTP HMAC/challenge binding, password hashing/verification and password policy.
+- Deny-by-default RBAC, forced initial-password boundaries and the protected panel/API permission matrix.
 - Fixed/from/range/consultation/calculated/variant/add-on/location pricing.
 - Duration, buffers, travel and multi-service sequencing.
 - Discounts, caps, minimums, eligibility and stacking.
@@ -33,8 +35,11 @@ No mandatory test is deleted or skipped merely to make CI green. Quarantined tes
 
 ## Integration tests
 Run against PostgreSQL, Redis and MinIO-compatible services.
-- Customer OTP, expiry, attempt limits and session rotation.
-- Staff password/2FA/recovery.
+- Customer OTP registration, expiry, resend cooldown, attempt limits, persisted profile, active session and logout-all.
+- Staff mobile/password login, temporary lockout foundation, SMS 2FA and password recovery primitives.
+- Active-device listing, owned-session revocation and cross-user session IDOR denial.
+- All role/permission API operations for unauthenticated, denied and super-admin principals.
+- Atomic audit evidence for custom permission and role creation.
 - KYC mock, encrypted identity and duplicate national-ID HMAC.
 - Provider onboarding, private documents and review transitions.
 - Professional affiliation bilateral approval and scope.
@@ -65,7 +70,7 @@ Run against PostgreSQL, Redis and MinIO-compatible services.
 - Role escalation and role-change step-up auth.
 - CSRF, XSS, injection and unsafe URL/SSRF validation.
 - Login/OTP/password recovery rate limits and enumeration resistance.
-- Session fixation/rotation/revocation/logout-all.
+- Session fixation/rotation/revocation/logout-all and per-device revocation.
 - Upload MIME/size/hash/private URL/scan-state controls.
 - Sensitive national ID, address, document and conversation access/audit.
 - Webhook signature/idempotency/replay.
@@ -78,4 +83,4 @@ Automated axe-compatible checks for home, search, provider page, authentication,
 Factories create deterministic domain data. Development seeds are clearly labelled «آزمایشی». Production must never seed test accounts. Secrets and real PII are prohibited in fixtures and snapshots.
 
 ## Current status
-GitHub Actions workflow run `29706453678` passed locked dependency installation, Prisma validation and client generation, committed migration deployment to clean PostgreSQL, migration status, lint, strict TypeScript, three foundational unit suites, production build, Docker Compose validation, application image build and production dependency audit. Integration, E2E, accessibility, dedicated permission/security, backup/restore and full runtime smoke tests remain open. Local execution in this session remains unavailable because the sandbox could not resolve GitHub for cloning/installing.
+GitHub Actions workflow run `29740506514` passed locked dependency installation, multi-file Prisma validation and client generation, both committed migrations on clean PostgreSQL, migration status, RBAC/super-admin seed, lint, strict TypeScript, authentication/RBAC plus foundational unit tests, PostgreSQL integration tests, production build, Docker Compose validation, application image build and production dependency audit. E2E, accessibility, upload/security completion, backup/restore and full runtime smoke tests remain open. Local execution in this session remains unavailable because the sandbox cannot clone GitHub; the user can run the documented commands on a developer machine.

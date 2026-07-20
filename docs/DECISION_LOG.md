@@ -40,14 +40,34 @@ Exact customer and home-studio addresses are private. Search and pre-confirmatio
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Preserve generic UI, replace business prototypes
 **Status:** Accepted
 
-Reviewed generic shadcn/ui primitives and useful design utilities may remain. Current admin/customer/provider/auth business pages are replacement targets because they use client-only state and hardcoded data.
+Reviewed generic shadcn/ui primitives and useful design utilities may remain. Current admin/customer/provider business pages are replacement targets because they use client-only state and hardcoded data. Authentication screens may be removed from this list only when their full database/API/security flow is operational and tested.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Early draft PR
 **Status:** Accepted
 
 Open a draft pull request after phase-zero foundations so progress, commits, CI and limitations are continuously visible. The PR remains draft and is never merged without explicit owner instruction.
 
+## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Versioned scrypt password KDF
+**Status:** Accepted
+
+Use Node.js scrypt as the approved memory-hard password hashing equivalent, with a random per-password salt, an environment-managed pepper and an encoded algorithm/version/parameter envelope. This avoids fragile native-build dependencies in the current deployment while preserving an explicit migration path to Argon2id. Passwords and pepper values are never logged or stored in seeds/source.
+
+## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Development OTP observability without production leakage
+**Status:** Accepted
+
+The mock SMS adapter may return the OTP to the development UI only when the application is not in production and `SMS_PROVIDER=mock`. The adapter refuses production use, logs only masked mobile/correlation metadata, and never logs the OTP. Real SMS delivery remains adapter-driven.
+
+## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Authentication state is PostgreSQL-authoritative
+**Status:** Accepted
+
+OTP challenges, attempt counters, resend cooldowns, application rate-limit windows, credentials, active sessions, idle/absolute expiry, device revocation and RBAC assignments are stored in PostgreSQL. Redis may later accelerate distributed limits but cannot be the only authority for authentication correctness.
+
+## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Multi-file Prisma schema by domain
+**Status:** Accepted
+
+Prisma reads the `prisma` directory as one schema. Authentication tables are defined in `prisma/auth.prisma` while the existing marketplace models remain in `prisma/schema.prisma`; committed SQL migrations remain the deployment source of truth. This permits gradual domain separation without rewriting the accepted foundation schema.
+
 ## 2026-07-20 — Execution limitation
 **Status:** Active
 
-The local execution sandbox could not resolve `github.com`, so a direct clone and local dependency-based build/lint could not run. Repository inspection and writes continue through the authenticated GitHub connector. Remote CI will be introduced for reproducible validation; failed/unrun checks remain visible and are not represented as passing.
+The local execution sandbox cannot reliably clone `github.com`, so direct local dependency-based checks are unavailable. Repository inspection and writes continue through the authenticated GitHub connector. GitHub Actions is the reproducible validation authority for this session; failed or unrun checks remain visible and are never represented as passing.

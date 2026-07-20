@@ -2,7 +2,7 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
@@ -15,7 +15,7 @@ Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
 - [x] Document target architecture and migration strategy.
 - [x] Mark legacy admin/customer/provider/auth routes as replacement targets.
 - [x] Create initial executable Prisma schema.
-- [x] Validate Prisma schema and committed migration against a clean PostgreSQL instance in CI.
+- [x] Validate Prisma schema and committed migrations against a clean PostgreSQL instance in CI.
 - [~] Complete repository-wide secret scanning and dependency auditing; production dependency audit passes, dedicated source/secret scanning is still open.
 
 ## Phase 1 — Infrastructure
@@ -27,7 +27,7 @@ Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
 - [~] Add MinIO development namespaces and S3-compatible environment contract; application storage adapter remains open.
 - [x] Add Dockerfile, Docker Compose, production-like Nginx and liveness/readiness endpoints; full runtime smoke test remains open.
 - [~] Add structured worker logs; request correlation middleware and full observability remain open.
-- [x] Add read-only reproducible CI gates for locked install, Prisma, migrations, lint, typecheck, unit tests, build, Compose, Docker image and production dependency audit.
+- [x] Add read-only reproducible CI gates for locked install, Prisma, migrations, seed, lint, typecheck, unit/integration tests, build, Compose, Docker image and production dependency audit.
 
 ## Phase 2 — Design system and public experience
 - [ ] RTL layout, licensed Persian font and theme tokens.
@@ -36,17 +36,20 @@ Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
 - [ ] Data-backed homepage/search entry.
 - [ ] Public provider/professional/service/geography pages.
 - [ ] Legal/static/content pages backed by CMS data.
-- [ ] Empty/error/loading states.
+- [~] Authentication and security screens now have real loading/error/success states; public and business panels remain open.
 - [ ] WCAG checks and responsive verification.
 
 ## Phase 3 — Authentication and security
-- [ ] Customer OTP registration and session lifecycle.
-- [ ] Staff/provider mobile-password login and Argon2id.
-- [ ] SMS 2FA/recovery, attempt limits and suspicious login audit.
-- [ ] RBAC/scopes/contextual policies.
+- [x] Customer mobile OTP registration/login, expiry, attempt limits, resend cooldown, rate limiting and persistent session lifecycle.
+- [x] Staff/provider mobile-password login using versioned scrypt with an environment pepper as an approved memory-hard KDF equivalent.
+- [x] SMS 2FA and password recovery through a replaceable provider with a development-only mock; login lockout and suspicious/failure audit are active.
+- [~] RBAC is deny-by-default with ten seeded roles, custom roles/permissions, protected APIs/layouts and atomic audit; provider/branch/professional scoped ABAC is still open.
 - [ ] Sensitive national-ID HMAC/encryption and audited access.
-- [ ] Step-up authentication for sensitive actions.
-- [ ] Security headers, CSRF/XSS/SSRF/file/rate-limit controls.
+- [~] Forced initial super-admin password change and staff SMS 2FA are active; freshness-based step-up for every future financial/identity action remains open.
+- [~] Same-origin mutation checks, secure cookies, session expiry/revocation, OTP/password rate limits and safe error envelopes are active; CSP/XSS/SSRF/upload controls remain open.
+- [x] Super-admin bootstrap uses mobile `09399496078`; the initial password is read only from `SEED_SUPER_ADMIN_INITIAL_PASSWORD`, never from code or a public seed.
+- [x] Active device/session listing, per-device revocation, current logout and logout-all are persisted and audited.
+- [x] Authentication/RBAC migration, multi-file Prisma schema, development seed, UI, API, permission matrix, unit tests and PostgreSQL integration tests pass CI.
 
 ## Phase 4 — Providers and verification
 - [ ] Provider-type onboarding.
@@ -77,15 +80,15 @@ Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
 - [ ] Dispute workflow and financial hold.
 
 ## Phase 7 — Operational panels
-- [ ] Customer panel.
+- [~] Customer authentication, profile completion and security/device management are data-backed; the complete customer panel remains open.
 - [ ] Salon/group panel.
 - [ ] Independent professional panel.
-- [ ] Platform administration panel.
-- [ ] Configurable roles/permissions.
+- [~] Platform role/permission management is data-backed and protected; the complete administration panel remains open.
+- [x] Seeded and configurable roles/permissions with server-side API and layout enforcement.
 - [ ] Real reports and CSV/Excel exports.
 
 ## Phase 8 — Communications
-- [ ] Kavenegar production adapter and explicit mock.
+- [~] Replaceable SMS port and explicit development mock support OTP, staff 2FA and password recovery; Kavenegar production adapter remains open.
 - [ ] SMS templates, quota, packs, delivery state, retries and reports.
 - [ ] In-app notifications and PWA push.
 - [ ] Internal messaging with private files and moderation signals.
@@ -116,29 +119,29 @@ Latest verified foundation CI: workflow run `29706453678` on 2026-07-20.
 
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development-only seed for nine cities and test roles.
-- [~] Unit test matrix; foundational money, Persian normalization and booking-state tests pass.
-- [ ] Integration test matrix.
+- [~] Unit test matrix now includes authentication cryptography, RBAC, route permission matrices, money, Persian normalization and booking transitions; later domains remain open.
+- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit and device IDOR; later domains remain open.
 - [ ] Playwright E2E matrix.
-- [ ] Security/permission/IDOR/rate/session/upload tests.
+- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR and CSRF-origin behavior have automated coverage; upload and full security matrix remain open.
 - [ ] Accessibility automated and manual checks.
-- [x] Current foundation production build, clean migration deployment, Compose validation and Docker image build pass in CI.
-- [x] Current production dependency audit passes at high severity threshold after remediating Prisma, BullMQ/uuid and Next/PostCSS advisories.
+- [x] Current authentication/RBAC production build, clean migration deployment, seed, Compose validation and Docker image build pass in CI.
+- [x] Current production dependency audit passes at high severity threshold.
 - [ ] Backup and restore test.
 - [ ] Operations/health/queue dashboards.
 - [ ] Persian README, installation, production, backup and restore docs.
 - [x] External integration limitations and environment contract documented.
-- [x] Draft PR description updated with current architecture, migration, capabilities, tests, build, environment, runbook, security and limitations.
-- [~] MR-001 through MR-071 are documented and traceable; most implementation requirements remain open.
+- [x] Draft PR description continuously records current architecture, migrations, capabilities, tests, build, environment, security and limitations.
+- [~] MR-001 through MR-071 are documented and traceable; authentication/RBAC requirements have advanced while most marketplace domains remain open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
-The following current routes are presentation prototypes and must not be treated as completed business capabilities:
-- `app/admin/page.tsx`
-- `app/dashboard/page.tsx`
-- `app/salon-dashboard/page.tsx`
-- `app/auth/login/page.tsx`
-- `app/auth/register/page.tsx`
-- `app/salon-register/page.tsx`
-- hardcoded public listing/statistics sections in current public pages
+The following current routes remain presentation prototypes unless explicitly noted:
+- `app/admin/page.tsx` — protected, but its business dashboard content remains a replacement target.
+- `app/dashboard/page.tsx` — protected, but the full customer business panel remains a replacement target.
+- `app/salon-dashboard/page.tsx` — protected, but its business dashboard content remains a replacement target.
+- `app/auth/login/page.tsx` — replaced with operational customer OTP and staff mobile/password/2FA flows.
+- `app/auth/register/page.tsx` — replaced with operational mobile OTP registration and persisted profile completion.
+- `app/salon-register/page.tsx` — still a provider-onboarding replacement target.
+- hardcoded public listing/statistics sections in current public pages.
 
 Generic reviewed `components/ui/*` primitives may be retained.
