@@ -185,3 +185,339 @@
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* Refined Luxe Beauty homepage hero */
+main > section:first-child {
+  isolation: isolate;
+  min-height: 680px;
+  margin-bottom: 6.5rem;
+  overflow: visible;
+  background: #f7f1ed;
+}
+
+main > section:first-child::before,
+main > section:first-child::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+  border-radius: 0 0 48% 48% / 0 0 7% 7%;
+}
+
+main > section:first-child::before {
+  z-index: -2;
+  background-image: url('https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=2400&q=90');
+  background-position: center 42%;
+  background-size: cover;
+}
+
+main > section:first-child::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgb(249 246 243 / 8%) 0%, rgb(249 246 243 / 34%) 40%, rgb(249 246 243 / 91%) 72%, rgb(249 246 243 / 98%) 100%),
+    linear-gradient(180deg, rgb(255 255 255 / 2%) 52%, rgb(83 52 43 / 16%) 100%);
+}
+
+main > section:first-child > div:nth-child(-n + 3) {
+  display: none;
+}
+
+main > section:first-child > div:nth-child(4) {
+  display: flex;
+  min-height: 680px;
+  align-items: center;
+  padding-top: 5.5rem;
+  padding-bottom: 0;
+}
+
+main > section:first-child > div:nth-child(4) > div {
+  position: relative;
+  width: 100%;
+  text-align: right;
+}
+
+main > section:first-child > div:nth-child(4) > div::before {
+  position: absolute;
+  z-index: -1;
+  top: -2.25rem;
+  right: -2rem;
+  width: min(44rem, calc(100% + 4rem));
+  height: 32rem;
+  content: '';
+  border: 1px solid rgb(255 255 255 / 58%);
+  border-radius: 2rem;
+  background: rgb(255 255 255 / 78%);
+  box-shadow: 0 30px 90px rgb(65 40 33 / 15%);
+  backdrop-filter: blur(20px) saturate(118%);
+  -webkit-backdrop-filter: blur(20px) saturate(118%);
+}
+
+main > section:first-child > div:nth-child(4) > div > :not(:last-child) {
+  width: min(100%, 40rem);
+  margin-right: 0;
+  margin-left: auto;
+}
+
+main > section:first-child > div:nth-child(4) > div > div:first-child {
+  display: flex;
+  width: max-content;
+  border-color: rgb(173 111 94 / 24%);
+  background: rgb(255 255 255 / 68%);
+  color: #81594e;
+  box-shadow: 0 8px 24px rgb(93 55 45 / 8%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:first-child > span {
+  background: #b36c5b;
+  box-shadow: 0 0 0 5px rgb(179 108 91 / 12%);
+}
+
+main > section:first-child > div:nth-child(4) > div > h1 {
+  max-width: 39rem;
+  margin-top: 1.5rem;
+  color: #251c19;
+  font-size: clamp(2.6rem, 5.2vw, 4.75rem);
+  font-weight: 780;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+main > section:first-child > div:nth-child(4) > div > h1 span {
+  margin-top: 0.4rem;
+  background: linear-gradient(135deg, #a75849, #c9806b 55%, #785046);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+main > section:first-child > div:nth-child(4) > div > p {
+  max-width: 35rem;
+  margin-top: 1.25rem;
+  color: #6f5f5a;
+  font-size: clamp(0.98rem, 1.35vw, 1.12rem);
+  line-height: 2;
+}
+
+main > section:first-child > div:nth-child(4) > div > div:nth-child(4) {
+  max-width: 40rem;
+  margin-top: 1.75rem;
+}
+
+main > section:first-child > div:nth-child(4) > div > div:nth-child(4) > div {
+  gap: 0.55rem;
+  padding: 0.55rem;
+  border-color: rgb(155 102 88 / 18%);
+  border-radius: 1.4rem;
+  background: rgb(255 255 255 / 86%);
+  box-shadow: 0 20px 50px rgb(70 42 34 / 14%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:nth-child(4) > div > div {
+  min-height: 3.35rem;
+  border: 1px solid rgb(155 102 88 / 8%);
+  border-radius: 1rem;
+  background: rgb(250 247 245 / 92%);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:nth-child(4) button {
+  min-height: 3.35rem;
+  border-radius: 1rem;
+  background: #a85f50;
+  padding-inline: 1.75rem;
+  box-shadow: 0 12px 24px rgb(168 95 80 / 24%);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:nth-child(4) button:hover {
+  background: #925044;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgb(146 80 68 / 28%);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:last-child {
+  width: 100%;
+  margin-top: 5.2rem;
+  gap: 0;
+  padding: 0.6rem;
+  border: 1px solid rgb(151 101 87 / 18%);
+  border-radius: 1.4rem;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 24px 70px rgb(63 38 31 / 16%);
+  transform: translateY(48%);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:last-child > div {
+  position: relative;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+}
+
+main > section:first-child > div:nth-child(4) > div > div:last-child > div:not(:last-child)::after {
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  left: 0;
+  width: 1px;
+  content: '';
+  background: linear-gradient(180deg, transparent, rgb(157 108 94 / 26%), transparent);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:last-child > div:hover {
+  background: rgb(174 103 84 / 6%);
+  transform: translateY(-2px);
+}
+
+main > section:first-child > div:nth-child(4) > div > div:last-child > div > div:first-child {
+  color: #2c211e;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+
+main > section:first-child > div:nth-child(4) > div > div:last-child > div > div:last-child {
+  margin-top: 0.3rem;
+  color: #81706b;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.dark main > section:first-child::after {
+  background:
+    linear-gradient(90deg, rgb(22 17 16 / 20%) 0%, rgb(22 17 16 / 52%) 44%, rgb(22 17 16 / 90%) 76%, rgb(22 17 16 / 97%) 100%),
+    linear-gradient(180deg, transparent 50%, rgb(0 0 0 / 30%) 100%);
+}
+
+.dark main > section:first-child > div:nth-child(4) > div::before,
+.dark main > section:first-child > div:nth-child(4) > div > div:last-child,
+.dark main > section:first-child > div:nth-child(4) > div > div:nth-child(4) > div {
+  border-color: rgb(255 255 255 / 12%);
+  background: rgb(30 24 22 / 76%);
+}
+
+.dark main > section:first-child > div:nth-child(4) > div > h1,
+.dark main > section:first-child > div:nth-child(4) > div > div:last-child > div > div:first-child {
+  color: #fffaf7;
+}
+
+.dark main > section:first-child > div:nth-child(4) > div > p,
+.dark main > section:first-child > div:nth-child(4) > div > div:last-child > div > div:last-child {
+  color: #cbbdb8;
+}
+
+.dark main > section:first-child > div:nth-child(4) > div > div:nth-child(4) > div > div {
+  background: rgb(47 38 35 / 80%);
+}
+
+@media (max-width: 1023px) {
+  main > section:first-child,
+  main > section:first-child > div:nth-child(4) {
+    min-height: 650px;
+  }
+
+  main > section:first-child::before {
+    background-position: 35% center;
+  }
+
+  main > section:first-child::after {
+    background:
+      linear-gradient(90deg, rgb(249 246 243 / 28%) 0%, rgb(249 246 243 / 72%) 48%, rgb(249 246 243 / 97%) 100%),
+      linear-gradient(180deg, transparent 55%, rgb(83 52 43 / 14%) 100%);
+  }
+
+  main > section:first-child > div:nth-child(4) > div::before {
+    right: -1rem;
+    width: min(42rem, calc(100% + 2rem));
+  }
+}
+
+@media (max-width: 767px) {
+  main > section:first-child {
+    min-height: auto;
+    margin-bottom: 5rem;
+  }
+
+  main > section:first-child::before,
+  main > section:first-child::after {
+    border-radius: 0 0 30% 30% / 0 0 3.5% 3.5%;
+  }
+
+  main > section:first-child::before {
+    background-position: 42% center;
+  }
+
+  main > section:first-child::after {
+    background:
+      linear-gradient(180deg, rgb(249 246 243 / 70%) 0%, rgb(249 246 243 / 90%) 44%, rgb(249 246 243 / 98%) 100%),
+      linear-gradient(90deg, rgb(249 246 243 / 25%), rgb(249 246 243 / 78%));
+  }
+
+  main > section:first-child > div:nth-child(4) {
+    min-height: auto;
+    padding-top: 4.25rem;
+    padding-bottom: 1rem;
+  }
+
+  main > section:first-child > div:nth-child(4) > div::before {
+    top: -1.25rem;
+    right: -0.5rem;
+    width: calc(100% + 1rem);
+    height: calc(100% - 9.5rem);
+    min-height: 32rem;
+    border-radius: 1.5rem;
+    background: rgb(255 255 255 / 80%);
+  }
+
+  main > section:first-child > div:nth-child(4) > div > h1 {
+    font-size: clamp(2.3rem, 11vw, 3.7rem);
+    line-height: 1.14;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > p {
+    font-size: 0.98rem;
+    line-height: 1.9;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > div:nth-child(4) > div {
+    padding: 0.5rem;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > div:last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    margin-top: 4rem;
+    transform: translateY(34%);
+  }
+
+  main > section:first-child > div:nth-child(4) > div > div:last-child > div {
+    border: 1px solid rgb(151 101 87 / 10%);
+    padding: 0.9rem 0.65rem;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > div:last-child > div:not(:last-child)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  main > section:first-child > div:nth-child(4) {
+    padding-top: 3.5rem;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > div:first-child {
+    max-width: 100%;
+    font-size: 0.72rem;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > h1 {
+    font-size: 2.35rem;
+  }
+
+  main > section:first-child > div:nth-child(4) > div > div:last-child {
+    transform: translateY(26%);
+  }
+}
