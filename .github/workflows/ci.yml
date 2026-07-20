@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - rebuild/full-platform
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: luxe
+          POSTGRES_PASSWORD: luxe_dev_password
+          POSTGRES_DB: luxe_beauty_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U luxe -d luxe_beauty_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      APP_ENV: test
+      APP_URL: http://localhost:5000
+      NEXT_PUBLIC_APP_URL: http://localhost:5000
+      DATABASE_URL: postgresql://luxe:luxe_dev_password@127.0.0.1:5432/luxe_beauty_test?schema=public
+      REDIS_URL: redis://127.0.0.1:6379
+      AUTH_SECRET: ci-auth-secret-not-used-outside-actions-123456
+      PASSWORD_PEPPER: ci-password-pepper-not-used-outside-actions-123456
+      SESSION_COOKIE_NAME: luxe_session
+      OTP_RESEND_COOLDOWN_SECONDS: 60
+      SEED_SUPER_ADMIN_INITIAL_PASSWORD: CiBootstrapPassword123
+      IDENTITY_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      SMS_PROVIDER: mock
+      MAP_PROVIDER: mock
+      STORAGE_PROVIDER: minio
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate Prisma schema
+        run: npm run db:validate
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Apply committed migrations to clean PostgreSQL
+        run: npm run db:migrate:deploy
+
+      - name: Verify migration status
+        run: npx prisma migrate status
+
+      - name: Seed system RBAC and bootstrap test super admin
+        run: npm run db:seed
+
+      - name: Lint
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee lint.log
+
+      - name: Typecheck
+        run: |
+          set -o pipefail
+          npm run typecheck 2>&1 | tee typecheck.log
+
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          npm run test:unit 2>&1 | tee unit.log
+
+      - name: Integration tests
+        run: |
+          set -o pipefail
+          npm run test:integration 2>&1 | tee integration.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+      - name: Build application image
+        run: docker build --target runtime --tag luxe-beauty-ci:${{ github.sha }} .
+
+      - name: Production dependency audit
+        run: |
+          set -o pipefail
+          npm audit --omit=dev --audit-level=high 2>&1 | tee audit.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics
+          path: |
+            lint.log
+            typecheck.log
+            unit.log
+            integration.log
+            audit.log
+          if-no-files-found: warn
+          retention-days: 3

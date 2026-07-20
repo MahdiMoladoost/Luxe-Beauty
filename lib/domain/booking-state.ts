@@ -1,0 +1,81 @@
+export const bookingStatuses = [
+  "DRAFT",
+  "AWAITING_IDENTITY",
+  "HOLDING_SLOT",
+  "AWAITING_PAYMENT",
+  "PAYMENT_PENDING",
+  "AWAITING_PROVIDER_APPROVAL",
+  "CONFIRMED",
+  "REJECTED",
+  "EXPIRED",
+  "RESCHEDULE_PROPOSED",
+  "RESCHEDULED",
+  "CUSTOMER_CANCELLED",
+  "PROVIDER_CANCELLED",
+  "CHECKED_IN",
+  "IN_SERVICE",
+  "COMPLETED_BY_PROVIDER",
+  "AWAITING_CUSTOMER_DISPUTE_WINDOW",
+  "FINALIZED",
+  "CUSTOMER_NO_SHOW",
+  "PROVIDER_NO_SHOW",
+  "DISPUTED",
+  "REFUNDED",
+  "PARTIALLY_REFUNDED",
+] as const
+
+export type BookingStatus = (typeof bookingStatuses)[number]
+
+export const allowedBookingTransitions = {
+  DRAFT: ["AWAITING_IDENTITY", "HOLDING_SLOT"],
+  AWAITING_IDENTITY: ["HOLDING_SLOT", "EXPIRED"],
+  HOLDING_SLOT: ["AWAITING_PAYMENT", "AWAITING_PROVIDER_APPROVAL", "CONFIRMED", "EXPIRED"],
+  AWAITING_PAYMENT: ["PAYMENT_PENDING", "EXPIRED"],
+  PAYMENT_PENDING: ["AWAITING_PROVIDER_APPROVAL", "CONFIRMED", "EXPIRED", "REFUNDED"],
+  AWAITING_PROVIDER_APPROVAL: ["CONFIRMED", "REJECTED", "EXPIRED", "REFUNDED"],
+  CONFIRMED: [
+    "RESCHEDULE_PROPOSED",
+    "CUSTOMER_CANCELLED",
+    "PROVIDER_CANCELLED",
+    "CHECKED_IN",
+    "CUSTOMER_NO_SHOW",
+    "PROVIDER_NO_SHOW",
+  ],
+  REJECTED: ["REFUNDED"],
+  EXPIRED: ["REFUNDED"],
+  RESCHEDULE_PROPOSED: ["RESCHEDULED", "CONFIRMED", "CUSTOMER_CANCELLED", "PROVIDER_CANCELLED"],
+  RESCHEDULED: [
+    "RESCHEDULE_PROPOSED",
+    "CUSTOMER_CANCELLED",
+    "PROVIDER_CANCELLED",
+    "CHECKED_IN",
+    "CUSTOMER_NO_SHOW",
+    "PROVIDER_NO_SHOW",
+  ],
+  CUSTOMER_CANCELLED: ["REFUNDED", "PARTIALLY_REFUNDED"],
+  PROVIDER_CANCELLED: ["REFUNDED"],
+  CHECKED_IN: ["IN_SERVICE"],
+  IN_SERVICE: ["COMPLETED_BY_PROVIDER", "DISPUTED"],
+  COMPLETED_BY_PROVIDER: ["AWAITING_CUSTOMER_DISPUTE_WINDOW", "DISPUTED"],
+  AWAITING_CUSTOMER_DISPUTE_WINDOW: ["FINALIZED", "DISPUTED"],
+  FINALIZED: [],
+  CUSTOMER_NO_SHOW: ["FINALIZED", "DISPUTED", "PARTIALLY_REFUNDED", "REFUNDED"],
+  PROVIDER_NO_SHOW: ["REFUNDED", "DISPUTED"],
+  DISPUTED: ["FINALIZED", "REFUNDED", "PARTIALLY_REFUNDED"],
+  REFUNDED: [],
+  PARTIALLY_REFUNDED: ["FINALIZED"],
+} as const satisfies Record<BookingStatus, readonly BookingStatus[]>
+
+export function canTransitionBooking(from: BookingStatus, to: BookingStatus): boolean {
+  return allowedBookingTransitions[from].includes(to as never)
+}
+
+export function assertBookingTransition(from: BookingStatus, to: BookingStatus): void {
+  if (!canTransitionBooking(from, to)) {
+    throw new Error(`Invalid booking transition: ${from} -> ${to}`)
+  }
+}
+
+export function isTerminalBookingStatus(status: BookingStatus): boolean {
+  return allowedBookingTransitions[status].length === 0
+}

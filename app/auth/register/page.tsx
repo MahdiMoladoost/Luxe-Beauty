@@ -1,204 +1,101 @@
 "use client"
 
-import { useState } from "react"
+import { type FormEvent, useState } from "react"
 import Link from "next/link"
+import { Phone, UserRound } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Phone, User, Lock, Eye, EyeOff, Mail } from "lucide-react"
+
+type ApiPayload<T> = { ok: true; data: T } | { ok: false; error: { message: string } }
+type OtpChallenge = { challengeId: string; mobileMasked: string; developmentCode?: string }
+
+async function request<T>(url: string, method: "POST" | "PATCH", body: unknown): Promise<T> {
+  const response = await fetch(url, { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+  const payload = await response.json() as ApiPayload<T>
+  if (!payload.ok) throw new Error(payload.error.message)
+  return payload.data
+}
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [step, setStep] = useState(1)
+  const [mobile, setMobile] = useState("")
+  const [challenge, setChallenge] = useState<OtpChallenge | null>(null)
+  const [code, setCode] = useState("")
+  const [verified, setVerified] = useState(false)
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (step === 1) {
-      setIsLoading(true)
-      setTimeout(() => {
-        setIsLoading(false)
-        setStep(2)
-      }, 1500)
-    } else {
-      setIsLoading(true)
-      setTimeout(() => setIsLoading(false), 1500)
-    }
+  async function sendOtp(event: FormEvent) {
+    event.preventDefault()
+    setLoading(true)
+    setError("")
+    try { setChallenge(await request<OtpChallenge>("/api/auth/otp/request", "POST", { mobile })) }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "ارسال کد انجام نشد.") }
+    finally { setLoading(false) }
+  }
+
+  async function verifyOtp(event: FormEvent) {
+    event.preventDefault()
+    if (!challenge) return
+    setLoading(true)
+    setError("")
+    try {
+      await request("/api/auth/otp/verify", "POST", { mobile, challengeId: challenge.challengeId, code })
+      setVerified(true)
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "کد تأیید معتبر نیست.") }
+    finally { setLoading(false) }
+  }
+
+  async function completeProfile(event: FormEvent) {
+    event.preventDefault()
+    setLoading(true)
+    setError("")
+    try {
+      await request("/api/auth/me", "PATCH", { firstName, lastName })
+      window.location.assign("/dashboard")
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "تکمیل پروفایل انجام نشد.") }
+    finally { setLoading(false) }
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left Side - Form */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 md:px-8 lg:px-16">
-        <div className="mx-auto w-full max-w-md">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <span className="text-lg font-bold text-primary-foreground">س</span>
-            </div>
-            <span className="text-xl font-bold">سالن یاب</span>
-          </Link>
+    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12" dir="rtl">
+      <section className="w-full max-w-md rounded-2xl border bg-background p-6 shadow-sm md:p-8">
+        <Link href="/" className="text-xl font-bold">لوکس بیوتی</Link>
+        <h1 className="mt-8 text-3xl font-bold">ساخت حساب مشتری</h1>
+        <p className="mt-2 text-sm text-muted-foreground">شماره موبایل تأیید می‌شود و سپس نام واقعی حساب تکمیل خواهد شد.</p>
+        {error && <p role="alert" className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
 
-          <h1 className="mt-8 text-3xl font-bold">ثبت نام</h1>
-          <p className="mt-2 text-muted-foreground">
-            برای استفاده از خدمات سالن یاب ثبت نام کنید
-          </p>
-
-          {/* Progress Steps */}
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-              step >= 1 ? "bg-accent text-white" : "bg-muted text-muted-foreground"
-            }`}>
-              ۱
-            </div>
-            <div className={`h-1 w-16 rounded ${step >= 2 ? "bg-accent" : "bg-muted"}`} />
-            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-              step >= 2 ? "bg-accent text-white" : "bg-muted text-muted-foreground"
-            }`}>
-              ۲
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-            {step === 1 && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">شماره موبایل</Label>
-                  <div className="relative">
-                    <Phone className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                      id="phone"
-                      type="tel"
-                      placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                      className="pr-10"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ارسال..." : "دریافت کد تایید"}
-                </Button>
-              </>
-            )}
-
-            {step === 2 && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="code">کد تایید</Label>
-                  <Input 
-                    id="code"
-                    type="text"
-                    placeholder="کد ۶ رقمی"
-                    dir="ltr"
-                    className="text-center text-lg tracking-widest"
-                  />
-                  <p className="text-center text-sm text-muted-foreground">
-                    کد تایید به شماره ۰۹۱۲۳۴۵۶۷۸۹ ارسال شد
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name">نام و نام خانوادگی</Label>
-                  <div className="relative">
-                    <User className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                      id="name"
-                      type="text"
-                      placeholder="نام و نام خانوادگی"
-                      className="pr-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">ایمیل (اختیاری)</Label>
-                  <div className="relative">
-                    <Mail className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                      id="email"
-                      type="email"
-                      placeholder="example@email.com"
-                      className="pr-10"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">رمز عبور</Label>
-                  <div className="relative">
-                    <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="حداقل ۸ کاراکتر"
-                      className="pl-10 pr-10"
-                      dir="ltr"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <Checkbox id="terms" className="mt-1" />
-                  <Label htmlFor="terms" className="text-sm leading-relaxed text-muted-foreground">
-                    با{" "}
-                    <Link href="/terms" className="text-accent hover:underline">
-                      قوانین و مقررات
-                    </Link>
-                    {" "}و{" "}
-                    <Link href="/privacy" className="text-accent hover:underline">
-                      حریم خصوصی
-                    </Link>
-                    {" "}سالن یاب موافقم
-                  </Label>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "در حال ثبت نام..." : "تکمیل ثبت نام"}
-                </Button>
-
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  className="w-full"
-                  onClick={() => setStep(1)}
-                >
-                  بازگشت
-                </Button>
-              </>
-            )}
+        {!challenge && !verified && (
+          <form onSubmit={sendOtp} className="mt-6 space-y-4">
+            <div className="space-y-2"><Label htmlFor="mobile">شماره موبایل</Label><div className="relative"><Phone className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" /><Input id="mobile" value={mobile} onChange={(event) => setMobile(event.target.value)} className="pr-10" dir="ltr" inputMode="tel" autoComplete="tel" required /></div></div>
+            <Button className="w-full" disabled={loading}>{loading ? "در حال ارسال..." : "دریافت کد تأیید"}</Button>
           </form>
+        )}
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            حساب کاربری دارید؟{" "}
-            <Link href="/auth/login" className="font-medium text-accent hover:underline">
-              وارد شوید
-            </Link>
-          </p>
-        </div>
-      </div>
+        {challenge && !verified && (
+          <form onSubmit={verifyOtp} className="mt-6 space-y-4">
+            <p className="text-sm text-muted-foreground">کد برای {challenge.mobileMasked} ارسال شد.</p>
+            {challenge.developmentCode && <p className="rounded-lg border border-dashed p-3 text-sm">کد Mock توسعه: <b dir="ltr">{challenge.developmentCode}</b></p>}
+            <div className="space-y-2"><Label htmlFor="code">کد شش‌رقمی</Label><Input id="code" value={code} onChange={(event) => setCode(event.target.value)} dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="text-center text-lg tracking-[0.35em]" required /></div>
+            <Button className="w-full" disabled={loading}>{loading ? "در حال بررسی..." : "تأیید شماره"}</Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setChallenge(null)}>تغییر شماره</Button>
+          </form>
+        )}
 
-      {/* Right Side - Image */}
-      <div className="hidden flex-1 bg-secondary lg:block">
-        <div className="relative flex h-full items-center justify-center p-12">
-          <div className="max-w-lg text-center">
-            <h2 className="text-4xl font-bold">
-              به جمع هزاران کاربر سالن یاب بپیوندید
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              با ثبت نام در سالن یاب، از تخفیف‌های ویژه و امکانات خاص بهره‌مند شوید.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+        {verified && (
+          <form onSubmit={completeProfile} className="mt-6 space-y-4">
+            <div className="rounded-lg bg-muted p-3 text-sm">شماره موبایل تأیید شد. اطلاعات پروفایل را تکمیل کنید.</div>
+            <div className="space-y-2"><Label htmlFor="first-name">نام</Label><div className="relative"><UserRound className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" /><Input id="first-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} className="pr-10" autoComplete="given-name" required /></div></div>
+            <div className="space-y-2"><Label htmlFor="last-name">نام خانوادگی</Label><Input id="last-name" value={lastName} onChange={(event) => setLastName(event.target.value)} autoComplete="family-name" required /></div>
+            <Button className="w-full" disabled={loading}>{loading ? "در حال ذخیره..." : "تکمیل ثبت‌نام"}</Button>
+          </form>
+        )}
+
+        <p className="mt-8 text-center text-sm text-muted-foreground">حساب دارید؟ <Link href="/auth/login" className="font-medium text-primary hover:underline">ورود</Link></p>
+      </section>
+    </main>
   )
 }
