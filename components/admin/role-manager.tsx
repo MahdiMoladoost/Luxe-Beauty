@@ -24,6 +24,13 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return payload.data
 }
 
+async function loadRbacData(): Promise<[Role[], Permission[]]> {
+  return Promise.all([
+    api<Role[]>("/api/admin/rbac/roles"),
+    api<Permission[]>("/api/admin/rbac/permissions"),
+  ])
+}
+
 export function RoleManager() {
   const [roles, setRoles] = useState<Role[]>([])
   const [permissions, setPermissions] = useState<Permission[]>([])
@@ -37,16 +44,28 @@ export function RoleManager() {
   const [loading, setLoading] = useState(false)
 
   async function refresh() {
-    const [roleRows, permissionRows] = await Promise.all([
-      api<Role[]>("/api/admin/rbac/roles"),
-      api<Permission[]>("/api/admin/rbac/permissions"),
-    ])
+    const [roleRows, permissionRows] = await loadRbacData()
     setRoles(roleRows)
     setPermissions(permissionRows)
   }
 
   useEffect(() => {
-    refresh().catch((reason) => setError(reason instanceof Error ? reason.message : "دریافت نقش‌ها انجام نشد."))
+    let cancelled = false
+
+    void loadRbacData()
+      .then(([roleRows, permissionRows]) => {
+        if (cancelled) return
+        setRoles(roleRows)
+        setPermissions(permissionRows)
+      })
+      .catch((reason: unknown) => {
+        if (cancelled) return
+        setError(reason instanceof Error ? reason.message : "دریافت نقش‌ها انجام نشد.")
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const selectedSet = useMemo(() => new Set(selected), [selected])
