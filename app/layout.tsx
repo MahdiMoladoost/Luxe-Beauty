@@ -1,33 +1,34 @@
-import type { Metadata } from 'next'
-import { Vazirmatn } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import type { Metadata } from "next"
+import { Vazirmatn } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import "./globals.css"
 
-const vazirmatn = Vazirmatn({ 
+const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
-  variable: '--font-vazirmatn',
+  variable: "--font-vazirmatn",
 })
 
 export const metadata: Metadata = {
-  title: 'سالن یاب | پلتفرم رزرو آنلاین آرایشگاه',
-  description: 'بزرگترین پلتفرم جستجو و رزرو آنلاین آرایشگاه در ایران - نوبت‌دهی آنلاین، مقایسه قیمت و مشاهده نمونه‌کارها',
-  generator: 'v0.app',
+  title: "لوکس بیوتی | رزرو آنلاین خدمات زیبایی",
+  description:
+    "جست‌وجو، مقایسه و رزرو آنلاین سالن‌های زیبایی، آرایشگاه‌های مردانه، متخصصان مستقل و خدمات زیبایی در منزل.",
+  generator: "v0.app",
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
       },
       {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
+        url: "/icon-dark-32x32.png",
+        media: "(prefers-color-scheme: dark)",
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: "/icon.svg",
+        type: "image/svg+xml",
       },
     ],
-    apple: '/apple-icon.png',
+    apple: "/apple-icon.png",
   },
 }
 
@@ -40,7 +41,7 @@ export default function RootLayout({
     <html lang="fa" dir="rtl" className="bg-background">
       <body className={`${vazirmatn.variable} font-sans antialiased`}>
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   )
