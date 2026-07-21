@@ -113,6 +113,20 @@ Authentication and account-discovery errors do not reveal whether an account exi
 - `POST /api/v1/admin/providers/{providerId}/review`
 - `POST /api/v1/admin/provider-documents/{documentId}/review`
 
+### Provider branches
+- `GET /api/v1/providers/{providerId}/branches`
+  - owner-scoped list of non-deleted branches.
+- `POST /api/v1/providers/{providerId}/branches`
+  - creates an inactive, unverified branch after validating city/district/neighborhood hierarchy.
+- `GET /api/v1/providers/{providerId}/branches/{branchId}`
+- `PATCH /api/v1/providers/{providerId}/branches/{branchId}`
+  - requires `expectedUpdatedAt`; stale mutations return `VERSION_CONFLICT`.
+  - `active=true` is rejected until the provider organization is approved.
+- `DELETE /api/v1/providers/{providerId}/branches/{branchId}?expectedUpdatedAt={ISO-8601}`
+  - soft deletes and deactivates the branch while preserving historical references.
+
+The owner cannot set `addressVerified`. Exact-address storage, Neshan integration and delegated branch staff remain open. See `docs/PROVIDER_BRANCHES.md`.
+
 ### Professional profile and bilateral affiliations
 - `GET /api/v1/professionals/me`
   - returns the current user's public professional summary.
@@ -142,10 +156,10 @@ Detailed state rules and explicit remaining limitations are recorded in `docs/PR
 - `GET /api/v1/availability/today`
 
 ### Provider operations still open
-- `POST /api/v1/providers/{providerId}/branches`
-- branch update/archive/address verification contracts.
+- branch private-address and verification contracts.
 - provider staff memberships and scoped role assignments.
 - professional discovery and privacy-safe invitation lookup.
+- business hours, resources and service-area configuration.
 
 ### Catalog and offerings
 - `GET /api/v1/catalog/categories`
