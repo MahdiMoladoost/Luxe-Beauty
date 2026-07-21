@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react"
-import { CalendarDays, ChevronDown, Crosshair, Loader2, Map, MapPin, Search } from "lucide-react"
+import { CalendarDays, ChevronDown, Clock3, Crosshair, Loader2, Map, MapPin, Search } from "lucide-react"
 
 const CITY_STORAGE_KEY = "luxe-beauty-selected-city"
 
@@ -51,18 +51,21 @@ function isSupportedLocation(value: string) {
 function buildAvailabilityMessage(summary: AvailabilitySummary | null) {
   if (!summary) return null
   if (summary.message) return summary.message
+
   if (typeof summary.availableCount === "number") {
     return `امروز ${summary.availableCount.toLocaleString("fa-IR")} نوبت خالی موجود است${summary.nearestTime ? `؛ نزدیک‌ترین زمان ${summary.nearestTime}` : ""}.`
   }
+
   if (typeof summary.activeProviders === "number") {
     return `${summary.activeProviders.toLocaleString("fa-IR")} سالن و متخصص در محدوده شما فعال هستند.`
   }
+
   return null
 }
 
 function FieldShell({ children }: { children: ReactNode }) {
   return (
-    <div className="h-full rounded-2xl border border-[#dfcbc2] bg-white px-4 py-3 shadow-[0_1px_0_rgba(58,37,31,0.03)]">
+    <div className="rounded-2xl border border-[#d8c1b7] bg-white px-4 py-3 shadow-[0_1px_0_rgba(58,37,31,0.03)] transition focus-within:border-[#b76f5e] focus-within:shadow-[0_0_0_3px_rgba(183,111,94,0.12)]">
       {children}
     </div>
   )
@@ -70,12 +73,7 @@ function FieldShell({ children }: { children: ReactNode }) {
 
 function HeroWave() {
   return (
-    <svg
-      viewBox="0 0 1440 140"
-      className="block h-[58px] w-full sm:h-[68px] lg:h-[76px]"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 1440 140" className="block h-[58px] w-full sm:h-[68px] lg:h-[76px]" preserveAspectRatio="none" aria-hidden="true">
       <path
         d="M0 42C108 72 215 86 348 82C500 77 604 30 752 31C880 31 994 76 1130 88C1257 99 1360 88 1440 66V140H0V42Z"
         fill="var(--background)"
@@ -113,11 +111,13 @@ export function BookingHero() {
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       setAvailabilityLoading(true)
+
       try {
         const response = await fetch(`/api/availability/summary?city=${encodeURIComponent(location)}`, {
           signal: controller.signal,
           cache: "no-store",
         })
+
         if (!response.ok) throw new Error("availability-unavailable")
         setAvailability((await response.json()) as AvailabilitySummary)
       } catch (fetchError) {
@@ -239,8 +239,8 @@ export function BookingHero() {
   }
 
   const mobileStepTitle = mobileStep === 1 ? "انتخاب خدمت" : mobileStep === 2 ? "انتخاب موقعیت" : "انتخاب زمان"
-  const inputClassName =
-    "mt-1 w-full bg-transparent text-sm font-semibold text-[#312725] outline-none placeholder:text-[#6f5b54] placeholder:opacity-100"
+  const mobileInputClassName =
+    "mt-1 w-full bg-transparent text-sm font-semibold text-[#302523] outline-none placeholder:text-[#6a5751] placeholder:opacity-100"
 
   return (
     <div className="relative bg-background pb-[235px] sm:pb-[190px] lg:pb-[145px]">
@@ -275,80 +275,67 @@ export function BookingHero() {
         <div className="absolute inset-x-0 bottom-0 z-20 translate-y-[48%] px-4 sm:px-6 lg:px-8">
           <form
             onSubmit={submitSearch}
-            className="mx-auto max-w-6xl rounded-[30px] border border-[#dcc3b8] bg-[#fffaf7] p-3 shadow-[0_30px_80px_rgba(54,35,30,0.20),0_8px_24px_rgba(54,35,30,0.10)] sm:p-4"
+            className="mx-auto max-w-6xl rounded-[30px] border border-[#d9c1b6] bg-[#fffaf7] p-3 shadow-[0_28px_74px_rgba(54,35,30,0.18),0_8px_22px_rgba(54,35,30,0.08)]"
           >
-            <div className="hidden gap-3 md:grid md:grid-cols-3">
-              <FieldShell>
-                <label className="flex items-start gap-3">
-                  <Search className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[11px] font-bold text-[#704b42]">چه خدمتی؟</span>
-                    <input
-                      value={service}
-                      onChange={(event) => setService(event.target.value)}
-                      onBlur={(event) => parseNaturalSearch(event.target.value)}
-                      list="hero-service-suggestions"
-                      placeholder="کراتین، کاشت ناخن..."
-                      className={inputClassName}
-                      autoComplete="off"
-                    />
-                  </span>
-                </label>
-              </FieldShell>
+            <div className="hidden overflow-hidden rounded-2xl border border-[#d8c1b7] bg-white shadow-[0_2px_10px_rgba(65,42,34,0.05)] md:grid md:grid-cols-4">
+              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <Search className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
+                <span className="shrink-0 text-xs font-bold text-[#66483f]">چه خدمتی؟</span>
+                <input
+                  value={service}
+                  onChange={(event) => setService(event.target.value)}
+                  onBlur={(event) => parseNaturalSearch(event.target.value)}
+                  list="hero-service-suggestions"
+                  placeholder="نام خدمت"
+                  className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#2f2522] outline-none placeholder:text-[#705b54] placeholder:opacity-100"
+                  autoComplete="off"
+                />
+              </label>
 
-              <FieldShell>
-                <label className="flex items-start gap-3">
-                  <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[11px] font-bold text-[#704b42]">کجا؟</span>
-                    <input
-                      value={location}
-                      onChange={(event) => setLocation(event.target.value)}
-                      list="hero-city-suggestions"
-                      placeholder="شهر، منطقه یا محله"
-                      className={inputClassName}
-                    />
-                  </span>
-                </label>
-              </FieldShell>
+              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <MapPin className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
+                <span className="shrink-0 text-xs font-bold text-[#66483f]">کجا؟</span>
+                <input
+                  value={location}
+                  onChange={(event) => setLocation(event.target.value)}
+                  list="hero-city-suggestions"
+                  placeholder="شهر یا محله"
+                  className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#2f2522] outline-none placeholder:text-[#705b54] placeholder:opacity-100"
+                />
+              </label>
 
-              <FieldShell>
-                <div className="flex items-start gap-3">
-                  <CalendarDays className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[11px] font-bold text-[#704b42]">چه زمانی؟</span>
-                    <div className="mt-2 grid grid-cols-[minmax(0,1fr)_96px] overflow-hidden rounded-xl border border-[#dfcbc2] bg-[#fffdfb]">
-                      <label className="min-w-0 px-3 py-2">
-                        <span className="block text-[10px] font-semibold text-[#735f58]">زمان</span>
-                        <select
-                          value={dateMode}
-                          onChange={(event) => setDateMode(event.target.value)}
-                          className="mt-0.5 w-full bg-transparent text-sm font-semibold text-[#312725] outline-none"
-                        >
-                          <option value="first-available">اولین نوبت خالی</option>
-                          <option value="today">امروز</option>
-                          <option value="tomorrow">فردا</option>
-                          <option value="weekend">آخر هفته</option>
-                          <option value="date">انتخاب تاریخ</option>
-                        </select>
-                      </label>
-                      <label className="border-r border-[#dfcbc2] px-3 py-2">
-                        <span className="block text-[10px] font-semibold text-[#735f58]">بازه</span>
-                        <select
-                          value={dayPart}
-                          onChange={(event) => setDayPart(event.target.value)}
-                          className="mt-0.5 w-full bg-transparent text-sm font-semibold text-[#312725] outline-none"
-                        >
-                          <option value="any">همه</option>
-                          <option value="morning">صبح</option>
-                          <option value="noon">ظهر</option>
-                          <option value="evening">عصر</option>
-                        </select>
-                      </label>
-                    </div>
-                  </span>
-                </div>
-              </FieldShell>
+              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <CalendarDays className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
+                <span className="shrink-0 text-xs font-bold text-[#66483f]">زمان</span>
+                <select
+                  value={dateMode}
+                  onChange={(event) => setDateMode(event.target.value)}
+                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-semibold text-[#2f2522] outline-none"
+                  aria-label="انتخاب زمان نوبت"
+                >
+                  <option value="first-available">اولین نوبت خالی</option>
+                  <option value="today">امروز</option>
+                  <option value="tomorrow">فردا</option>
+                  <option value="weekend">آخر هفته</option>
+                  <option value="date">انتخاب تاریخ</option>
+                </select>
+              </label>
+
+              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <Clock3 className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
+                <span className="shrink-0 text-xs font-bold text-[#66483f]">بازه</span>
+                <select
+                  value={dayPart}
+                  onChange={(event) => setDayPart(event.target.value)}
+                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-semibold text-[#2f2522] outline-none"
+                  aria-label="انتخاب بازه زمانی"
+                >
+                  <option value="any">همه</option>
+                  <option value="morning">صبح</option>
+                  <option value="noon">ظهر</option>
+                  <option value="evening">عصر</option>
+                </select>
+              </label>
             </div>
 
             <div className="md:hidden">
@@ -368,8 +355,8 @@ export function BookingHero() {
                         onChange={(event) => setService(event.target.value)}
                         onBlur={(event) => parseNaturalSearch(event.target.value)}
                         list="hero-service-suggestions"
-                        placeholder="مثلاً کراتین در غرب تهران"
-                        className={inputClassName}
+                        placeholder="نام خدمت را بنویسید"
+                        className={mobileInputClassName}
                         autoComplete="off"
                       />
                     </span>
@@ -389,7 +376,7 @@ export function BookingHero() {
                           onChange={(event) => setLocation(event.target.value)}
                           list="hero-city-suggestions"
                           placeholder="شهر، منطقه یا محله"
-                          className={inputClassName}
+                          className={mobileInputClassName}
                         />
                       </span>
                     </label>
@@ -418,32 +405,38 @@ export function BookingHero() {
               {mobileStep === 3 && (
                 <div className="grid gap-3 sm:grid-cols-2">
                   <FieldShell>
-                    <span className="mb-2 block text-[11px] font-bold text-[#704b42]">زمان موردنظر</span>
-                    <select
-                      value={dateMode}
-                      onChange={(event) => setDateMode(event.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold text-[#312725] outline-none"
-                    >
-                      <option value="first-available">اولین نوبت خالی</option>
-                      <option value="today">امروز</option>
-                      <option value="tomorrow">فردا</option>
-                      <option value="weekend">آخر هفته</option>
-                      <option value="date">انتخاب تاریخ</option>
-                    </select>
+                    <label className="flex items-center gap-3">
+                      <CalendarDays className="h-5 w-5 shrink-0 text-[#a85f4f]" />
+                      <span className="shrink-0 text-xs font-bold text-[#704b42]">زمان</span>
+                      <select
+                        value={dateMode}
+                        onChange={(event) => setDateMode(event.target.value)}
+                        className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#312725] outline-none"
+                      >
+                        <option value="first-available">اولین نوبت خالی</option>
+                        <option value="today">امروز</option>
+                        <option value="tomorrow">فردا</option>
+                        <option value="weekend">آخر هفته</option>
+                        <option value="date">انتخاب تاریخ</option>
+                      </select>
+                    </label>
                   </FieldShell>
 
                   <FieldShell>
-                    <span className="mb-2 block text-[11px] font-bold text-[#704b42]">بازه زمانی</span>
-                    <select
-                      value={dayPart}
-                      onChange={(event) => setDayPart(event.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold text-[#312725] outline-none"
-                    >
-                      <option value="any">همه بازه‌ها</option>
-                      <option value="morning">صبح</option>
-                      <option value="noon">ظهر</option>
-                      <option value="evening">عصر</option>
-                    </select>
+                    <label className="flex items-center gap-3">
+                      <Clock3 className="h-5 w-5 shrink-0 text-[#a85f4f]" />
+                      <span className="shrink-0 text-xs font-bold text-[#704b42]">بازه</span>
+                      <select
+                        value={dayPart}
+                        onChange={(event) => setDayPart(event.target.value)}
+                        className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#312725] outline-none"
+                      >
+                        <option value="any">همه بازه‌ها</option>
+                        <option value="morning">صبح</option>
+                        <option value="noon">ظهر</option>
+                        <option value="evening">عصر</option>
+                      </select>
+                    </label>
                   </FieldShell>
                 </div>
               )}
@@ -464,7 +457,7 @@ export function BookingHero() {
                   <button
                     type="button"
                     onClick={moveMobileForward}
-                    className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_26px_rgba(174,102,85,0.28)]"
+                    className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_26px_rgba(174,102,85,0.24)]"
                   >
                     مرحله بعد
                   </button>
@@ -472,7 +465,7 @@ export function BookingHero() {
                   <button
                     type="submit"
                     disabled={status === "submitting"}
-                    className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_26px_rgba(174,102,85,0.28)] disabled:cursor-wait disabled:opacity-70"
+                    className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_26px_rgba(174,102,85,0.24)] disabled:cursor-wait disabled:opacity-70"
                   >
                     {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
                     مشاهده نوبت‌های خالی
@@ -482,7 +475,7 @@ export function BookingHero() {
             </div>
 
             {dateMode === "date" && (
-              <div className="mt-3 md:grid md:grid-cols-3 md:gap-3">
+              <div className="mt-2 md:grid md:grid-cols-4">
                 <div className="md:col-start-3">
                   <FieldShell>
                     <label className="flex items-center gap-3 text-sm font-semibold text-[#5f4943]">
@@ -499,11 +492,11 @@ export function BookingHero() {
               </div>
             )}
 
-            <div className="mt-3 hidden grid-cols-3 gap-3 md:grid">
+            <div className="mt-2 hidden grid-cols-2 gap-2.5 md:grid">
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="col-span-2 inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_12px_30px_rgba(174,102,85,0.30)] transition hover:bg-[#985545] disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_24px_rgba(174,102,85,0.24)] transition hover:bg-[#985545] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f5144] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
               >
                 {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
                 مشاهده نوبت‌های خالی
@@ -511,22 +504,22 @@ export function BookingHero() {
 
               <Link
                 href="/salons"
-                className="inline-flex h-14 items-center justify-center rounded-2xl border border-[#d8beb3] bg-white px-5 text-sm font-bold leading-none text-[#674942] transition hover:bg-[#f9efea]"
+                className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#b87362] bg-transparent px-5 text-sm font-bold leading-none text-[#7a493e] transition hover:bg-[#f8ece7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b87362] focus-visible:ring-offset-2"
               >
                 مشاهده خدمات
               </Link>
             </div>
 
-            <div className="mt-3 rounded-2xl border border-[#ead8d0] bg-white px-4 py-2.5 text-xs font-medium leading-6 text-[#66544e]">
+            <div className="mt-2 rounded-2xl border border-[#dfcbc2] bg-white px-4 py-2.5 text-[13px] font-medium leading-6 text-[#51413c]">
               {availabilityLoading ? (
-                <span className="inline-flex items-center gap-2 font-semibold text-[#674d45]">
+                <span className="inline-flex items-center gap-2 font-semibold text-[#5e453e]">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   در حال دریافت زمان‌های واقعی...
                 </span>
               ) : availabilityMessage ? (
                 <span>{availabilityMessage}</span>
               ) : (
-                <span>زمان‌های واقعی و قیمت‌ها پس از جست‌وجو از اطلاعات ارائه‌دهندگان نمایش داده می‌شوند.</span>
+                <span>زمان‌ها و قیمت‌های واقعی پس از جست‌وجو، مستقیماً از اطلاعات ارائه‌دهندگان نمایش داده می‌شوند.</span>
               )}
             </div>
 
