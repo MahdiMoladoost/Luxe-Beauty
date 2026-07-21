@@ -251,7 +251,8 @@ export class BookingHoldRepository {
         },
       })
 
-      const expiresAt = new Date(input.now.getTime() + bookingConfig.holdTtlSeconds * 1000)
+      const configuredExpiry = new Date(input.now.getTime() + bookingConfig.holdTtlSeconds * 1000)
+      const expiresAt = configuredExpiry < quote.expiresAt ? configuredExpiry : quote.expiresAt
       const hold = await tx.bookingHold.create({
         data: {
           customerUserId: input.principal.userId,
@@ -280,7 +281,8 @@ export class BookingHoldRepository {
             resourceId: resource.id,
             occupiedFrom: input.startsAt.toISOString(),
             occupiedUntil: occupiedUntil.toISOString(),
-            holdTtlSeconds: bookingConfig.holdTtlSeconds,
+            configuredHoldTtlSeconds: bookingConfig.holdTtlSeconds,
+            effectiveExpiresAt: expiresAt.toISOString(),
           } as Prisma.InputJsonValue,
         },
       })
