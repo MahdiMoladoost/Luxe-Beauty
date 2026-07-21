@@ -1,17 +1,18 @@
 import {
   Prisma,
+  type BookingHold,
   type BookingStatus,
   type PrismaClient,
   type ScheduleOwnerType,
 } from "@prisma/client"
 
 import { scheduleWindows } from "@/lib/availability/time"
+import type { RequestContext, SessionPrincipal } from "@/lib/auth/types"
 import { bookingConfig } from "@/lib/booking/config"
 import {
   intervalsOverlap,
   parseBookableQuoteSnapshot,
 } from "@/lib/booking/hold-policy"
-import type { RequestContext, SessionPrincipal } from "@/lib/auth/types"
 import { prisma } from "@/lib/infrastructure/prisma"
 
 const BLOCKING_BOOKING_STATUSES: BookingStatus[] = [
@@ -37,8 +38,8 @@ const offeringInclude = {
 } satisfies Prisma.ServiceOfferingInclude
 
 export type HoldRepositoryResult =
-  | { kind: "CREATED"; hold: Prisma.BookingHoldGetPayload<object> }
-  | { kind: "REPLAY"; hold: Prisma.BookingHoldGetPayload<object> }
+  | { kind: "CREATED"; hold: BookingHold }
+  | { kind: "REPLAY"; hold: BookingHold }
   | {
       kind:
         | "IDEMPOTENCY_CONFLICT"
@@ -95,15 +96,6 @@ export class BookingHoldRepository {
         return { kind: "IDEMPOTENCY_IN_PROGRESS" }
       }
 
-      await tx.idempotencyRecord.create({
-        data: {
-          scope: idempotencyScope,
-          key: input.idempotencyKey,
-          requestHash: input.requestHash,
-          expiresAt: new Date(input.now.getTime() + 24 * 60 * 60 * 1000),
-        },
-      })
-
       const quote = await tx.serviceQuote.findUnique({ where: { id: input.quoteId } })
       if (!quote) return { kind: "QUOTE_NOT_FOUND" }
       if (quote.expiresAt <= input.now) return { kind: "QUOTE_EXPIRED" }
@@ -134,7 +126,13 @@ export class BookingHoldRepository {
         include: offeringInclude,
       })
       if (!offering) return { kind: "OFFERING_NOT_AVAILABLE" }
-      if (offering.version !== quoteSnapshot.offering.version) return { kind: "QUOTE_STALE" }
+      if (
+        offering.version !== quoteSnapshot.offering.version ||
+        offering.branchId !== quoteSnapshot.offering.branchId ||
+        offering.professionalId !== quoteSnapshot.offering.professionalId
+      ) {
+        return { kind: "QUOTE_STALE" }
+      }
       if (offering.branchId && (!offering.branch || !offering.branch.active || offering.branch.deletedAt)) {
         return { kind: "OFFERING_NOT_AVAILABLE" }
       }
@@ -243,6 +241,15 @@ export class BookingHoldRepository {
         }),
       )
       if (!insideWindow || conflicts) return { kind: "SLOT_NOT_AVAILABLE" }
+
+      await tx.idempotencyRecord.create({
+        data: {
+          scope: idempotencyScope,
+          key: input.idempotencyKey,
+          requestHash: input.requestHash,
+          expiresAt: new Date(input.now.getTime() + 24 * 60 * 60 * 1000),
+        },
+      })
 
       const expiresAt = new Date(input.now.getTime() + bookingConfig.holdTtlSeconds * 1000)
       const hold = await tx.bookingHold.create({
@@ -371,7 +378,7 @@ export class BookingHoldRepository {
     })
   }
 
-  responseSnapshot(hold: Prisma.BookingHoldGetPayload<object>) {
+  responseSnapshot(hold: BookingHold) {
     return {
       id: hold.id,
       quoteId: hold.quoteId,
