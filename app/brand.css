@@ -32,3 +32,33 @@ main > div[class~="pb-[235px]"] > section {
     height: 600px !important;
   }
 }
+
+/* Compact the desktop search fields so the complete action row stays visible. */
+@media (min-width: 768px) {
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] {
+    padding: 12px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child {
+    gap: 8px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] {
+    margin-top: 4px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] > label {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] input,
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] select {
+    line-height: 1.25rem !important;
+  }
+}
