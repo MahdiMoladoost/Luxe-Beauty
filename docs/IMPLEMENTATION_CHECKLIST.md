@@ -2,7 +2,7 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider verification and affiliation commits require a fresh CI run before their implementation status can be upgraded to verified complete.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider verification, affiliation and branch-management commits require a fresh CI run before their implementation status can be upgraded to verified complete.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
@@ -53,7 +53,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 4 — Providers and verification
 - [~] Provider-type onboarding supports persisted applications for salon and professional modes; dynamic per-type requirement configuration and the complete workspace remain open.
-- [~] Provider organizations and stable professional profiles exist; full branch CRUD, professional discovery and operational management remain open.
+- [~] Provider organizations, stable professional profiles and owner-scoped branch CRUD exist. Branch creation validates city/district/neighborhood hierarchy, remains inactive by default, supports soft delete and optimistic concurrency, and can activate only after provider approval. Delegated branch staff, private address verification, business hours and public branch pages remain open.
 - [~] Private provider documents support validation, malware-scan adapter state, private storage, audited reads and review; configurable document requirement definitions remain open.
 - [~] Verification supports submit, review, correction, rejection, approval and appeals; scheduled expiry/re-review and complete appeal operations remain open.
 - [ ] Home-location verification.
@@ -120,9 +120,9 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development-only seed for nine cities and test roles.
 - [~] Unit tests cover authentication cryptography, RBAC, route permission matrices, money, Persian normalization, booking transitions, identity policy, provider policy and bilateral affiliation transitions; later domains remain open.
-- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit, device IDOR, identity verification, provider onboarding/private documents and professional affiliation ownership/lifecycle; fresh CI verification of the newest slice is pending.
+- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit, device IDOR, identity verification, provider onboarding/private documents, professional affiliation ownership/lifecycle and branch ownership/geography/concurrency; fresh CI verification of the newest slices is pending.
 - [ ] Playwright E2E matrix.
-- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR, CSRF-origin behavior and provider-document/affiliation IDOR have automated coverage; upload and full security matrix remain open.
+- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR, CSRF-origin behavior, provider-document/affiliation IDOR and branch owner isolation have automated coverage; upload and full security matrix remain open.
 - [ ] Accessibility automated and manual checks.
 - [x] Current authentication/RBAC production build, clean migration deployment, seed, Compose validation and Docker image build pass in CI.
 - [x] Current production dependency audit passes at high severity threshold.
@@ -137,7 +137,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 ## Legacy replacement targets
 The following current routes remain presentation prototypes unless explicitly noted:
 - `app/admin/page.tsx` — protected, but its business dashboard content remains a replacement target.
-- `app/dashboard/page.tsx` — protected, but the full customer business panel remains a replacement target.
+- `app/dashboard/page.tsx` — protected, but the full customer business panel remains open.
 - `app/salon-dashboard/page.tsx` — protected, but its business dashboard content remains a replacement target.
 - `app/auth/login/page.tsx` — replaced with operational customer OTP and staff mobile/password/2FA flows.
 - `app/auth/register/page.tsx` — replaced with operational mobile OTP registration and persisted profile completion.
