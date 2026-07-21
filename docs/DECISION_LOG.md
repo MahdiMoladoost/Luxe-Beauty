@@ -77,6 +77,16 @@ A professional has one user-linked `ProfessionalProfile` that survives salon cha
 
 Provider-professional relationships become active only after acceptance by the counterparty. Ending an active relationship also requires a termination request and counterparty response. PostgreSQL serializable transactions protect request creation and transitions, while every transition is preserved in `AuditLog`. Until provider/branch scoped ABAC is complete, provider-side authority is intentionally limited to the provider owner rather than inferred from a global permission.
 
+## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Final and indicative prices are distinct
+**Status:** Accepted
+
+Only a server-calculated `FIXED` Offering quote is marked final and directly bookable in the initial pricing slice. `STARTING_FROM` and `RANGE` are persisted as explicit estimates, and `AFTER_CONSULTATION` never invents a price. Calculated, package, variant, add-on and location-aware pricing remain rejected until their dedicated rule engines and tests exist. Every quote stores the Offering version and calculation snapshot.
+
+## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Professional calendar takes precedence
+**Status:** Accepted
+
+An Offering assigned to a professional always resolves availability through the stable professional calendar, even when the Offering belongs to a salon or branch. A branch calendar is used only when no professional is assigned. This prevents the same professional from appearing free at two affiliated salons and preserves one conflict authority across affiliations.
+
 ## 2026-07-20 — Execution limitation
 **Status:** Active
 
