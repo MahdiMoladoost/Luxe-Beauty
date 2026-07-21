@@ -74,8 +74,16 @@ function availabilityText(summary: AvailabilitySummary | null) {
 
 function HeroWave() {
   return (
-    <svg viewBox="0 0 1440 140" className="block h-[64px] w-full sm:h-[76px] lg:h-[88px]" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M0 42C108 72 215 86 348 82C500 77 604 30 752 31C880 31 994 76 1130 88C1257 99 1360 88 1440 66V140H0V42Z" fill="var(--background)" />
+    <svg
+      viewBox="0 0 1440 150"
+      className="block h-[74px] w-full sm:h-[86px] lg:h-[102px]"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M0 42C108 72 215 86 348 82C500 77 604 30 752 31C880 31 994 76 1130 88C1257 99 1360 88 1440 66V150H0V42Z"
+        fill="var(--background)"
+      />
     </svg>
   )
 }
@@ -99,24 +107,34 @@ function DropdownField({
   onToggle: () => void
   onSelect: (value: string) => void
 }) {
-  const selected = options.find((option) => option.value === value)?.label || label
+  const selected = options.find((option) => option.value === value)?.label || "انتخاب کنید"
 
   return (
-    <div className={`relative min-w-0 ${divider ? "border-r border-[#dfc9c0]/80" : ""}`}>
+    <div
+      className={`relative min-w-0 border-[#ead8cf]/80 ${
+        divider ? "border-b md:border-b-0 md:border-r" : "border-b md:border-b-0"
+      }`}
+    >
       <button
         type="button"
         dir="rtl"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex h-[62px] w-full items-center gap-3 px-4 text-right transition hover:bg-white/40 focus-visible:bg-white/55 focus-visible:outline-none sm:h-[66px] sm:px-5"
+        className="group flex min-h-[68px] w-full items-center gap-3 px-4 text-right transition hover:bg-white/30 focus-visible:bg-white/[0.45] focus-visible:outline-none sm:px-5 md:h-[104px] md:flex-col md:justify-center md:gap-1.5 md:px-3 md:text-center"
       >
-        {icon}
-        <span className={`min-w-0 flex-1 truncate text-sm font-bold ${value ? "text-[#302522]" : "text-[#654f48]"}`}>{selected}</span>
-        <ChevronDown className={`h-[18px] w-[18px] shrink-0 text-[#6d5048] transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={1.8} />
+        <span className="shrink-0 text-[#efd8a6] drop-shadow-[0_2px_8px_rgba(74,42,29,0.28)]">{icon}</span>
+        <span className="min-w-0 flex-1 md:flex-none">
+          <span className="block text-[10px] font-bold tracking-[0.12em] text-[#725348] md:text-[11px]">{label}</span>
+          <span className={`mt-0.5 block truncate text-sm font-bold ${value ? "text-[#332622]" : "text-[#705950]"}`}>{selected}</span>
+        </span>
+        <ChevronDown
+          className={`h-[17px] w-[17px] shrink-0 text-[#76584e] transition-transform md:absolute md:bottom-4 md:left-4 ${open ? "rotate-180" : ""}`}
+          strokeWidth={1.7}
+        />
       </button>
 
       {open ? (
-        <div className="absolute inset-x-2 top-[calc(100%+10px)] z-50 rounded-[22px] border border-white/80 bg-[#fffaf7]/95 p-2 shadow-[0_22px_55px_rgba(48,27,21,0.24)] backdrop-blur-xl">
+        <div className="absolute inset-x-2 top-[calc(100%+10px)] z-50 rounded-[22px] border border-white/80 bg-[#fffaf7]/95 p-2 shadow-[0_24px_58px_rgba(48,27,21,0.25)] backdrop-blur-xl">
           <p className="px-3 pb-1 pt-1 text-right text-[11px] font-bold text-[#936457]">{label}</p>
           <div className="max-h-64 overflow-y-auto">
             {options.map((option) => {
@@ -127,7 +145,9 @@ function DropdownField({
                   type="button"
                   dir="rtl"
                   onClick={() => onSelect(option.value)}
-                  className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${active ? "bg-[#f2dfd7] text-[#884f42]" : "text-[#392c29] hover:bg-[#f9ece6]"}`}
+                  className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${
+                    active ? "bg-[#f2dfd7] text-[#884f42]" : "text-[#392c29] hover:bg-[#f9ece6]"
+                  }`}
                 >
                   <span>{option.label}</span>
                   {active ? <Check className="h-4 w-4" /> : <span className="h-4 w-4" />}
@@ -249,59 +269,147 @@ export function BookingHero() {
 
   return (
     <div className="relative bg-background">
-      <section className="relative isolate h-[590px] overflow-visible sm:h-[620px] lg:h-[660px] xl:h-[690px]">
+      <section className="relative isolate min-h-[820px] overflow-visible sm:min-h-[650px] md:h-[580px] md:min-h-0 lg:h-[620px] xl:h-[650px]">
         <div
-          className="absolute inset-0 -z-30 bg-cover bg-[position:center_58%] sm:bg-[position:center_62%] lg:bg-[position:center_65%]"
+          className="absolute inset-0 -z-30 bg-cover bg-[position:center_60%] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
           style={{ backgroundImage: "url('/hero.png')" }}
           aria-hidden="true"
         />
-        <div className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(51,27,22,0.03)_0%,rgba(51,27,22,0.10)_52%,rgba(51,27,22,0.22)_100%)]" aria-hidden="true" />
+        <div
+          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(43,23,18,0.22)_0%,rgba(54,29,22,0.08)_34%,rgba(51,27,22,0.16)_65%,rgba(45,23,18,0.32)_100%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_42%,rgba(255,246,226,0.18),transparent_46%)]"
+          aria-hidden="true"
+        />
 
-        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center justify-center px-4 pb-16 pt-8 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24">
-          <form
-            onSubmit={submitSearch}
-            className="w-full max-w-6xl rounded-[30px] border border-white/60 bg-white/40 p-3 shadow-[0_32px_85px_rgba(48,27,21,0.28),0_8px_28px_rgba(48,27,21,0.13)] backdrop-blur-2xl backdrop-saturate-150 sm:p-4"
-          >
-            <div ref={dropdownRoot} className="grid overflow-visible rounded-2xl border border-white/70 bg-white/75 shadow-[0_7px_24px_rgba(56,34,28,0.10)] md:grid-cols-4">
-              <DropdownField icon={<Search className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />} label="انتخاب خدمت" value={service} options={services.map((item) => ({ value: item, label: item }))} open={openField === "service"} onToggle={() => setOpenField(openField === "service" ? null : "service")} onSelect={(value) => { setService(value); setOpenField(null) }} />
-              <DropdownField divider icon={<MapPin className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />} label="انتخاب شهر" value={location} options={supportedCities.map((item) => ({ value: item, label: item }))} open={openField === "location"} onToggle={() => setOpenField(openField === "location" ? null : "location")} onSelect={(value) => { setLocation(value); setOpenField(null) }} />
-              <DropdownField divider icon={<CalendarDays className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />} label="انتخاب زمان" value={dateMode} options={dateOptions} open={openField === "date"} onToggle={() => setOpenField(openField === "date" ? null : "date")} onSelect={(value) => { setDateMode(value); setOpenField(null) }} />
-              <DropdownField divider icon={<Clock3 className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />} label="انتخاب بازه" value={dayPart} options={rangeOptions} open={openField === "range"} onToggle={() => setOpenField(openField === "range" ? null : "range")} onSelect={(value) => { setDayPart(value); setOpenField(null) }} />
+        <Link
+          href="/"
+          className="absolute left-5 top-5 z-30 inline-flex flex-col items-start text-[#fff1d3] drop-shadow-[0_3px_16px_rgba(48,25,18,0.48)] sm:left-8 sm:top-7 lg:left-12"
+          aria-label="Luxe Beauty"
+        >
+          <span className="font-serif text-[24px] tracking-[0.12em] sm:text-[30px] lg:text-[36px]">LUXE BEAUTY</span>
+          <span className="mt-0.5 text-[8px] font-semibold tracking-[0.34em] text-[#f3dfbd]/90 sm:text-[9px]">CURATED BEAUTY</span>
+        </Link>
+
+        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center justify-center px-4 pb-20 pt-20 sm:px-6 sm:pb-24 sm:pt-24 lg:px-8 lg:pb-28">
+          <div className="w-full translate-y-5 sm:translate-y-7">
+            <div className="mx-auto mb-4 max-w-3xl text-center text-white drop-shadow-[0_3px_18px_rgba(43,22,17,0.38)] sm:mb-5">
+              <p className="text-[10px] font-semibold tracking-[0.38em] text-[#f7e5c4] sm:text-xs">PREMIUM SERVICES. TIMELESS YOU.</p>
+              <h1 className="mt-2 font-serif text-[28px] font-medium leading-tight sm:text-[38px] lg:text-[46px]">زیبایی، در سطحی بالاتر</h1>
             </div>
 
-            {dateMode === "date" ? (
-              <div className="mt-2 rounded-2xl border border-white/70 bg-white/75 px-4 py-3">
-                <label className="flex items-center gap-3 text-sm font-bold text-[#59443e]">
-                  <span>انتخاب تاریخ</span>
-                  <input type="date" value={customDate} onChange={(event) => setCustomDate(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[#302522] outline-none" />
-                </label>
+            <form
+              onSubmit={submitSearch}
+              className="mx-auto w-full max-w-6xl rounded-[30px] border border-white/70 bg-[#6a4437]/25 p-3 shadow-[0_34px_90px_rgba(42,22,16,0.34),0_8px_28px_rgba(42,22,16,0.18)] backdrop-blur-2xl backdrop-saturate-150 sm:p-4"
+            >
+              <div
+                ref={dropdownRoot}
+                className="grid overflow-visible rounded-[22px] border border-white/75 bg-[#fff9f3]/[0.72] shadow-[inset_0_1px_0_rgba(255,255,255,0.62),0_8px_26px_rgba(56,34,28,0.12)] sm:grid-cols-2 md:grid-cols-[repeat(4,minmax(0,1fr))_88px]"
+              >
+                <DropdownField
+                  icon={<Search className="h-[20px] w-[20px]" strokeWidth={1.65} />}
+                  label="خدمت"
+                  value={service}
+                  options={services.map((item) => ({ value: item, label: item }))}
+                  open={openField === "service"}
+                  onToggle={() => setOpenField(openField === "service" ? null : "service")}
+                  onSelect={(value) => {
+                    setService(value)
+                    setOpenField(null)
+                  }}
+                />
+                <DropdownField
+                  divider
+                  icon={<MapPin className="h-[20px] w-[20px]" strokeWidth={1.65} />}
+                  label="شهر"
+                  value={location}
+                  options={supportedCities.map((item) => ({ value: item, label: item }))}
+                  open={openField === "location"}
+                  onToggle={() => setOpenField(openField === "location" ? null : "location")}
+                  onSelect={(value) => {
+                    setLocation(value)
+                    setOpenField(null)
+                  }}
+                />
+                <DropdownField
+                  divider
+                  icon={<CalendarDays className="h-[20px] w-[20px]" strokeWidth={1.65} />}
+                  label="تاریخ"
+                  value={dateMode}
+                  options={dateOptions}
+                  open={openField === "date"}
+                  onToggle={() => setOpenField(openField === "date" ? null : "date")}
+                  onSelect={(value) => {
+                    setDateMode(value)
+                    setOpenField(null)
+                  }}
+                />
+                <DropdownField
+                  divider
+                  icon={<Clock3 className="h-[20px] w-[20px]" strokeWidth={1.65} />}
+                  label="بازه زمانی"
+                  value={dayPart}
+                  options={rangeOptions}
+                  open={openField === "range"}
+                  onToggle={() => setOpenField(openField === "range" ? null : "range")}
+                  onSelect={(value) => {
+                    setDayPart(value)
+                    setOpenField(null)
+                  }}
+                />
+
+                <div className="flex items-center justify-center p-2.5 sm:col-span-2 md:col-span-1 md:p-0">
+                  <button
+                    type="submit"
+                    disabled={status === "submitting"}
+                    className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#e9ca83_0%,#b9843e_58%,#8f612b_100%)] px-5 text-sm font-bold text-white shadow-[0_14px_34px_rgba(103,65,25,0.34)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70 md:h-[68px] md:w-[68px] md:rounded-full md:px-0"
+                    aria-label="مشاهده نوبت‌های خالی"
+                  >
+                    {status === "submitting" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-6 w-6 transition-transform group-hover:scale-105" strokeWidth={1.8} />}
+                    <span className="md:sr-only">مشاهده نوبت‌های خالی</span>
+                  </button>
+                </div>
               </div>
-            ) : null}
 
-            <div className="mt-2 grid gap-2.5 md:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-              <button type="submit" disabled={status === "submitting"} className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold text-white shadow-[0_10px_26px_rgba(71,36,28,0.25)] transition hover:-translate-y-0.5 hover:bg-[#985545] disabled:opacity-70">
-                {status === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                مشاهده نوبت‌های خالی
-              </button>
-              <Link href="/salons" className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#b87362]/80 bg-white/55 px-5 text-sm font-bold text-[#75483e] transition hover:bg-white/75">مشاهده خدمات</Link>
-            </div>
+              {dateMode === "date" ? (
+                <div className="mt-2 rounded-2xl border border-white/70 bg-[#fff9f3]/[0.72] px-4 py-3">
+                  <label className="flex items-center gap-3 text-sm font-bold text-[#59443e]">
+                    <span>انتخاب تاریخ</span>
+                    <input
+                      type="date"
+                      value={customDate}
+                      onChange={(event) => setCustomDate(event.target.value)}
+                      className="min-w-0 flex-1 bg-transparent text-[#302522] outline-none"
+                    />
+                  </label>
+                </div>
+              ) : null}
 
-            <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-white/65 bg-white/65 px-4 py-2.5 text-[13px] font-medium leading-6 text-[#493a36] sm:flex-row sm:items-center sm:justify-between">
-              <span>{availabilityLoading ? "در حال دریافت زمان‌های واقعی..." : helperText || "زمان‌ها و قیمت‌های واقعی پس از جست‌وجو نمایش داده می‌شوند."}</span>
-              <span className="flex shrink-0 gap-2">
-                <button type="button" onClick={useCurrentLocation} className="inline-flex items-center gap-1.5 font-bold text-[#845246]">
-                  {status === "locating" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
-                  موقعیت فعلی
-                </button>
-                <Link href="/salons?map=1" className="inline-flex items-center gap-1.5 font-bold text-[#845246]"><Map className="h-4 w-4" />روی نقشه</Link>
-              </span>
-            </div>
+              <div className="mt-2.5 flex flex-col gap-2 rounded-2xl border border-white/65 bg-[#fff9f3]/[0.68] px-4 py-2.5 text-[13px] font-medium leading-6 text-[#493a36] sm:flex-row sm:items-center sm:justify-between">
+                <span>{availabilityLoading ? "در حال دریافت زمان‌های واقعی..." : helperText || "زمان‌ها و قیمت‌های واقعی پس از جست‌وجو نمایش داده می‌شوند."}</span>
+                <span className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
+                  <button type="button" onClick={useCurrentLocation} className="inline-flex items-center gap-1.5 font-bold text-[#845246] transition hover:text-[#64392f]">
+                    {status === "locating" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
+                    موقعیت فعلی
+                  </button>
+                  <Link href="/salons?map=1" className="inline-flex items-center gap-1.5 font-bold text-[#845246] transition hover:text-[#64392f]">
+                    <Map className="h-4 w-4" />
+                    روی نقشه
+                  </Link>
+                  <Link href="/salons" className="font-bold text-[#845246] transition hover:text-[#64392f]">مشاهده خدمات</Link>
+                </span>
+              </div>
 
-            {error ? <p className="mt-2 text-sm font-bold text-rose-700">{error}</p> : null}
-          </form>
+              {error ? <p className="mt-2 rounded-xl bg-white/80 px-3 py-2 text-sm font-bold text-rose-700">{error}</p> : null}
+            </form>
+          </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-[-1px] z-0 leading-none"><HeroWave /></div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-[-1px] z-10 leading-none">
+          <HeroWave />
+        </div>
       </section>
     </div>
   )
