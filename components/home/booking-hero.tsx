@@ -122,7 +122,7 @@ function DropdownField({
         aria-expanded={open}
         className="group flex min-h-[68px] w-full items-center gap-3 px-4 text-right transition hover:bg-white/30 focus-visible:bg-white/[0.45] focus-visible:outline-none sm:px-5 md:h-[104px] md:flex-col md:justify-center md:gap-1.5 md:px-3 md:text-center"
       >
-        <span className="shrink-0 text-[#efd8a6] drop-shadow-[0_2px_8px_rgba(74,42,29,0.28)]">{icon}</span>
+        <span className="shrink-0 text-[#c79339] drop-shadow-[0_2px_8px_rgba(74,42,29,0.34)]">{icon}</span>
         <span className="min-w-0 flex-1 md:flex-none">
           <span className="block text-[10px] font-bold tracking-[0.12em] text-[#725348] md:text-[11px]">{label}</span>
           <span className={`mt-0.5 block truncate text-sm font-bold ${value ? "text-[#332622]" : "text-[#705950]"}`}>{selected}</span>
@@ -271,16 +271,16 @@ export function BookingHero() {
     <div className="relative bg-background">
       <section className="relative isolate min-h-[820px] overflow-visible sm:min-h-[650px] md:h-[580px] md:min-h-0 lg:h-[620px] xl:h-[650px]">
         <div
-          className="absolute inset-0 -z-30 bg-cover bg-[position:center_60%] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
+          className="absolute inset-0 -z-30 scale-[1.03] bg-cover bg-[position:center_60%] blur-[2px] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
           style={{ backgroundImage: "url('/hero.png')" }}
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(43,23,18,0.22)_0%,rgba(54,29,22,0.08)_34%,rgba(51,27,22,0.16)_65%,rgba(45,23,18,0.32)_100%)]"
+          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(22,12,10,0.48)_0%,rgba(28,15,12,0.34)_28%,rgba(34,18,14,0.38)_60%,rgba(25,13,11,0.58)_100%)]"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_42%,rgba(255,246,226,0.18),transparent_46%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_42%,rgba(255,245,230,0.10),rgba(14,8,7,0.18)_58%,rgba(10,6,5,0.38)_100%)]"
           aria-hidden="true"
         />
 
@@ -291,15 +291,11 @@ export function BookingHero() {
         >
           <span className="font-serif text-[24px] tracking-[0.12em] sm:text-[30px] lg:text-[36px]">LUXE BEAUTY</span>
           <span className="mt-0.5 text-[8px] font-semibold tracking-[0.34em] text-[#f3dfbd]/90 sm:text-[9px]">CURATED BEAUTY</span>
+          <span className="mt-2 text-[8px] font-semibold tracking-[0.28em] text-[#f7e5c4] sm:text-[9px]">PREMIUM SERVICES. TIMELESS YOU.</span>
         </Link>
 
-        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center justify-center px-4 pb-20 pt-20 sm:px-6 sm:pb-24 sm:pt-24 lg:px-8 lg:pb-28">
-          <div className="w-full translate-y-5 sm:translate-y-7">
-            <div className="mx-auto mb-4 max-w-3xl text-center text-white drop-shadow-[0_3px_18px_rgba(43,22,17,0.38)] sm:mb-5">
-              <p className="text-[10px] font-semibold tracking-[0.38em] text-[#f7e5c4] sm:text-xs">PREMIUM SERVICES. TIMELESS YOU.</p>
-              <h1 className="mt-2 font-serif text-[28px] font-medium leading-tight sm:text-[38px] lg:text-[46px]">زیبایی، در سطحی بالاتر</h1>
-            </div>
-
+        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-start justify-center px-4 pb-16 pt-24 sm:px-6 sm:pb-20 sm:pt-28 lg:px-8 lg:pb-24">
+          <div className="w-full pt-10 -translate-y-2 sm:pt-12 sm:-translate-y-4">
             <form
               onSubmit={submitSearch}
               className="mx-auto w-full max-w-6xl rounded-[30px] border border-white/70 bg-[#6a4437]/25 p-3 shadow-[0_34px_90px_rgba(42,22,16,0.34),0_8px_28px_rgba(42,22,16,0.18)] backdrop-blur-2xl backdrop-saturate-150 sm:p-4"
