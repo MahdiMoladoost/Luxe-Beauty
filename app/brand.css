@@ -33,7 +33,7 @@ main > div[class~="pb-[235px]"] > section {
   }
 }
 
-/* Compact the booking card without changing its visual hierarchy. */
+/* Desktop: keep field labels and their values on one horizontal line. */
 @media (min-width: 768px) {
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] {
     padding: 10px !important;
@@ -44,44 +44,70 @@ main > div[class~="pb-[235px]"] > section {
   }
 
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div {
-    height: 76px !important;
-    min-height: 76px !important;
-    padding: 7px 13px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    padding: 6px 12px !important;
     border-radius: 14px !important;
   }
 
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div > label,
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div > div {
+    align-items: center !important;
     gap: 8px !important;
   }
 
-  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child svg {
-    width: 18px !important;
-    height: 18px !important;
-  }
-
-  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] {
-    height: 42px !important;
-    margin-top: 3px !important;
-    border-radius: 10px !important;
-  }
-
-  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] > label {
-    display: flex !important;
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div > label > span,
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div > div > span {
+    display: grid !important;
+    width: 100% !important;
     min-width: 0 !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    padding: 3px 10px !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div > label > span > span:first-child,
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > div > div > span > span:first-child {
+    white-space: nowrap !important;
+    line-height: 1 !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child svg {
+    width: 17px !important;
+    height: 17px !important;
+    margin-top: 0 !important;
   }
 
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] input,
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] select {
+    margin-top: 0 !important;
+    min-width: 0 !important;
     line-height: 1.1rem !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] {
+    height: 36px !important;
+    margin-top: 0 !important;
+    border-radius: 9px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] > label {
+    display: grid !important;
+    min-width: 0 !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 5px !important;
+    padding: 3px 8px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] div[class*="grid-cols-[minmax"] > label > span {
+    white-space: nowrap !important;
+    line-height: 1 !important;
   }
 
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] button[class*="h-14"],
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] a[class*="h-14"] {
-    height: 48px !important;
+    height: 46px !important;
   }
 
   main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="mt-3"] {
