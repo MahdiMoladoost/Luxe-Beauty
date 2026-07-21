@@ -1,0 +1,11 @@
+header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-child {
+  background-color: #ffffff !important;
+  background-image: url('/luxe-beauty-mark.png') !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 108% auto !important;
+}
+
+header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-child > svg {
+  display: none !important;
+}
