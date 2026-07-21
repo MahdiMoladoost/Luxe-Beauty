@@ -9,16 +9,3 @@ header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-chil
 header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-child > svg {
   display: none !important;
 }
-
-/* Always use the original high-resolution hero asset committed in public/hero.png. */
-main > section:first-child::before {
-  background-image: url('/hero.png') !important;
-  background-position: center 42% !important;
-  background-repeat: no-repeat !important;
-  background-size: cover !important;
-}
-
-/* Fallback for the component-level full-bleed background. */
-[style*="/luxe-hero.svg"] {
-  background-image: url('/hero.png') !important;
-}
