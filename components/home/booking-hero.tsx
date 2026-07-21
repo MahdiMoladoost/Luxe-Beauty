@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react"
-import { CalendarDays, Check, ChevronDown, Clock3, Crosshair, Loader2, Map, MapPin, Search } from "lucide-react"
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { CalendarDays, Check, ChevronDown, Clock3, Loader2, MapPin, Search } from "lucide-react"
 
 const CITY_STORAGE_KEY = "luxe-beauty-selected-city"
 const CITY_COOKIE_KEY = "luxe_beauty_city"
@@ -41,37 +41,6 @@ const rangeOptions = [
 
 type DropdownKey = "service" | "location" | "date" | "range"
 type Option = { value: string; label: string }
-type AvailabilitySummary = {
-  message?: string
-  availableCount?: number
-  nearestTime?: string
-  activeProviders?: number
-}
-
-function readSavedCity() {
-  const entry = document.cookie.split("; ").find((item) => item.startsWith(`${CITY_COOKIE_KEY}=`))
-  const cookieCity = entry ? decodeURIComponent(entry.slice(CITY_COOKIE_KEY.length + 1)) : ""
-  return cookieCity || window.localStorage.getItem(CITY_STORAGE_KEY) || ""
-}
-
-function persistCity(city: string) {
-  if (!city || city === "موقعیت فعلی") return
-  document.cookie = `${CITY_COOKIE_KEY}=${encodeURIComponent(city)}; Max-Age=${CITY_COOKIE_MAX_AGE}; Path=/; SameSite=Lax`
-  window.localStorage.setItem(CITY_STORAGE_KEY, city)
-}
-
-function availabilityText(summary: AvailabilitySummary | null) {
-  if (!summary) return null
-  if (summary.message) return summary.message
-  if (typeof summary.availableCount === "number") {
-    return `امروز ${summary.availableCount.toLocaleString("fa-IR")} نوبت خالی موجود است${summary.nearestTime ? `؛ نزدیک‌ترین زمان ${summary.nearestTime}` : ""}.`
-  }
-  if (typeof summary.activeProviders === "number") {
-    return `${summary.activeProviders.toLocaleString("fa-IR")} سالن و متخصص در محدوده شما فعال هستند.`
-  }
-  return null
-}
-
 function HeroWave() {
   return (
     <svg
@@ -111,7 +80,7 @@ function DropdownField({
 
   return (
     <div
-      className={`relative min-w-0 border-[#ead8cf]/80 ${
+      className={`relative min-w-0 border-[#d6b993]/30 ${
         divider ? "border-b md:border-b-0 md:border-r" : "border-b md:border-b-0"
       }`}
     >
@@ -120,22 +89,22 @@ function DropdownField({
         dir="rtl"
         onClick={onToggle}
         aria-expanded={open}
-        className="group flex min-h-[68px] w-full items-center gap-3 px-4 text-right transition hover:bg-white/30 focus-visible:bg-white/[0.45] focus-visible:outline-none sm:px-5 md:h-[104px] md:flex-col md:justify-center md:gap-1.5 md:px-3 md:text-center"
+        className="group flex min-h-[68px] w-full items-center gap-3 px-4 text-right transition hover:bg-[#c89a75]/10 focus-visible:bg-[#c89a75]/15 focus-visible:outline-none sm:px-5 md:h-[104px] md:flex-col md:justify-center md:gap-1.5 md:px-3 md:text-center"
       >
         <span className="shrink-0 text-[#c79339] drop-shadow-[0_2px_8px_rgba(74,42,29,0.34)]">{icon}</span>
         <span className="min-w-0 flex-1 md:flex-none">
-          <span className="block text-[10px] font-bold tracking-[0.12em] text-[#725348] md:text-[11px]">{label}</span>
-          <span className={`mt-0.5 block truncate text-sm font-bold ${value ? "text-[#332622]" : "text-[#705950]"}`}>{selected}</span>
+          <span className="block text-[10px] font-bold tracking-[0.12em] text-[#f0d5ad] md:text-[11px]">{label}</span>
+          <span className={`mt-0.5 block truncate text-sm font-bold ${value ? "text-[#fff4df]" : "text-[#ead5c4]"}`}>{selected}</span>
         </span>
         <ChevronDown
-          className={`h-[17px] w-[17px] shrink-0 text-[#76584e] transition-transform md:absolute md:bottom-4 md:left-4 ${open ? "rotate-180" : ""}`}
+          className={`h-[17px] w-[17px] shrink-0 text-[#e5c18a] transition-transform md:absolute md:bottom-4 md:left-4 ${open ? "rotate-180" : ""}`}
           strokeWidth={1.7}
         />
       </button>
 
       {open ? (
-        <div className="absolute inset-x-2 top-[calc(100%+10px)] z-50 rounded-[22px] border border-white/80 bg-[#fffaf7]/95 p-2 shadow-[0_24px_58px_rgba(48,27,21,0.25)] backdrop-blur-xl">
-          <p className="px-3 pb-1 pt-1 text-right text-[11px] font-bold text-[#936457]">{label}</p>
+        <div className="absolute inset-x-2 top-[calc(100%+10px)] z-50 rounded-[22px] border border-[#d8b98d]/35 bg-[#3b2722]/90 p-2 shadow-[0_24px_58px_rgba(28,15,12,0.42)] backdrop-blur-xl">
+          <p className="px-3 pb-1 pt-1 text-right text-[11px] font-bold text-[#efcf9d]">{label}</p>
           <div className="max-h-64 overflow-y-auto">
             {options.map((option) => {
               const active = option.value === value
@@ -146,7 +115,7 @@ function DropdownField({
                   dir="rtl"
                   onClick={() => onSelect(option.value)}
                   className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${
-                    active ? "bg-[#f2dfd7] text-[#884f42]" : "text-[#392c29] hover:bg-[#f9ece6]"
+                    active ? "bg-[#b8875f]/35 text-[#fff2dc]" : "text-[#f1dfd2] hover:bg-[#b8875f]/18"
                   }`}
                 >
                   <span>{option.label}</span>
@@ -170,11 +139,8 @@ export function BookingHero() {
   const [dayPart, setDayPart] = useState("")
   const [customDate, setCustomDate] = useState("")
   const [openField, setOpenField] = useState<DropdownKey | null>(null)
-  const [status, setStatus] = useState<"idle" | "locating" | "submitting">("idle")
+  const [status, setStatus] = useState<"idle" | "submitting">("idle")
   const [error, setError] = useState("")
-  const [availability, setAvailability] = useState<AvailabilitySummary | null>(null)
-  const [availabilityLoading, setAvailabilityLoading] = useState(false)
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
 
   useEffect(() => {
     const savedCity = readSavedCity()
@@ -200,53 +166,6 @@ export function BookingHero() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!location || location === "موقعیت فعلی") return
-    const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
-      setAvailabilityLoading(true)
-      try {
-        const response = await fetch(`/api/availability/summary?city=${encodeURIComponent(location)}`, {
-          signal: controller.signal,
-          cache: "no-store",
-        })
-        if (!response.ok) throw new Error("availability-unavailable")
-        setAvailability((await response.json()) as AvailabilitySummary)
-      } catch (fetchError) {
-        if ((fetchError as Error).name !== "AbortError") setAvailability(null)
-      } finally {
-        setAvailabilityLoading(false)
-      }
-    }, 350)
-    return () => {
-      window.clearTimeout(timer)
-      controller.abort()
-    }
-  }, [location])
-
-  const helperText = useMemo(() => availabilityText(availability), [availability])
-
-  const useCurrentLocation = () => {
-    setError("")
-    if (!navigator.geolocation) {
-      setError("مرورگر شما دسترسی به موقعیت فعلی را پشتیبانی نمی‌کند.")
-      return
-    }
-    setStatus("locating")
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setCoordinates({ lat: coords.latitude, lng: coords.longitude })
-        setLocation("موقعیت فعلی")
-        setStatus("idle")
-      },
-      () => {
-        setError("دسترسی به موقعیت فعلی انجام نشد؛ شهر را دستی انتخاب کنید.")
-        setStatus("idle")
-      },
-      { timeout: 8000, maximumAge: 300000 },
-    )
-  }
-
   const submitSearch = (event: FormEvent) => {
     event.preventDefault()
     setError("")
@@ -259,17 +178,13 @@ export function BookingHero() {
     persistCity(location)
     const params = new URLSearchParams({ service, location, availability: dateMode, dayPart })
     if (customDate && dateMode === "date") params.set("date", customDate)
-    if (coordinates) {
-      params.set("lat", coordinates.lat.toString())
-      params.set("lng", coordinates.lng.toString())
-    }
     setStatus("submitting")
     router.push(`/salons?${params.toString()}`)
   }
 
   return (
     <div className="relative bg-background">
-      <section className="relative isolate min-h-[760px] overflow-visible sm:min-h-[610px] md:h-[540px] md:min-h-0 lg:h-[565px] xl:h-[590px]">
+      <section className="relative isolate min-h-[810px] overflow-visible sm:min-h-[660px] md:h-[585px] md:min-h-0 lg:h-[620px] xl:h-[645px]">
         <div
           className="absolute inset-0 -z-30 bg-cover bg-[position:center_60%] blur-[1px] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
           style={{ backgroundImage: "url('/hero.png')" }}
@@ -284,25 +199,27 @@ export function BookingHero() {
           aria-hidden="true"
         />
 
-        <Link
-          href="/"
-          className="absolute left-5 top-5 z-30 inline-flex flex-col items-start text-[#fff1d3] drop-shadow-[0_3px_16px_rgba(48,25,18,0.48)] sm:left-8 sm:top-7 lg:left-12"
-          aria-label="Luxe Beauty"
-        >
-          <span className="font-serif text-[24px] tracking-[0.12em] sm:text-[30px] lg:text-[36px]">LUXE BEAUTY</span>
-          <span className="mt-1 text-[9px] font-semibold tracking-[0.32em] text-[#f3dfbd]/95 sm:text-[10px]">CURATED BEAUTY</span>
-          <span className="mt-2 text-[9px] font-semibold tracking-[0.22em] text-[#f7e5c4] sm:text-[10px]">PREMIUM SERVICES. TIMELESS YOU.</span>
-        </Link>
+        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-start justify-center px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8 lg:pb-20">
+          <div className="w-full pt-8 sm:pt-10">
+            <div className="mx-auto mb-5 flex max-w-5xl justify-center text-center sm:mb-6">
+              <Link
+                href="/"
+                className="inline-flex flex-col items-center text-[#fff1d3] drop-shadow-[0_5px_18px_rgba(48,25,18,0.42)]"
+                aria-label="Luxe Beauty"
+              >
+                <span className="font-serif text-[28px] tracking-[0.12em] sm:text-[34px] lg:text-[40px]">LUXE BEAUTY</span>
+                <span className="mt-2 text-[9px] font-semibold tracking-[0.34em] text-[#f3dfbd]/95 sm:text-[10px]">CURATED BEAUTY</span>
+                <span className="mt-2 text-[9px] font-semibold tracking-[0.24em] text-[#f7e5c4] sm:text-[10px]">PREMIUM SERVICES. TIMELESS YOU.</span>
+              </Link>
+            </div>
 
-        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-start justify-center px-4 pb-16 pt-24 sm:px-6 sm:pb-20 sm:pt-28 lg:px-8 lg:pb-20">
-          <div className="w-full pt-11 sm:pt-12">
             <form
               onSubmit={submitSearch}
-              className="mx-auto w-full max-w-6xl rounded-[30px] border border-white/65 bg-[#5d372c]/22 p-3 shadow-[0_28px_72px_rgba(42,22,16,0.28),0_8px_24px_rgba(42,22,16,0.14)] backdrop-blur-xl backdrop-saturate-150 sm:p-4"
+              className="mx-auto w-full max-w-6xl rounded-[32px] border border-[#d6b98f]/35 bg-[linear-gradient(180deg,rgba(70,43,35,0.34)_0%,rgba(43,27,23,0.26)_100%)] p-3 shadow-[0_28px_72px_rgba(28,15,12,0.30),inset_0_1px_0_rgba(234,205,164,0.16)] backdrop-blur-[24px] backdrop-saturate-150 sm:p-4"
             >
               <div
                 ref={dropdownRoot}
-                className="grid overflow-visible rounded-[22px] border border-white/75 bg-[#fff9f3]/[0.72] shadow-[inset_0_1px_0_rgba(255,255,255,0.62),0_8px_26px_rgba(56,34,28,0.12)] sm:grid-cols-2 md:grid-cols-[repeat(4,minmax(0,1fr))_88px]"
+                className="grid overflow-visible rounded-[24px] border border-[#e0c59c]/30 bg-[linear-gradient(180deg,rgba(94,61,49,0.32)_0%,rgba(55,35,30,0.25)_100%)] shadow-[inset_0_1px_0_rgba(238,210,170,0.15),0_10px_30px_rgba(32,18,14,0.18)] backdrop-blur-[18px] sm:grid-cols-2 md:grid-cols-[repeat(4,minmax(0,1fr))_88px]"
               >
                 <DropdownField
                   icon={<Search className="h-[20px] w-[20px]" strokeWidth={1.65} />}
@@ -370,35 +287,20 @@ export function BookingHero() {
               </div>
 
               {dateMode === "date" ? (
-                <div className="mt-2 rounded-2xl border border-white/70 bg-[#fff9f3]/[0.72] px-4 py-3">
-                  <label className="flex items-center gap-3 text-sm font-bold text-[#59443e]">
+                <div className="mt-3 rounded-[22px] border border-[#d9bd92]/30 bg-[#4b3028]/28 px-4 py-3 backdrop-blur-[16px]">
+                  <label className="flex items-center gap-3 text-sm font-bold text-[#f0dcc5]">
                     <span>انتخاب تاریخ</span>
                     <input
                       type="date"
                       value={customDate}
                       onChange={(event) => setCustomDate(event.target.value)}
-                      className="min-w-0 flex-1 bg-transparent text-[#302522] outline-none"
+                      className="min-w-0 flex-1 bg-transparent text-[#fff0dc] outline-none"
                     />
                   </label>
                 </div>
               ) : null}
 
-              <div className="mt-2.5 flex flex-col gap-2 rounded-2xl border border-white/65 bg-[#fff9f3]/[0.68] px-4 py-2.5 text-[13px] font-medium leading-6 text-[#493a36] sm:flex-row sm:items-center sm:justify-between">
-                <span>{availabilityLoading ? "در حال دریافت زمان‌های واقعی..." : helperText || "زمان‌ها و قیمت‌های واقعی پس از جست‌وجو نمایش داده می‌شوند."}</span>
-                <span className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
-                  <button type="button" onClick={useCurrentLocation} className="inline-flex items-center gap-1.5 font-bold text-[#845246] transition hover:text-[#64392f]">
-                    {status === "locating" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
-                    موقعیت فعلی
-                  </button>
-                  <Link href="/salons?map=1" className="inline-flex items-center gap-1.5 font-bold text-[#845246] transition hover:text-[#64392f]">
-                    <Map className="h-4 w-4" />
-                    روی نقشه
-                  </Link>
-                  <Link href="/salons" className="font-bold text-[#845246] transition hover:text-[#64392f]">مشاهده خدمات</Link>
-                </span>
-              </div>
-
-              {error ? <p className="mt-2 rounded-xl bg-white/80 px-3 py-2 text-sm font-bold text-rose-700">{error}</p> : null}
+              {error ? <p className="mt-2 rounded-xl bg-[#3f2722]/85 px-3 py-2 text-sm font-bold text-rose-200">{error}</p> : null}
             </form>
           </div>
         </div>
