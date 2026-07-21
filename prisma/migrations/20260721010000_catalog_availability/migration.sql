@@ -3,6 +3,20 @@
 CREATE TYPE "ScheduleOwnerType" AS ENUM ('PROFESSIONAL', 'BRANCH');
 CREATE TYPE "ScheduleExceptionKind" AS ENUM ('CLOSED', 'AVAILABLE');
 
+ALTER TABLE "ServiceOffering"
+    ADD CONSTRAINT "ServiceOffering_price_min_check" CHECK ("priceMinToman" IS NULL OR "priceMinToman" >= 0),
+    ADD CONSTRAINT "ServiceOffering_price_max_check" CHECK ("priceMaxToman" IS NULL OR "priceMaxToman" >= 0),
+    ADD CONSTRAINT "ServiceOffering_price_range_check" CHECK (
+        "priceMinToman" IS NULL OR "priceMaxToman" IS NULL OR "priceMaxToman" >= "priceMinToman"
+    ),
+    ADD CONSTRAINT "ServiceOffering_base_duration_check" CHECK ("baseDurationMinute" BETWEEN 5 AND 720),
+    ADD CONSTRAINT "ServiceOffering_preparation_check" CHECK ("preparationMinute" BETWEEN 0 AND 180),
+    ADD CONSTRAINT "ServiceOffering_cleanup_check" CHECK ("cleanupMinute" BETWEEN 0 AND 180),
+    ADD CONSTRAINT "ServiceOffering_buffer_before_check" CHECK ("bufferBeforeMinute" BETWEEN 0 AND 180),
+    ADD CONSTRAINT "ServiceOffering_buffer_after_check" CHECK ("bufferAfterMinute" BETWEEN 0 AND 180),
+    ADD CONSTRAINT "ServiceOffering_version_check" CHECK ("version" > 0),
+    ADD CONSTRAINT "ServiceOffering_published_active_check" CHECK (NOT "published" OR "active");
+
 CREATE TABLE "ServiceQuote" (
     "id" UUID NOT NULL,
     "offeringId" UUID NOT NULL,
