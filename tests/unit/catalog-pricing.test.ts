@@ -80,13 +80,36 @@ describe("catalog pricing policy", () => {
       }),
     ).toThrow(OfferingPricingError)
 
-    expect(() =>
+    let unsupported: unknown
+    try {
       validateOfferingPricing({
         ...duration,
         priceModel: "PACKAGE",
         priceMinToman: 500_000n,
         priceMaxToman: null,
-      }),
-    ).toThrowError(expect.objectContaining({ code: "PRICE_MODEL_NOT_IMPLEMENTED" }))
+      })
+    } catch (error) {
+      unsupported = error
+    }
+    expect(unsupported).toBeInstanceOf(OfferingPricingError)
+    expect((unsupported as OfferingPricingError).code).toBe("PRICE_MODEL_NOT_IMPLEMENTED")
+  })
+
+  it("rejects a quote whose occupied duration exceeds one day", () => {
+    expect(() =>
+      calculateOfferingQuote(
+        {
+          baseDurationMinute: 720,
+          preparationMinute: 0,
+          cleanupMinute: 0,
+          bufferBeforeMinute: 0,
+          bufferAfterMinute: 1,
+          priceModel: "FIXED",
+          priceMinToman: 100_000n,
+          priceMaxToman: null,
+        },
+        2,
+      ),
+    ).toThrowError("One quote cannot reserve more than 1440 minutes")
   })
 })
