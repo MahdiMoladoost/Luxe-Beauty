@@ -9,3 +9,94 @@ header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-chil
 header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-child > svg {
   display: none !important;
 }
+
+/* Hero: restore the generous height used before the dropdown refinement. */
+main > div[class~="pb-[235px]"] > section {
+  height: 500px !important;
+}
+
+@media (min-width: 640px) {
+  main > div[class~="pb-[235px]"] > section {
+    height: 540px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  main > div[class~="pb-[235px]"] > section {
+    height: 580px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  main > div[class~="pb-[235px]"] > section {
+    height: 610px !important;
+  }
+}
+
+/* A warm, subtle scrim across the artwork keeps the centered copy readable. */
+main > div[class~="pb-[235px]"] > section > div:nth-child(2) {
+  inset: 0 !important;
+  width: 100% !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 249, 246, 0.28) 0%,
+    rgba(88, 49, 40, 0.13) 56%,
+    rgba(88, 49, 40, 0.21) 100%
+  ) !important;
+}
+
+/* Center the complete hero message horizontally and vertically. */
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) {
+  align-items: center !important;
+  justify-content: center !important;
+  padding-top: 0 !important;
+  padding-bottom: 105px !important;
+  text-align: center !important;
+}
+
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) > div {
+  margin-inline: auto !important;
+  max-width: 760px !important;
+  padding: 28px 42px !important;
+  border: 1px solid rgba(255, 255, 255, 0.68) !important;
+  border-radius: 30px !important;
+  background: rgba(255, 250, 247, 0.72) !important;
+  box-shadow: 0 24px 64px rgba(69, 39, 32, 0.18) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(115%) !important;
+  backdrop-filter: blur(9px) saturate(115%) !important;
+  text-align: center !important;
+}
+
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) h1,
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) h1 span,
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) p {
+  text-align: center !important;
+}
+
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) h1 > span:first-child {
+  color: #925646 !important;
+  text-shadow: 0 4px 20px rgba(255, 255, 255, 0.92) !important;
+}
+
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) h1 > span:nth-child(2) {
+  color: #30211e !important;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.92) !important;
+}
+
+main > div[class~="pb-[235px]"] > section > div:nth-child(3) p {
+  margin-inline: auto !important;
+  color: #503a34 !important;
+  font-weight: 650 !important;
+}
+
+@media (max-width: 639px) {
+  main > div[class~="pb-[235px]"] > section > div:nth-child(3) {
+    padding-bottom: 125px !important;
+  }
+
+  main > div[class~="pb-[235px]"] > section > div:nth-child(3) > div {
+    margin-inline: 16px !important;
+    padding: 22px 18px !important;
+    border-radius: 24px !important;
+  }
+}
