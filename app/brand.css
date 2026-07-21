@@ -9,3 +9,26 @@ header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-chil
 header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-child > svg {
   display: none !important;
 }
+
+/* Keep the hero visually generous without pushing the booking card below the first viewport. */
+main > div[class~="pb-[235px]"] > section {
+  height: 460px !important;
+}
+
+@media (min-width: 640px) {
+  main > div[class~="pb-[235px]"] > section {
+    height: 520px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  main > div[class~="pb-[235px]"] > section {
+    height: 570px !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  main > div[class~="pb-[235px]"] > section {
+    height: 600px !important;
+  }
+}
