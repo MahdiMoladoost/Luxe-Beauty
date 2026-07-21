@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Vazirmatn } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
+import "./brand.css"
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
@@ -16,19 +17,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/luxe-beauty-mark.png",
+        type: "image/png",
+        sizes: "256x256",
       },
     ],
-    apple: "/apple-icon.png",
+    shortcut: "/luxe-beauty-mark.png",
+    apple: [
+      {
+        url: "/luxe-beauty-mark.png",
+        type: "image/png",
+        sizes: "256x256",
+      },
+    ],
   },
 }
 
