@@ -15,7 +15,7 @@ Customer OTP registration/login, profile completion, session/device security, st
 ## KL-003 — Infrastructure is foundational, not production-complete
 **Status:** Active
 
-The rebuild branch contains Prisma/PostgreSQL schemas and migrations, Redis/BullMQ worker scaffold, MinIO namespaces, Docker Compose, Nginx and health endpoints. Real queue workflows, scheduling, dead-letter handling, complete observability, backup/restore and production deployment validation remain open.
+The rebuild branch contains Prisma/PostgreSQL schemas and migrations, Redis/BullMQ worker, MinIO namespaces, Docker Compose, Nginx and health endpoints. The worker now schedules booking-hold expiry, but complete queue monitoring, dead-letter operations, remaining scheduled workflows, observability, backup/restore and production deployment validation remain open.
 
 ## KL-004 — External production providers are unconfigured
 **Status:** Expected
@@ -42,7 +42,7 @@ Retention is configurable by policy, but final production durations for identity
 
 GitHub Actions workflow run `29740506514` passed locked installation, multi-file Prisma validation/client generation, clean deployment of the committed foundation and authentication migrations, migration status, system role/super-admin seed, lint, strict TypeScript, unit and PostgreSQL integration tests, production build, Docker Compose validation, application image build and production dependency audit. Auth tests cover OTP cooldown/attempts, session lifecycle/logout-all, staff password/2FA, device IDOR, RBAC permission denial/allow and mutation audit.
 
-Identity verification, provider onboarding/private documents, bilateral professional affiliations, provider branch management, standard catalog operations, Offering ownership/publication, server Quote snapshots and shared schedule/availability preview were added after that verified run. Connector-created commits have not produced a fresh visible workflow run. These slices remain marked partial and pending validation; they are not represented as CI-passing. E2E, accessibility, full upload/security coverage, booking/payment concurrency, queue, backup/restore and full runtime smoke tests remain open.
+Identity verification, provider onboarding/private documents, bilateral professional affiliations, provider branch management, Catalog/Offering, Quote snapshots, shared availability and transactional Booking Holds were added after that verified run. Connector-created commits have not produced a fresh visible workflow run. These slices remain partial and pending validation; they are not represented as CI-passing. E2E, accessibility, full upload/security coverage, booking/payment load testing, queue failure injection, backup/restore and full runtime smoke tests remain open.
 
 ## KL-009 — Secret scanning is incomplete
 **Status:** Active
@@ -52,7 +52,7 @@ No real secret was intentionally added. `.env.example` contains names and blank 
 ## KL-010 — Full platform scope is not complete
 **Status:** Active
 
-Phase zero, infrastructure and operational authentication/RBAC are established. Initial identity, provider verification, private documents, professional affiliation, branch, catalog, Quote and single-Offering availability slices exist. Configurable document requirements, private address verification, provider staff ABAC, variants/packages/questionnaires, resource capacity, multi-service availability, transactional booking holds, booking workflows, payment/ledger, subscriptions, complete panels, public search, integrations, communications, reviews/disputes, full seed data, E2E and release hardening remain open. Do not use «پروژه کامل شد» or equivalent wording. The authoritative status is `docs/IMPLEMENTATION_CHECKLIST.md`.
+Phase zero, infrastructure and operational authentication/RBAC are established. Initial identity, provider verification, private documents, professional affiliation, branch, catalog, Quote, single-Offering availability and transactional Booking Hold slices exist. Configurable document requirements, private address verification, provider staff ABAC, variants/packages/questionnaires, resource capacity, multi-service availability, Hold-to-Booking conversion, payment/ledger, subscriptions, complete panels, public search, integrations, communications, reviews/disputes, full seed data, E2E and release hardening remain open. Do not use «پروژه کامل شد» or equivalent wording. The authoritative status is `docs/IMPLEMENTATION_CHECKLIST.md`.
 
 ## KL-011 — Password KDF migration remains a maintained security decision
 **Status:** Active review
@@ -67,4 +67,9 @@ Provider branch and Offering mutations, branch schedules, and provider-originate
 ## KL-013 — Pricing and availability are an initial bounded slice
 **Status:** Active
 
-Only fixed prices are final/directly bookable. Starting-from and range prices are explicit estimates; consultation-based services do not invent a price. Calculated, package, variant, add-on and location-aware pricing remain rejected. Availability supports one Offering, one professional-or-branch schedule owner, weekly rules, exceptions and subtraction of persisted blocking Booking intervals. Resources, capacity, travel time, multi-service adjacency, waitlist, transactional holds, cache invalidation and background expiry jobs remain open.
+Only fixed prices are final/directly bookable. Starting-from and range prices are explicit estimates; consultation-based services do not invent a price. Calculated, package, variant, add-on and location-aware pricing remain rejected. Availability supports one Offering, one professional-or-branch schedule owner, weekly rules, exceptions and subtraction of blocking Booking/Hold intervals. Resources, capacity, travel time, multi-service adjacency, alternatives, waitlist and cache invalidation remain open.
+
+## KL-014 — Booking Hold is not a completed Booking workflow
+**Status:** Active
+
+A Hold reserves one fixed-price Offering interval for a verified customer with TTL, idempotency, PostgreSQL locking/exclusion, Audit, Outbox, release and scheduled/lazy expiry. It does not yet select a persisted recipient, evaluate full audience/questionnaire rules, take payment, obtain provider approval, create Booking/BookingItem records or consume the Hold. The current selected `startsAt` represents the occupied interval start in the initial API; richer service-start/buffer presentation remains open. The `btree_gist` extension must be available to the migration role or preinstalled operationally.
