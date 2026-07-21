@@ -64,7 +64,7 @@ function HeroWave() {
     >
       <path
         d="M0 42C108 72 215 86 348 82C500 77 604 30 752 31C880 31 994 76 1130 88C1257 99 1360 88 1440 66V150H0V42Z"
-        fill="var(--background)"
+        fill="#2c1c18"
       />
     </svg>
   )
@@ -196,8 +196,8 @@ export function BookingHero() {
   }
 
   return (
-    <div className="relative bg-background">
-      <section className="relative isolate min-h-[810px] overflow-visible sm:min-h-[660px] md:h-[585px] md:min-h-0 lg:h-[620px] xl:h-[645px]">
+    <div className="relative bg-[#2c1c18]">
+      <section className="relative isolate min-h-[850px] overflow-visible sm:min-h-[700px] md:h-[640px] md:min-h-0 lg:h-[690px] xl:h-[720px]">
         <div
           className="absolute inset-0 -z-30 bg-cover bg-[position:center_60%] blur-[1px] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
           style={{ backgroundImage: "url('/hero.png')" }}
