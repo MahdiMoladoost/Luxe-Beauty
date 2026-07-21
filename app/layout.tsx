@@ -19,7 +19,7 @@ export const metadata: Metadata = {
       {
         url: "/luxe-beauty-mark.png",
         type: "image/png",
-        sizes: "256x256",
+        sizes: "64x64",
       },
     ],
     shortcut: "/luxe-beauty-mark.png",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
       {
         url: "/luxe-beauty-mark.png",
         type: "image/png",
-        sizes: "256x256",
+        sizes: "64x64",
       },
     ],
   },
