@@ -269,18 +269,18 @@ export function BookingHero() {
 
   return (
     <div className="relative bg-background">
-      <section className="relative isolate min-h-[820px] overflow-visible sm:min-h-[650px] md:h-[580px] md:min-h-0 lg:h-[620px] xl:h-[650px]">
+      <section className="relative isolate min-h-[760px] overflow-visible sm:min-h-[610px] md:h-[540px] md:min-h-0 lg:h-[565px] xl:h-[590px]">
         <div
-          className="absolute inset-0 -z-30 scale-[1.03] bg-cover bg-[position:center_60%] blur-[2px] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
+          className="absolute inset-0 -z-30 bg-cover bg-[position:center_60%] blur-[1px] sm:bg-[position:center_64%] lg:bg-[position:center_67%]"
           style={{ backgroundImage: "url('/hero.png')" }}
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(22,12,10,0.48)_0%,rgba(28,15,12,0.34)_28%,rgba(34,18,14,0.38)_60%,rgba(25,13,11,0.58)_100%)]"
+          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(22,12,10,0.36)_0%,rgba(28,15,12,0.24)_28%,rgba(34,18,14,0.28)_60%,rgba(25,13,11,0.46)_100%)]"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_42%,rgba(255,245,230,0.10),rgba(14,8,7,0.18)_58%,rgba(10,6,5,0.38)_100%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_42%,rgba(255,245,230,0.08),rgba(14,8,7,0.10)_58%,rgba(10,6,5,0.24)_100%)]"
           aria-hidden="true"
         />
 
@@ -290,15 +290,15 @@ export function BookingHero() {
           aria-label="Luxe Beauty"
         >
           <span className="font-serif text-[24px] tracking-[0.12em] sm:text-[30px] lg:text-[36px]">LUXE BEAUTY</span>
-          <span className="mt-0.5 text-[8px] font-semibold tracking-[0.34em] text-[#f3dfbd]/90 sm:text-[9px]">CURATED BEAUTY</span>
-          <span className="mt-2 text-[8px] font-semibold tracking-[0.28em] text-[#f7e5c4] sm:text-[9px]">PREMIUM SERVICES. TIMELESS YOU.</span>
+          <span className="mt-1 text-[9px] font-semibold tracking-[0.32em] text-[#f3dfbd]/95 sm:text-[10px]">CURATED BEAUTY</span>
+          <span className="mt-2 text-[9px] font-semibold tracking-[0.22em] text-[#f7e5c4] sm:text-[10px]">PREMIUM SERVICES. TIMELESS YOU.</span>
         </Link>
 
-        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-start justify-center px-4 pb-16 pt-24 sm:px-6 sm:pb-20 sm:pt-28 lg:px-8 lg:pb-24">
-          <div className="w-full pt-10 -translate-y-2 sm:pt-12 sm:-translate-y-4">
+        <div className="relative z-20 mx-auto flex h-full max-w-7xl items-start justify-center px-4 pb-16 pt-24 sm:px-6 sm:pb-20 sm:pt-28 lg:px-8 lg:pb-20">
+          <div className="w-full pt-11 sm:pt-12">
             <form
               onSubmit={submitSearch}
-              className="mx-auto w-full max-w-6xl rounded-[30px] border border-white/70 bg-[#6a4437]/25 p-3 shadow-[0_34px_90px_rgba(42,22,16,0.34),0_8px_28px_rgba(42,22,16,0.18)] backdrop-blur-2xl backdrop-saturate-150 sm:p-4"
+              className="mx-auto w-full max-w-6xl rounded-[30px] border border-white/65 bg-[#5d372c]/22 p-3 shadow-[0_28px_72px_rgba(42,22,16,0.28),0_8px_24px_rgba(42,22,16,0.14)] backdrop-blur-xl backdrop-saturate-150 sm:p-4"
             >
               <div
                 ref={dropdownRoot}
