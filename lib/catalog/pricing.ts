@@ -115,6 +115,12 @@ export function calculateOfferingQuote(
     definition.cleanupMinute +
     definition.bufferBeforeMinute +
     definition.bufferAfterMinute
+  if (durationMinute > 1440) {
+    throw new OfferingPricingError(
+      "QUOTE_DURATION_TOO_LONG",
+      "One quote cannot reserve more than 1440 minutes",
+    )
+  }
 
   if (definition.priceModel === "AFTER_CONSULTATION") {
     return {
