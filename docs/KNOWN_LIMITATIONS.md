@@ -37,12 +37,12 @@ A compliant marketplace/payment-facilitator arrangement and provider contract ha
 
 Retention is configurable by policy, but final production durations for identity, finance, documents, messages, consultations, support evidence and backups require legal/business approval.
 
-## KL-008 — Latest verified quality evidence predates the newest provider slices
+## KL-008 — Latest verified quality evidence predates the newest marketplace slices
 **Status:** Active
 
 GitHub Actions workflow run `29740506514` passed locked installation, multi-file Prisma validation/client generation, clean deployment of the committed foundation and authentication migrations, migration status, system role/super-admin seed, lint, strict TypeScript, unit and PostgreSQL integration tests, production build, Docker Compose validation, application image build and production dependency audit. Auth tests cover OTP cooldown/attempts, session lifecycle/logout-all, staff password/2FA, device IDOR, RBAC permission denial/allow and mutation audit.
 
-Identity verification, provider onboarding/private documents, bilateral professional affiliations and provider branch management have been added after that verified run. Connector-created commits have not yet produced a fresh visible workflow run. These slices remain marked partial and pending validation; they are not represented as CI-passing. E2E, accessibility, full upload/security coverage, booking/payment concurrency, queue, backup/restore and full runtime smoke tests remain open.
+Identity verification, provider onboarding/private documents, bilateral professional affiliations, provider branch management, standard catalog operations, Offering ownership/publication, server Quote snapshots and shared schedule/availability preview were added after that verified run. Connector-created commits have not produced a fresh visible workflow run. These slices remain marked partial and pending validation; they are not represented as CI-passing. E2E, accessibility, full upload/security coverage, booking/payment concurrency, queue, backup/restore and full runtime smoke tests remain open.
 
 ## KL-009 — Secret scanning is incomplete
 **Status:** Active
@@ -52,7 +52,7 @@ No real secret was intentionally added. `.env.example` contains names and blank 
 ## KL-010 — Full platform scope is not complete
 **Status:** Active
 
-Phase zero, infrastructure and operational authentication/RBAC are established. Initial customer identity, provider verification, private document handling, professional affiliation and owner-scoped branch vertical slices exist, but configurable document requirements, home-location verification, provider staff ABAC, shared availability, service catalog, pricing, booking, payment/ledger, subscriptions, complete panels, public search, integrations, communications, reviews/disputes, full seed data, E2E and release hardening remain open. Do not use «پروژه کامل شد» or equivalent wording. The authoritative status is `docs/IMPLEMENTATION_CHECKLIST.md`.
+Phase zero, infrastructure and operational authentication/RBAC are established. Initial identity, provider verification, private documents, professional affiliation, branch, catalog, Quote and single-Offering availability slices exist. Configurable document requirements, private address verification, provider staff ABAC, variants/packages/questionnaires, resource capacity, multi-service availability, transactional booking holds, booking workflows, payment/ledger, subscriptions, complete panels, public search, integrations, communications, reviews/disputes, full seed data, E2E and release hardening remain open. Do not use «پروژه کامل شد» or equivalent wording. The authoritative status is `docs/IMPLEMENTATION_CHECKLIST.md`.
 
 ## KL-011 — Password KDF migration remains a maintained security decision
 **Status:** Active review
@@ -62,4 +62,9 @@ The implementation uses versioned Node.js scrypt with per-password random salt a
 ## KL-012 — Provider authority is temporarily owner-only
 **Status:** Active
 
-Provider branch mutations and provider-originated professional affiliation requests currently require the owning user of the provider organization. This is intentional and safer than treating a global permission as tenant authority. Provider/branch/professional scoped ABAC, delegated managers and branch staff remain open. Exact branch/home-studio addresses and address verification also remain unavailable until private location storage and the Neshan adapter are implemented.
+Provider branch and Offering mutations, branch schedules, and provider-originated professional affiliation requests currently require the owning user of the provider organization. This is intentional and safer than treating a global permission as tenant authority. Provider/branch/professional scoped ABAC, delegated managers and branch staff remain open. Exact branch/home-studio addresses and address verification also remain unavailable until private location storage and the Neshan adapter are implemented.
+
+## KL-013 — Pricing and availability are an initial bounded slice
+**Status:** Active
+
+Only fixed prices are final/directly bookable. Starting-from and range prices are explicit estimates; consultation-based services do not invent a price. Calculated, package, variant, add-on and location-aware pricing remain rejected. Availability supports one Offering, one professional-or-branch schedule owner, weekly rules, exceptions and subtraction of persisted blocking Booking intervals. Resources, capacity, travel time, multi-service adjacency, waitlist, transactional holds, cache invalidation and background expiry jobs remain open.
