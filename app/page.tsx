@@ -142,27 +142,39 @@ export default function HomePage() {
       <main className="flex-1 pt-16">
         <BookingHero />
 
-        <section className="border-y border-border bg-card py-20">
-          <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-foreground md:text-4xl">خدمات محبوب</h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">انواع خدمات آرایشگاهی و زیبایی را جستجو و رزرو کنید</p>
+        <section className="relative isolate overflow-hidden border-y border-[#d8bd95]/20 bg-[radial-gradient(circle_at_50%_-20%,rgba(203,156,101,0.32),transparent_44%),linear-gradient(135deg,#2c1c18_0%,#4b3028_48%,#251713_100%)] py-20 sm:py-24">
+          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#c79a64]/15 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-[#f1d7ad]/10 blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f2d6a8]/60 to-transparent" />
+
+          <div className="relative mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="mx-auto mb-5 flex w-fit items-center gap-3 text-[#e9c98f]">
+                <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#e9c98f]" />
+                <span className="text-[10px] font-semibold tracking-[0.34em] sm:text-xs">LUXE BEAUTY SERVICES</span>
+                <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#e9c98f]" />
+              </div>
+              <h2 className="font-serif text-3xl font-medium text-[#fff4df] drop-shadow-[0_3px_14px_rgba(0,0,0,0.22)] md:text-5xl">خدمات محبوب</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#ead8ca]/80 sm:text-base">تجربه‌ای دقیق، لوکس و حرفه‌ای برای انتخاب و رزرو محبوب‌ترین خدمات زیبایی</p>
             </div>
 
-            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-              {services.map((service) => {
+            <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
+              {services.map((service, index) => {
                 const Icon = service.icon
                 return (
                   <Link
                     key={service.name}
                     href={`/salons?service=${service.name}`}
-                    className="group flex flex-col items-center rounded-2xl border border-border bg-background p-6 text-center transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/5"
+                    className="group relative min-h-[190px] overflow-hidden rounded-[26px] border border-[#e1c398]/25 bg-[linear-gradient(160deg,rgba(255,255,255,0.13)_0%,rgba(255,255,255,0.045)_100%)] p-5 text-center shadow-[0_18px_45px_rgba(15,8,6,0.22),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-[18px] transition-all duration-500 hover:-translate-y-2 hover:border-[#e7c891]/55 hover:bg-[linear-gradient(160deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.08)_100%)] hover:shadow-[0_28px_60px_rgba(15,8,6,0.34),0_0_0_1px_rgba(229,194,139,0.08)]"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <Icon className="h-7 w-7" />
+                    <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#f4d8a7]/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <span className="absolute left-4 top-3 font-serif text-[10px] tracking-[0.18em] text-[#e5c18a]/45">{String(index + 1).padStart(2, "0")}</span>
+                    <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#e5c18a]/30 bg-[linear-gradient(145deg,rgba(227,190,133,0.28),rgba(103,65,48,0.20))] text-[#f1cf94] shadow-[0_12px_30px_rgba(17,9,7,0.24),inset_0_1px_0_rgba(255,244,220,0.18)] transition-all duration-500 group-hover:scale-110 group-hover:border-[#f0d09a]/60 group-hover:text-[#fff0ce] group-hover:shadow-[0_16px_38px_rgba(17,9,7,0.32),0_0_26px_rgba(212,166,102,0.16)]">
+                      <Icon className="h-7 w-7" strokeWidth={1.65} />
                     </div>
-                    <span className="mt-4 font-medium text-foreground">{service.name}</span>
-                    <span className="mt-1 text-xs text-muted-foreground">{service.count}</span>
+                    <h3 className="mt-5 text-sm font-bold text-[#fff5e8] transition-colors group-hover:text-white sm:text-[15px]">{service.name}</h3>
+                    <p className="mt-2 text-xs font-medium text-[#d8c2b2]/75">{service.count}</p>
+                    <div className="mx-auto mt-4 h-px w-8 bg-[#d4ae77]/35 transition-all duration-500 group-hover:w-14 group-hover:bg-[#e7c48d]/70" />
                   </Link>
                 )
               })}
