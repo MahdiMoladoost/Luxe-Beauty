@@ -2,7 +2,7 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider verification and affiliation commits require a fresh CI run before their implementation status can be upgraded to verified complete.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
@@ -44,7 +44,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [x] Staff/provider mobile-password login using versioned scrypt with an environment pepper as an approved memory-hard KDF equivalent.
 - [x] SMS 2FA and password recovery through a replaceable provider with a development-only mock; login lockout and suspicious/failure audit are active.
 - [~] RBAC is deny-by-default with ten seeded roles, custom roles/permissions, protected APIs/layouts and atomic audit; provider/branch/professional scoped ABAC is still open.
-- [ ] Sensitive national-ID HMAC/encryption and audited access.
+- [~] Sensitive national-ID HMAC/encryption, mock verification adapter and audited administrative access are implemented; production identity provider and complete retention workflows remain open.
 - [~] Forced initial super-admin password change and staff SMS 2FA are active; freshness-based step-up for every future financial/identity action remains open.
 - [~] Same-origin mutation checks, secure cookies, session expiry/revocation, OTP/password rate limits and safe error envelopes are active; CSP/XSS/SSRF/upload controls remain open.
 - [x] Super-admin bootstrap uses mobile `09399496078`; the initial password is read only from `SEED_SUPER_ADMIN_INITIAL_PASSWORD`, never from code or a public seed.
@@ -52,12 +52,12 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [x] Authentication/RBAC migration, multi-file Prisma schema, development seed, UI, API, permission matrix, unit tests and PostgreSQL integration tests pass CI.
 
 ## Phase 4 — Providers and verification
-- [ ] Provider-type onboarding.
-- [ ] Salons, organizations, branches and professionals.
-- [ ] Configurable document requirements and private uploads.
-- [ ] Verification review, correction, rejection, expiry and appeals.
+- [~] Provider-type onboarding supports persisted applications for salon and professional modes; dynamic per-type requirement configuration and the complete workspace remain open.
+- [~] Provider organizations and stable professional profiles exist; full branch CRUD, professional discovery and operational management remain open.
+- [~] Private provider documents support validation, malware-scan adapter state, private storage, audited reads and review; configurable document requirement definitions remain open.
+- [~] Verification supports submit, review, correction, rejection, approval and appeals; scheduled expiry/re-review and complete appeal operations remain open.
 - [ ] Home-location verification.
-- [ ] Bilateral professional affiliations and shared calendar identity.
+- [~] Bilateral professional affiliations support provider/professional requests, counterparty acceptance/rejection, bilateral termination, serializable transactions and audit. Shared availability-calendar conflict enforcement and delegated provider-staff ABAC remain open.
 
 ## Phase 5 — Catalog, pricing and availability
 - [ ] Standard catalog and provider offerings.
@@ -83,7 +83,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [~] Customer authentication, profile completion and security/device management are data-backed; the complete customer panel remains open.
 - [ ] Salon/group panel.
 - [ ] Independent professional panel.
-- [~] Platform role/permission management is data-backed and protected; the complete administration panel remains open.
+- [~] Platform role/permission management and provider verification queue are data-backed and protected; the complete administration panel remains open.
 - [x] Seeded and configurable roles/permissions with server-side API and layout enforcement.
 - [ ] Real reports and CSV/Excel exports.
 
@@ -119,10 +119,10 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development-only seed for nine cities and test roles.
-- [~] Unit test matrix now includes authentication cryptography, RBAC, route permission matrices, money, Persian normalization and booking transitions; later domains remain open.
-- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit and device IDOR; later domains remain open.
+- [~] Unit tests cover authentication cryptography, RBAC, route permission matrices, money, Persian normalization, booking transitions, identity policy, provider policy and bilateral affiliation transitions; later domains remain open.
+- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit, device IDOR, identity verification, provider onboarding/private documents and professional affiliation ownership/lifecycle; fresh CI verification of the newest slice is pending.
 - [ ] Playwright E2E matrix.
-- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR and CSRF-origin behavior have automated coverage; upload and full security matrix remain open.
+- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR, CSRF-origin behavior and provider-document/affiliation IDOR have automated coverage; upload and full security matrix remain open.
 - [ ] Accessibility automated and manual checks.
 - [x] Current authentication/RBAC production build, clean migration deployment, seed, Compose validation and Docker image build pass in CI.
 - [x] Current production dependency audit passes at high severity threshold.
@@ -131,7 +131,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Persian README, installation, production, backup and restore docs.
 - [x] External integration limitations and environment contract documented.
 - [x] Draft PR description continuously records current architecture, migrations, capabilities, tests, build, environment, security and limitations.
-- [~] MR-001 through MR-071 are documented and traceable; authentication/RBAC requirements have advanced while most marketplace domains remain open.
+- [~] MR-001 through MR-071 are documented and traceable; authentication/RBAC and initial provider/identity slices have advanced while most marketplace domains remain open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
