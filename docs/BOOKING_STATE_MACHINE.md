@@ -2,7 +2,27 @@
 
 A booking transition is valid only through the booking application service. Direct status mutation is forbidden. Every transition records actor, source state, destination state, reason, timestamp, version, correlation ID, and safe metadata.
 
-## States
+## Temporary hold before Booking creation
+
+`BookingHold` is a separate pre-booking aggregate. Its states are:
+
+- `ACTIVE`
+- `CONSUMED`
+- `EXPIRED`
+- `RELEASED`
+
+Creating a Hold does not create a `Booking` and does not imply payment or provider approval. A future Hold-to-Booking command must atomically:
+
+1. lock and reload the owning active Hold;
+2. reject elapsed, released or already consumed Holds;
+3. validate the accepted recipient, questionnaire, legal versions and current eligibility;
+4. create the Booking and initial Booking item/snapshots;
+5. transition the Hold to `CONSUMED` with `consumedBookingId`;
+6. preserve the same resource lock so no gap opens between Hold and Booking occupancy.
+
+The current implemented slice covers Hold creation/read/release/expiry only. See `docs/BOOKING_HOLDS.md`.
+
+## Booking states
 - `DRAFT`
 - `AWAITING_IDENTITY`
 - `HOLDING_SLOT`
