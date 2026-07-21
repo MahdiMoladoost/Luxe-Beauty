@@ -67,6 +67,16 @@ OTP challenges, attempt counters, resend cooldowns, application rate-limit windo
 
 Prisma reads the `prisma` directory as one schema. Authentication tables are defined in `prisma/auth.prisma` while the existing marketplace models remain in `prisma/schema.prisma`; committed SQL migrations remain the deployment source of truth. This permits gradual domain separation without rewriting the accepted foundation schema.
 
+## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Stable professional identity before affiliations
+**Status:** Accepted
+
+A professional has one user-linked `ProfessionalProfile` that survives salon changes and independent/provider-mode changes. An approved professional-type provider application is required before that profile becomes verified and active. Affiliations reference the stable profile rather than creating duplicate professional identities inside each salon.
+
+## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Bilateral affiliation activation and termination
+**Status:** Accepted
+
+Provider-professional relationships become active only after acceptance by the counterparty. Ending an active relationship also requires a termination request and counterparty response. PostgreSQL serializable transactions protect request creation and transitions, while every transition is preserved in `AuditLog`. Until provider/branch scoped ABAC is complete, provider-side authority is intentionally limited to the provider owner rather than inferred from a global permission.
+
 ## 2026-07-20 — Execution limitation
 **Status:** Active
 
