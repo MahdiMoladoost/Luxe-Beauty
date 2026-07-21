@@ -1,4 +1,5 @@
-import { Worker } from "bullmq"
+import { Prisma, PrismaClient } from "@prisma/client"
+import { Queue, Worker } from "bullmq"
 import IORedis from "ioredis"
 
 const redisUrl = process.env.REDIS_URL
@@ -18,6 +19,62 @@ const connection = new IORedis(redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: true,
 })
+const queue = new Queue(queueName, { connection, prefix: queuePrefix })
+const prisma = new PrismaClient()
+
+async function expireBookingHolds(job) {
+  const now = new Date()
+  const candidates = await prisma.bookingHold.findMany({
+    where: { status: "ACTIVE", expiresAt: { lte: now } },
+    select: { id: true, providerId: true, resourceType: true, resourceId: true, expiresAt: true },
+    orderBy: { expiresAt: "asc" },
+    take: 500,
+  })
+  let expiredCount = 0
+  for (const candidate of candidates) {
+    const correlationId = `worker:booking-hold-expiry:${job.id}:${candidate.id}`
+    const changed = await prisma.$transaction(async (tx) => {
+      const update = await tx.bookingHold.updateMany({
+        where: { id: candidate.id, status: "ACTIVE", expiresAt: { lte: now } },
+        data: { status: "EXPIRED" },
+      })
+      if (update.count !== 1) return false
+      await tx.auditLog.create({
+        data: {
+          actorUserId: null,
+          action: "booking.hold.expired",
+          resourceType: "BookingHold",
+          resourceId: candidate.id,
+          scopeType: "PROVIDER",
+          scopeId: candidate.providerId,
+          correlationId,
+          metadata: {
+            source: "scheduled-worker",
+            resourceType: candidate.resourceType,
+            resourceId: candidate.resourceId,
+            expiresAt: candidate.expiresAt.toISOString(),
+          },
+        },
+      })
+      await tx.outboxEvent.create({
+        data: {
+          aggregateType: "BookingHold",
+          aggregateId: candidate.id,
+          eventType: "booking.hold.expired",
+          dedupeKey: `booking-hold-expired:${candidate.id}`,
+          payload: {
+            schemaVersion: 1,
+            holdId: candidate.id,
+            expiredAt: now.toISOString(),
+          },
+        },
+      })
+      return true
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted })
+    if (changed) expiredCount += 1
+  }
+  return { expiredCount, checkedCount: candidates.length, processedAt: now.toISOString() }
+}
 
 const worker = new Worker(
   queueName,
@@ -28,6 +85,8 @@ const worker = new Worker(
           ok: true,
           processedAt: new Date().toISOString(),
         }
+      case "booking.holds.expire":
+        return expireBookingHolds(job)
       default:
         throw new Error(`Unsupported job type: ${job.name}`)
     }
@@ -36,6 +95,21 @@ const worker = new Worker(
     connection,
     concurrency,
     prefix: queuePrefix,
+  },
+)
+
+await queue.upsertJobScheduler(
+  "booking-hold-expiry",
+  { every: 60_000 },
+  {
+    name: "booking.holds.expire",
+    data: { schemaVersion: 1 },
+    opts: {
+      removeOnComplete: 100,
+      removeOnFail: 500,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 5_000 },
+    },
   },
 )
 
@@ -71,6 +145,8 @@ worker.on("error", (error) => {
 async function shutdown(signal) {
   console.info(JSON.stringify({ level: "info", event: "worker.shutdown", signal }))
   await worker.close()
+  await queue.close()
+  await prisma.$disconnect()
   await connection.quit()
 }
 
@@ -95,4 +171,5 @@ console.info(JSON.stringify({
   event: "worker.started",
   queueName,
   concurrency,
+  schedulers: ["booking-hold-expiry"],
 }))
