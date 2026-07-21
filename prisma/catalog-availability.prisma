@@ -1,0 +1,58 @@
+enum ScheduleOwnerType {
+  PROFESSIONAL
+  BRANCH
+}
+
+enum ScheduleExceptionKind {
+  CLOSED
+  AVAILABLE
+}
+
+model ServiceQuote {
+  id               String   @id @default(uuid()) @db.Uuid
+  offeringId       String   @db.Uuid
+  providerId       String   @db.Uuid
+  customerUserId   String?  @db.Uuid
+  quantity         Int      @default(1)
+  unitPriceToman   BigInt
+  totalToman       BigInt
+  durationMinute   Int
+  snapshot         Json
+  expiresAt        DateTime @db.Timestamptz(6)
+  createdAt        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([offeringId, expiresAt], map: "ServiceQuote_offering_expiry_idx")
+  @@index([customerUserId, createdAt], map: "ServiceQuote_customer_created_idx")
+}
+
+model WeeklyScheduleRule {
+  id          String            @id @default(uuid()) @db.Uuid
+  ownerType   ScheduleOwnerType
+  ownerId     String            @db.Uuid
+  dayOfWeek   Int
+  startMinute Int
+  endMinute   Int
+  timezone    String            @default("Asia/Tehran") @db.VarChar(80)
+  active      Boolean           @default(true)
+  version     Int               @default(1)
+  createdAt   DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime          @updatedAt @db.Timestamptz(6)
+
+  @@unique([ownerType, ownerId, dayOfWeek, startMinute, endMinute], map: "WeeklyScheduleRule_owner_window_key")
+  @@index([ownerType, ownerId, dayOfWeek, active], map: "WeeklyScheduleRule_owner_day_idx")
+}
+
+model ScheduleException {
+  id        String                @id @default(uuid()) @db.Uuid
+  ownerType ScheduleOwnerType
+  ownerId   String                @db.Uuid
+  kind      ScheduleExceptionKind
+  startsAt  DateTime              @db.Timestamptz(6)
+  endsAt    DateTime              @db.Timestamptz(6)
+  reason    String?               @db.VarChar(500)
+  createdBy String                @db.Uuid
+  createdAt DateTime              @default(now()) @db.Timestamptz(6)
+
+  @@index([ownerType, ownerId, startsAt, endsAt], map: "ScheduleException_owner_range_idx")
+  @@index([createdBy, createdAt], map: "ScheduleException_creator_idx")
+}
