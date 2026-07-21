@@ -37,6 +37,20 @@ export function apiError(error: unknown, correlationId?: string): NextResponse {
     }, { status: 409 })
   }
 
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    (error.code === "P2003" || error.code === "P2004")
+  ) {
+    return NextResponse.json({
+      ok: false,
+      error: {
+        code: "DATA_CONSTRAINT_VIOLATION",
+        message: "اطلاعات با قواعد یکپارچگی سامانه سازگار نیست.",
+      },
+      correlationId,
+    }, { status: 409 })
+  }
+
   console.error(JSON.stringify({ event: "api.unhandled-error", correlationId, error }))
   return NextResponse.json({
     ok: false,
