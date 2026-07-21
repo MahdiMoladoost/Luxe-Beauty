@@ -32,7 +32,11 @@ export const quoteSnapshotSchema = z.object({
 export type ParsedQuoteSnapshot = z.infer<typeof quoteSnapshotSchema>
 
 export function parseBookableQuoteSnapshot(value: unknown): ParsedQuoteSnapshot {
-  const snapshot = quoteSnapshotSchema.parse(value)
+  const parsed = quoteSnapshotSchema.safeParse(value)
+  if (!parsed.success) {
+    throw new BookingHoldPolicyError("QUOTE_SNAPSHOT_INVALID", "Stored quote snapshot is invalid")
+  }
+  const snapshot = parsed.data
   if (!snapshot.calculation.finalPrice || !snapshot.calculation.directlyBookable) {
     throw new BookingHoldPolicyError(
       "QUOTE_NOT_DIRECTLY_BOOKABLE",
