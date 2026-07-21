@@ -73,7 +73,12 @@ function FieldShell({ children }: { children: ReactNode }) {
 
 function HeroWave() {
   return (
-    <svg viewBox="0 0 1440 140" className="block h-[58px] w-full sm:h-[68px] lg:h-[76px]" preserveAspectRatio="none" aria-hidden="true">
+    <svg
+      viewBox="0 0 1440 140"
+      className="block h-[60px] w-full sm:h-[72px] lg:h-[82px]"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
       <path
         d="M0 42C108 72 215 86 348 82C500 77 604 30 752 31C880 31 994 76 1130 88C1257 99 1360 88 1440 66V140H0V42Z"
         fill="var(--background)"
@@ -85,9 +90,9 @@ function HeroWave() {
 export function BookingHero() {
   const router = useRouter()
   const [service, setService] = useState("")
-  const [location, setLocation] = useState("تهران، منطقه ۲۲")
-  const [dateMode, setDateMode] = useState("first-available")
-  const [dayPart, setDayPart] = useState("any")
+  const [location, setLocation] = useState("")
+  const [dateMode, setDateMode] = useState("")
+  const [dayPart, setDayPart] = useState("")
   const [customDate, setCustomDate] = useState("")
   const [mobileStep, setMobileStep] = useState(1)
   const [status, setStatus] = useState<"idle" | "locating" | "submitting">("idle")
@@ -97,16 +102,14 @@ export function BookingHero() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
 
   useEffect(() => {
-    const savedCity = window.localStorage.getItem(CITY_STORAGE_KEY)
-    if (savedCity) setLocation(savedCity)
-  }, [])
-
-  useEffect(() => {
     if (location) window.localStorage.setItem(CITY_STORAGE_KEY, location)
   }, [location])
 
   useEffect(() => {
-    if (!location || location === "موقعیت فعلی") return
+    if (!location || location === "موقعیت فعلی") {
+      setAvailability(null)
+      return
+    }
 
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
@@ -186,7 +189,7 @@ export function BookingHero() {
     }
 
     if (!location.trim()) {
-      setError("شهر، منطقه یا محله را وارد کنید.")
+      setError("شهر، منطقه یا محله را انتخاب کنید.")
       setMobileStep(2)
       return
     }
@@ -194,6 +197,18 @@ export function BookingHero() {
     if (!isSupportedLocation(location)) {
       setError("این شهر هنوز تحت پوشش لوکس بیوتی نیست. می‌توانید شهر دیگری را انتخاب کنید.")
       setMobileStep(2)
+      return
+    }
+
+    if (!dateMode) {
+      setError("زمان موردنظر را انتخاب کنید.")
+      setMobileStep(3)
+      return
+    }
+
+    if (!dayPart) {
+      setError("بازه زمانی را انتخاب کنید.")
+      setMobileStep(3)
       return
     }
 
@@ -231,39 +246,33 @@ export function BookingHero() {
     }
 
     if (mobileStep === 2 && !location.trim()) {
-      setError("موقعیت موردنظر را وارد کنید.")
+      setError("موقعیت موردنظر را انتخاب کنید.")
       return
     }
 
     setMobileStep((step) => Math.min(3, step + 1))
   }
 
-  const mobileStepTitle = mobileStep === 1 ? "انتخاب خدمت" : mobileStep === 2 ? "انتخاب موقعیت" : "انتخاب زمان"
+  const mobileStepTitle = mobileStep === 1 ? "انتخاب خدمت" : mobileStep === 2 ? "انتخاب شهر" : "انتخاب زمان"
   const mobileInputClassName =
-    "mt-1 w-full bg-transparent text-sm font-semibold text-[#302523] outline-none placeholder:text-[#6a5751] placeholder:opacity-100"
+    "mt-1 w-full bg-transparent text-sm font-semibold text-[#302523] outline-none placeholder:text-[#66514a] placeholder:opacity-100"
 
   return (
-    <div className="relative bg-background pb-[235px] sm:pb-[190px] lg:pb-[145px]">
-      <section className="relative isolate h-[350px] overflow-visible sm:h-[390px] lg:h-[425px]">
+    <div className="relative bg-background pb-[280px] sm:pb-[250px] md:pb-[165px]">
+      <section className="relative isolate h-[500px] overflow-visible sm:h-[540px] lg:h-[580px] xl:h-[610px]">
         <div
-          className="absolute inset-0 -z-30 bg-cover bg-[position:center_58%] sm:bg-[position:center_62%] lg:bg-[position:center_66%]"
+          className="absolute inset-0 -z-20 bg-cover bg-[position:center_58%] sm:bg-[position:center_62%] lg:bg-[position:center_65%]"
           style={{ backgroundImage: "url('/hero.png')" }}
           aria-hidden="true"
         />
 
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 -z-20 w-full bg-[linear-gradient(270deg,rgba(255,249,246,0.80)_0%,rgba(255,249,246,0.58)_30%,rgba(255,249,246,0.14)_58%,transparent_76%)] sm:w-[76%] lg:w-[62%]"
-          aria-hidden="true"
-        />
-
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-start justify-end px-4 pt-10 sm:px-6 sm:pt-12 lg:px-8 lg:pt-14">
-          <div className="w-full max-w-[570px] rounded-[28px] bg-white/40 px-4 py-3 backdrop-blur-[2px] sm:px-5 sm:py-4 lg:bg-white/28">
-            <h1
-              dir="rtl"
-              className="text-right font-sans text-[1.45rem] font-extrabold leading-[1.55] tracking-[-0.018em] text-[#342421] sm:text-[1.85rem] sm:leading-[1.5] lg:text-[2.2rem] lg:leading-[1.48]"
-            >
-              <span className="block">بهترین سالن‌ها و متخصصان زیبایی</span>
-              <span className="block">را پیدا کن و آنلاین نوبت بگیر</span>
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-start px-4 pt-14 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
+          <div className="mr-auto w-full max-w-[650px] text-right" dir="rtl">
+            <p className="font-sans text-[3.2rem] font-black leading-none tracking-[-0.045em] text-[#a85f4f] drop-shadow-[0_3px_12px_rgba(255,255,255,0.85)] sm:text-[4.4rem] lg:text-[5.6rem]">
+              لوکس بیوتی
+            </p>
+            <h1 className="mt-4 max-w-[600px] font-sans text-[1.65rem] font-extrabold leading-[1.5] tracking-[-0.02em] text-[#342421] drop-shadow-[0_2px_10px_rgba(255,255,255,0.9)] sm:text-[2.15rem] lg:text-[2.75rem]">
+              انتخاب بهترین آرایشگاه برای شما
             </h1>
           </div>
         </div>
@@ -272,47 +281,47 @@ export function BookingHero() {
           <HeroWave />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-20 translate-y-[48%] px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-x-0 bottom-0 z-20 translate-y-1/2 px-4 sm:px-6 lg:px-8">
           <form
             onSubmit={submitSearch}
             className="mx-auto max-w-6xl rounded-[30px] border border-[#d9c1b6] bg-[#fffaf7] p-3 shadow-[0_28px_74px_rgba(54,35,30,0.18),0_8px_22px_rgba(54,35,30,0.08)]"
           >
             <div className="hidden overflow-hidden rounded-2xl border border-[#d8c1b7] bg-white shadow-[0_2px_10px_rgba(65,42,34,0.05)] md:grid md:grid-cols-4">
-              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <Search className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
-                <span className="shrink-0 text-xs font-bold text-[#66483f]">چه خدمتی؟</span>
+              <label className="flex min-h-[62px] min-w-0 items-center gap-3 px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <Search className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
                 <input
                   value={service}
                   onChange={(event) => setService(event.target.value)}
                   onBlur={(event) => parseNaturalSearch(event.target.value)}
                   list="hero-service-suggestions"
-                  placeholder="نام خدمت"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#2f2522] outline-none placeholder:text-[#705b54] placeholder:opacity-100"
+                  placeholder="انتخاب خدمت"
+                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-[#2f2522] outline-none placeholder:text-[#5f4943] placeholder:opacity-100"
                   autoComplete="off"
+                  aria-label="انتخاب خدمت"
                 />
               </label>
 
-              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <MapPin className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
-                <span className="shrink-0 text-xs font-bold text-[#66483f]">کجا؟</span>
+              <label className="flex min-h-[62px] min-w-0 items-center gap-3 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <MapPin className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
                 <input
                   value={location}
                   onChange={(event) => setLocation(event.target.value)}
                   list="hero-city-suggestions"
-                  placeholder="شهر یا محله"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#2f2522] outline-none placeholder:text-[#705b54] placeholder:opacity-100"
+                  placeholder="انتخاب شهر"
+                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-[#2f2522] outline-none placeholder:text-[#5f4943] placeholder:opacity-100"
+                  aria-label="انتخاب شهر"
                 />
               </label>
 
-              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <CalendarDays className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
-                <span className="shrink-0 text-xs font-bold text-[#66483f]">زمان</span>
+              <label className="flex min-h-[62px] min-w-0 items-center gap-3 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <CalendarDays className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
                 <select
                   value={dateMode}
                   onChange={(event) => setDateMode(event.target.value)}
-                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-semibold text-[#2f2522] outline-none"
-                  aria-label="انتخاب زمان نوبت"
+                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-bold text-[#2f2522] outline-none"
+                  aria-label="انتخاب زمان"
                 >
+                  <option value="" disabled>انتخاب زمان</option>
                   <option value="first-available">اولین نوبت خالی</option>
                   <option value="today">امروز</option>
                   <option value="tomorrow">فردا</option>
@@ -321,16 +330,16 @@ export function BookingHero() {
                 </select>
               </label>
 
-              <label className="group flex min-h-[64px] min-w-0 items-center gap-2.5 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <Clock3 className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />
-                <span className="shrink-0 text-xs font-bold text-[#66483f]">بازه</span>
+              <label className="flex min-h-[62px] min-w-0 items-center gap-3 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
+                <Clock3 className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
                 <select
                   value={dayPart}
                   onChange={(event) => setDayPart(event.target.value)}
-                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-semibold text-[#2f2522] outline-none"
-                  aria-label="انتخاب بازه زمانی"
+                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-bold text-[#2f2522] outline-none"
+                  aria-label="انتخاب بازه"
                 >
-                  <option value="any">همه</option>
+                  <option value="" disabled>انتخاب بازه</option>
+                  <option value="any">همه بازه‌ها</option>
                   <option value="morning">صبح</option>
                   <option value="noon">ظهر</option>
                   <option value="evening">عصر</option>
@@ -347,19 +356,16 @@ export function BookingHero() {
               {mobileStep === 1 && (
                 <FieldShell>
                   <label className="flex items-start gap-3">
-                    <Search className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-bold text-[#704b42]">چه خدمتی؟</span>
-                      <input
-                        value={service}
-                        onChange={(event) => setService(event.target.value)}
-                        onBlur={(event) => parseNaturalSearch(event.target.value)}
-                        list="hero-service-suggestions"
-                        placeholder="نام خدمت را بنویسید"
-                        className={mobileInputClassName}
-                        autoComplete="off"
-                      />
-                    </span>
+                    <Search className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
+                    <input
+                      value={service}
+                      onChange={(event) => setService(event.target.value)}
+                      onBlur={(event) => parseNaturalSearch(event.target.value)}
+                      list="hero-service-suggestions"
+                      placeholder="انتخاب خدمت"
+                      className={mobileInputClassName}
+                      autoComplete="off"
+                    />
                   </label>
                 </FieldShell>
               )}
@@ -368,17 +374,14 @@ export function BookingHero() {
                 <div className="space-y-3">
                   <FieldShell>
                     <label className="flex items-start gap-3">
-                      <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-[11px] font-bold text-[#704b42]">کجا؟</span>
-                        <input
-                          value={location}
-                          onChange={(event) => setLocation(event.target.value)}
-                          list="hero-city-suggestions"
-                          placeholder="شهر، منطقه یا محله"
-                          className={mobileInputClassName}
-                        />
-                      </span>
+                      <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
+                      <input
+                        value={location}
+                        onChange={(event) => setLocation(event.target.value)}
+                        list="hero-city-suggestions"
+                        placeholder="انتخاب شهر"
+                        className={mobileInputClassName}
+                      />
                     </label>
                   </FieldShell>
 
@@ -406,13 +409,13 @@ export function BookingHero() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <FieldShell>
                     <label className="flex items-center gap-3">
-                      <CalendarDays className="h-5 w-5 shrink-0 text-[#a85f4f]" />
-                      <span className="shrink-0 text-xs font-bold text-[#704b42]">زمان</span>
+                      <CalendarDays className="h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
                       <select
                         value={dateMode}
                         onChange={(event) => setDateMode(event.target.value)}
                         className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#312725] outline-none"
                       >
+                        <option value="" disabled>انتخاب زمان</option>
                         <option value="first-available">اولین نوبت خالی</option>
                         <option value="today">امروز</option>
                         <option value="tomorrow">فردا</option>
@@ -424,13 +427,13 @@ export function BookingHero() {
 
                   <FieldShell>
                     <label className="flex items-center gap-3">
-                      <Clock3 className="h-5 w-5 shrink-0 text-[#a85f4f]" />
-                      <span className="shrink-0 text-xs font-bold text-[#704b42]">بازه</span>
+                      <Clock3 className="h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
                       <select
                         value={dayPart}
                         onChange={(event) => setDayPart(event.target.value)}
                         className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#312725] outline-none"
                       >
+                        <option value="" disabled>انتخاب بازه</option>
                         <option value="any">همه بازه‌ها</option>
                         <option value="morning">صبح</option>
                         <option value="noon">ظهر</option>
@@ -492,11 +495,11 @@ export function BookingHero() {
               </div>
             )}
 
-            <div className="mt-2 hidden grid-cols-2 gap-2.5 md:grid">
+            <div className="mt-2 hidden grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] gap-2.5 md:grid">
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_24px_rgba(174,102,85,0.24)] transition hover:bg-[#985545] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f5144] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_24px_rgba(174,102,85,0.24)] transition hover:-translate-y-0.5 hover:bg-[#985545] hover:shadow-[0_13px_28px_rgba(174,102,85,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f5144] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
               >
                 {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
                 مشاهده نوبت‌های خالی
@@ -510,7 +513,7 @@ export function BookingHero() {
               </Link>
             </div>
 
-            <div className="mt-2 rounded-2xl border border-[#dfcbc2] bg-white px-4 py-2.5 text-[13px] font-medium leading-6 text-[#51413c]">
+            <div className="mt-2 rounded-2xl border border-[#dfcbc2] bg-white px-4 py-2.5 text-[13px] font-medium leading-6 text-[#493a36]">
               {availabilityLoading ? (
                 <span className="inline-flex items-center gap-2 font-semibold text-[#5e453e]">
                   <Loader2 className="h-4 w-4 animate-spin" />
