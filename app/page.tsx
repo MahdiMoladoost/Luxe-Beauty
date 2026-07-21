@@ -142,10 +142,9 @@ export default function HomePage() {
       <main className="flex-1 pt-16">
         <BookingHero />
 
-        <section className="relative isolate overflow-hidden border-y border-[#d8bd95]/20 bg-[radial-gradient(circle_at_50%_-20%,rgba(203,156,101,0.32),transparent_44%),linear-gradient(135deg,#2c1c18_0%,#4b3028_48%,#251713_100%)] py-20 sm:py-24">
-          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#c79a64]/15 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-[#f1d7ad]/10 blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f2d6a8]/60 to-transparent" />
+        <section className="relative isolate -mt-px overflow-hidden bg-[#3b2722] py-20 sm:py-24">
+          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#c79a64]/12 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-[#f1d7ad]/8 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
