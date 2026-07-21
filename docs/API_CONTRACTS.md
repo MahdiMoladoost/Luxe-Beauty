@@ -16,7 +16,7 @@ Content type: JSON unless an upload/download contract states otherwise.
 - Carry a correlation ID through requests, audit events and async work.
 - Pagination uses opaque cursors for operational lists and explicit page metadata for SEO/public pages.
 - Dates are ISO-8601 UTC values. UI-localized values are presentation concerns.
-- Money fields use integer tomans and end with `Toman`.
+- Money fields use integer tomans and are serialized as decimal strings ending in `Toman` in field names.
 - Private URLs are short-lived signed URLs, never permanent public object URLs.
 
 ## Current response envelopes
@@ -44,7 +44,7 @@ Error:
 }
 ```
 
-Authentication and account-discovery errors do not reveal whether an account exists. OTPs, password hashes, session tokens/hashes, raw IP addresses and national IDs never appear in errors or analytics.
+Authentication and account-discovery errors do not reveal whether an account exists. OTPs, password hashes, session tokens/hashes, raw IP addresses and national IDs never appear in errors or analytics. Database uniqueness, foreign-key and check-constraint failures are mapped to stable safe errors without exposing SQL details.
 
 ## Operational authentication and RBAC routes
 
@@ -66,14 +66,9 @@ Authentication and account-discovery errors do not reveal whether an account exi
   - input: `{ "mobile", "password" }`
   - mobile-only; verifies the versioned memory-hard password hash, applies temporary lockout and starts SMS 2FA when required.
 - `POST /api/auth/staff/verify-2fa`
-  - input: `{ "challengeId", "code" }`
-  - creates a two-factor-verified session.
 - `POST /api/auth/password/request-reset`
-  - enumeration-resistant response; sends a reset challenge only for eligible credential accounts.
 - `POST /api/auth/password/reset`
-  - verifies the reset OTP, updates the password and revokes every active session.
 - `POST /api/auth/password/change`
-  - requires an authenticated session and current password; updates the password, clears forced-change state and revokes every session.
 
 ### Sessions and devices
 - `POST /api/auth/logout`
@@ -99,9 +94,7 @@ Authentication and account-discovery errors do not reveal whether an account exi
 - `POST /api/v1/providers`
   - creates a persisted provider application in draft status and assigns the matching provider role.
 - `GET /api/v1/providers/me`
-  - lists provider applications owned by the current user.
 - `GET /api/v1/providers/{providerId}`
-  - returns an owned application and its document review summaries.
 - `POST /api/v1/providers/{providerId}/documents`
   - private multipart upload; validates MIME/size/signature, runs the malware adapter, stores privately and writes audit evidence.
 - `GET /api/v1/provider-documents/{documentId}/content`
@@ -115,7 +108,6 @@ Authentication and account-discovery errors do not reveal whether an account exi
 
 ### Provider branches
 - `GET /api/v1/providers/{providerId}/branches`
-  - owner-scoped list of non-deleted branches.
 - `POST /api/v1/providers/{providerId}/branches`
   - creates an inactive, unverified branch after validating city/district/neighborhood hierarchy.
 - `GET /api/v1/providers/{providerId}/branches/{branchId}`
@@ -129,22 +121,75 @@ The owner cannot set `addressVerified`. Exact-address storage, Neshan integratio
 
 ### Professional profile and bilateral affiliations
 - `GET /api/v1/professionals/me`
-  - returns the current user's public professional summary.
 - `PUT /api/v1/professionals/me`
-  - creates/updates the stable professional profile only when the user owns an approved professional-type provider application.
 - `GET /api/v1/professional-affiliations`
-  - lists relations where the current user is the professional or owner of the provider organization.
 - `POST /api/v1/professional-affiliations`
   - professional request: `{ "organizationId", "branchId?" }`.
   - provider request: `{ "organizationId", "professionalProfileId", "branchId?", "permissions?" }`.
-  - provider-side authority is owner-only until provider/branch scoped ABAC is implemented.
 - `PATCH /api/v1/professional-affiliations/{affiliationId}`
   - actions: `ACCEPT`, `REJECT`, `REQUEST_TERMINATION`, `ACCEPT_TERMINATION`, `REJECT_TERMINATION`.
   - the requester cannot accept their own request; termination also requires counterparty action.
 
-Detailed state rules and explicit remaining limitations are recorded in `docs/PROFESSIONAL_AFFILIATIONS.md`.
+Provider-side authority is owner-only until provider/branch scoped ABAC is implemented. See `docs/PROFESSIONAL_AFFILIATIONS.md`.
 
-## Target endpoint families
+### Standard catalog
+- `GET /api/v1/catalog/categories`
+  - public; returns active categories with active standard services.
+- `POST /api/v1/catalog/categories`
+  - requires `content.manage`.
+  - input: `{ "parentId?", "nameFa", "nameEn?", "slug" }`.
+- `POST /api/v1/catalog/services`
+  - requires `content.manage`.
+  - input: `{ "categoryId", "titleFa", "titleEn?", "slug", "description?" }`.
+
+Provider users cannot create arbitrary standard catalog records through Offering endpoints.
+
+### Provider offerings
+- `GET /api/v1/providers/{providerId}/offerings`
+  - provider-owner scoped list including drafts and inactive records.
+- `POST /api/v1/providers/{providerId}/offerings`
+  - provider must be approved.
+  - validates standard service, branch ownership and active professional affiliation.
+  - supported price models in this slice: `FIXED`, `STARTING_FROM`, `RANGE`, `AFTER_CONSULTATION`.
+  - money inputs are digit-only decimal strings, for example `"650000"` toman.
+- `PATCH /api/v1/providers/{providerId}/offerings/{offeringId}`
+  - requires integer `expectedVersion` in the body; stale writes return `VERSION_CONFLICT`.
+- `DELETE /api/v1/providers/{providerId}/offerings/{offeringId}?expectedVersion={integer}`
+  - soft archive; disables `active` and `published`.
+- `GET /api/v1/offerings/{offeringId}`
+  - public only when Offering, provider, standard service and assigned branch/professional are operational.
+
+`published=true` requires `active=true` and is enforced by PostgreSQL. Publishing also requires `bookingEnabled=true`, an active branch when branch-bound, and an active verified professional when professional-bound.
+
+### Server quote
+- `POST /api/v1/offerings/{offeringId}/quote`
+  - guest or authenticated caller; same-origin mutation check applies.
+  - input: `{ "quantity": 1 }`, maximum 20 and maximum total duration 1,440 minutes.
+  - reloads the Offering, calculates integer-toman money and duration on the server, persists a 15-minute `ServiceQuote`, and snapshots Offering version and rules.
+  - `FIXED` returns `finalPrice=true` and `directlyBookable=true`.
+  - `STARTING_FROM` and `RANGE` return explicit estimates with `directlyBookable=false`.
+  - `AFTER_CONSULTATION` returns no invented price and requires consultation.
+
+Quote expiry enforcement during booking, calculated pricing, package/variant/add-on/location pricing and consultation-to-final-quote are still open.
+
+### Shared schedule and availability
+- `GET /api/v1/availability/schedules?ownerType=PROFESSIONAL|BRANCH&ownerId={uuid}`
+  - owner-only; cross-owner IDs return not found.
+- `PUT /api/v1/availability/schedules`
+  - input includes `ownerType`, `ownerId`, `expectedUpdatedAt` and up to 50 weekly rules.
+  - first write uses `expectedUpdatedAt=null`; stale replacement returns `VERSION_CONFLICT`.
+  - current timezone is explicitly `Asia/Tehran`; active rules on one day may not overlap.
+- `POST /api/v1/availability/exceptions`
+  - creates `CLOSED` or `AVAILABLE` range for an authorized schedule owner.
+- `DELETE /api/v1/availability/exceptions/{exceptionId}`
+- `GET /api/v1/offerings/{offeringId}/availability?from={ISO}&to={ISO}&stepMinute=15&limit=60`
+  - public, maximum range 31 days and maximum 200 slots.
+  - professional-bound Offering uses the stable professional calendar across all affiliations; otherwise branch calendar is used.
+  - combines weekly rules and exceptions, subtracts blocking Booking intervals and past time, and returns UTC slot ranges.
+
+Complete rules, limitations and examples are in `docs/CATALOG_PRICING_AVAILABILITY.md`.
+
+## Target endpoint families still open
 
 ### Geography and search
 - `GET /api/v1/geography/provinces`
@@ -156,18 +201,18 @@ Detailed state rules and explicit remaining limitations are recorded in `docs/PR
 - `GET /api/v1/availability/today`
 
 ### Provider operations still open
-- branch private-address and verification contracts.
-- provider staff memberships and scoped role assignments.
-- professional discovery and privacy-safe invitation lookup.
-- business hours, resources and service-area configuration.
+- branch private-address and verification contracts;
+- provider staff memberships and scoped role assignments;
+- professional discovery and privacy-safe invitation lookup;
+- service areas, travel rules and resource/capacity configuration.
 
-### Catalog and offerings
-- `GET /api/v1/catalog/categories`
-- `GET /api/v1/catalog/services`
-- `POST /api/v1/providers/{providerId}/offerings`
-- `PATCH /api/v1/offerings/{offeringId}`
-- `POST /api/v1/offerings/{offeringId}/quote`
-- `GET /api/v1/offerings/{offeringId}/availability`
+### Catalog and availability still open
+- category/service edit, deactivate, ordering and admin UI;
+- variants, add-ons, packages and questionnaires;
+- calculated and location-aware pricing;
+- resources, capacity, holidays, leave and travel time;
+- multi-service contiguous availability, alternatives and waitlist;
+- quote expiry jobs, cache invalidation and transactional booking holds.
 
 ### Booking
 - `POST /api/v1/booking-recipients`
