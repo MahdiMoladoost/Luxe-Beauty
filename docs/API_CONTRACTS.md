@@ -1,6 +1,7 @@
 # API Contracts
 
 Target versioned base path: `/api/v1`.
+
 Current operational authentication/RBAC compatibility routes use `/api/auth/*` and `/api/admin/rbac/*` while the remaining versioned marketplace API is implemented. A future versioning migration must preserve a documented compatibility window.
 
 Content type: JSON unless an upload/download contract states otherwise.
@@ -87,13 +88,49 @@ Authentication and account-discovery errors do not reveal whether an account exi
 - `GET /api/admin/rbac/permissions` requires `permission.read`.
 - `POST /api/admin/rbac/permissions` requires `permission.manage` and atomically writes permission and audit evidence.
 
-## Target endpoint families
+## Operational versioned marketplace routes
 
 ### Identity verification
 - `GET /api/v1/identity/status`
-- `POST /api/v1/identity/profile`
 - `POST /api/v1/identity/verify`
-- `GET /api/v1/identity/provider-mode` returns `mock`, `sandbox`, or `production` without secret configuration.
+- `GET /api/v1/admin/identity/users/{userId}` requires identity review permission and recent step-up authentication for sensitive access.
+
+### Providers and verification
+- `POST /api/v1/providers`
+  - creates a persisted provider application in draft status and assigns the matching provider role.
+- `GET /api/v1/providers/me`
+  - lists provider applications owned by the current user.
+- `GET /api/v1/providers/{providerId}`
+  - returns an owned application and its document review summaries.
+- `POST /api/v1/providers/{providerId}/documents`
+  - private multipart upload; validates MIME/size/signature, runs the malware adapter, stores privately and writes audit evidence.
+- `GET /api/v1/provider-documents/{documentId}/content`
+  - owner or authorized reviewer only; reviewer access requires a reason and is audited.
+- `POST /api/v1/providers/{providerId}/submit`
+- `POST /api/v1/providers/{providerId}/appeal`
+- `POST /api/v1/provider-documents/{documentId}/appeal`
+- `GET /api/v1/admin/providers/review-queue`
+- `POST /api/v1/admin/providers/{providerId}/review`
+- `POST /api/v1/admin/provider-documents/{documentId}/review`
+
+### Professional profile and bilateral affiliations
+- `GET /api/v1/professionals/me`
+  - returns the current user's public professional summary.
+- `PUT /api/v1/professionals/me`
+  - creates/updates the stable professional profile only when the user owns an approved professional-type provider application.
+- `GET /api/v1/professional-affiliations`
+  - lists relations where the current user is the professional or owner of the provider organization.
+- `POST /api/v1/professional-affiliations`
+  - professional request: `{ "organizationId", "branchId?" }`.
+  - provider request: `{ "organizationId", "professionalProfileId", "branchId?", "permissions?" }`.
+  - provider-side authority is owner-only until provider/branch scoped ABAC is implemented.
+- `PATCH /api/v1/professional-affiliations/{affiliationId}`
+  - actions: `ACCEPT`, `REJECT`, `REQUEST_TERMINATION`, `ACCEPT_TERMINATION`, `REJECT_TERMINATION`.
+  - the requester cannot accept their own request; termination also requires counterparty action.
+
+Detailed state rules and explicit remaining limitations are recorded in `docs/PROFESSIONAL_AFFILIATIONS.md`.
+
+## Target endpoint families
 
 ### Geography and search
 - `GET /api/v1/geography/provinces`
@@ -104,16 +141,11 @@ Authentication and account-discovery errors do not reveal whether an account exi
 - `GET /api/v1/search/providers`
 - `GET /api/v1/availability/today`
 
-### Providers and onboarding
-- `POST /api/v1/providers`
-- `GET /api/v1/providers/me`
-- `PATCH /api/v1/providers/me`
+### Provider operations still open
 - `POST /api/v1/providers/{providerId}/branches`
-- `POST /api/v1/providers/{providerId}/documents`
-- `GET /api/v1/providers/{providerId}/verification`
-- `POST /api/v1/professionals/affiliations`
-- `POST /api/v1/professional-affiliations/{id}/approve`
-- `POST /api/v1/professional-affiliations/{id}/terminate`
+- branch update/archive/address verification contracts.
+- provider staff memberships and scoped role assignments.
+- professional discovery and privacy-safe invitation lookup.
 
 ### Catalog and offerings
 - `GET /api/v1/catalog/categories`
