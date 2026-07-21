@@ -2,7 +2,7 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider verification, affiliation and branch-management commits require a fresh CI run before their implementation status can be upgraded to verified complete.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider verification, affiliation, branch management, catalog, quote and availability commits require a fresh CI run before their implementation status can be upgraded to verified complete.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
@@ -57,16 +57,16 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [~] Private provider documents support validation, malware-scan adapter state, private storage, audited reads and review; configurable document requirement definitions remain open.
 - [~] Verification supports submit, review, correction, rejection, approval and appeals; scheduled expiry/re-review and complete appeal operations remain open.
 - [ ] Home-location verification.
-- [~] Bilateral professional affiliations support provider/professional requests, counterparty acceptance/rejection, bilateral termination, serializable transactions and audit. Shared availability-calendar conflict enforcement and delegated provider-staff ABAC remain open.
+- [~] Bilateral professional affiliations support provider/professional requests, counterparty acceptance/rejection, bilateral termination, serializable transactions and audit. Shared professional calendar ownership is now represented; delegated provider-staff ABAC and booking-time conflict constraints remain open.
 
 ## Phase 5 — Catalog, pricing and availability
-- [ ] Standard catalog and provider offerings.
-- [ ] Variants, add-ons, packages and consultation services.
-- [ ] Pricing factors/questionnaires and immutable quote snapshots.
-- [ ] Audience, age, guardian and location rules.
-- [ ] Schedules, exceptions, holidays and leaves.
-- [ ] Resources, capacity, buffers and travel time.
-- [ ] Multi-service availability and actionable alternatives.
+- [~] Platform-owned categories and standard services have protected creation, public reads and audit. Provider-owner Offering create/list/update/archive, branch/professional ownership checks, publication guards and optimistic `version` are implemented; full admin editing/order and delegated provider ABAC remain open.
+- [ ] Variants, add-ons, packages and complete consultation workflows.
+- [~] Integer-toman policy supports fixed, starting-from, range and consultation-required modes. Server Quotes persist Offering version, duration formula and rule snapshots with expiry; calculated/location/package/variant pricing and quote-expiry jobs remain open.
+- [~] Audience, booking and pricing rule objects are persisted and snapshotted, but age/guardian/questionnaire/location rule engines are still open.
+- [~] Weekly schedules, open/closed exceptions, timezone-aware slot generation and professional-first shared calendar resolution are implemented. Holiday templates, leave workflow and schedule administration UI remain open.
+- [~] Preparation, cleanup and before/after buffers are enforced. Resource capacity, equipment/room constraints and travel-time scheduling remain open.
+- [~] Single-Offering slot preview subtracts blocking Booking intervals and past time. Multi-service contiguous search, alternatives, waitlist and transactional holds remain open.
 
 ## Phase 6 — Booking, mock payment and ledger
 - [~] Booking recipient, booking, booking-item and transition persistence models exist; application workflows remain open.
@@ -119,10 +119,10 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development-only seed for nine cities and test roles.
-- [~] Unit tests cover authentication cryptography, RBAC, route permission matrices, money, Persian normalization, booking transitions, identity policy, provider policy and bilateral affiliation transitions; later domains remain open.
-- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit, device IDOR, identity verification, provider onboarding/private documents, professional affiliation ownership/lifecycle and branch ownership/geography/concurrency; fresh CI verification of the newest slices is pending.
+- [~] Unit tests cover authentication cryptography, RBAC, route permission matrices, money, Persian normalization, booking transitions, identity/provider/affiliation policies, catalog pricing and timezone-aware availability intervals; later domains remain open.
+- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit, device IDOR, identity verification, provider onboarding/private documents, affiliation lifecycle, branch concurrency and the Catalog→Offering→Quote→Schedule→Availability path. Fresh CI verification of the newest slices is pending.
 - [ ] Playwright E2E matrix.
-- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR, CSRF-origin behavior, provider-document/affiliation IDOR and branch owner isolation have automated coverage; upload and full security matrix remain open.
+- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR, CSRF-origin behavior, provider-document/affiliation IDOR, branch isolation and Offering/schedule owner isolation have automated coverage; upload and full security matrix remain open.
 - [ ] Accessibility automated and manual checks.
 - [x] Current authentication/RBAC production build, clean migration deployment, seed, Compose validation and Docker image build pass in CI.
 - [x] Current production dependency audit passes at high severity threshold.
@@ -131,7 +131,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Persian README, installation, production, backup and restore docs.
 - [x] External integration limitations and environment contract documented.
 - [x] Draft PR description continuously records current architecture, migrations, capabilities, tests, build, environment, security and limitations.
-- [~] MR-001 through MR-071 are documented and traceable; authentication/RBAC and initial provider/identity slices have advanced while most marketplace domains remain open.
+- [~] MR-001 through MR-071 are documented and traceable; authentication/RBAC, initial provider/identity and initial catalog/availability slices have advanced while most marketplace domains remain open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
