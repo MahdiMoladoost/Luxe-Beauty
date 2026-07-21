@@ -57,7 +57,11 @@ async function fixture() {
   const suffix = randomUUID().slice(0, 8)
 
   const province = await prisma.province.create({
-    data: { nameFa: `استان ${suffix}`, normalizedName: `hold-province-${suffix}`, slug: `hold-province-${suffix}` },
+    data: {
+      nameFa: `استان ${suffix}`,
+      normalizedName: `hold-province-${suffix}`,
+      slug: `hold-province-${suffix}`,
+    },
   })
   provinceIds.add(province.id)
   const city = await prisma.city.create({
@@ -244,17 +248,19 @@ describe("transactional booking holds", () => {
         context("race-two"),
       ),
     ])
-    const fulfilled = results.filter((result) => result.status === "fulfilled")
-    const rejected = results.filter((result) => result.status === "rejected")
-    expect(fulfilled).toHaveLength(1)
-    expect(rejected).toHaveLength(1)
-    expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({
+    const winnerIndex = results.findIndex((result) => result.status === "fulfilled")
+    const loserIndex = results.findIndex((result) => result.status === "rejected")
+    expect(winnerIndex).toBeGreaterThanOrEqual(0)
+    expect(loserIndex).toBeGreaterThanOrEqual(0)
+
+    const rejected = results[loserIndex] as PromiseRejectedResult
+    expect(rejected.reason).toMatchObject({
       code: expect.stringMatching(/SLOT_NOT_AVAILABLE|BOOKING_CONCURRENCY_RETRY/),
     })
 
-    const winner = (fulfilled[0] as PromiseFulfilledResult<Awaited<ReturnType<typeof createBookingHold>>>).value
-    const winnerPrincipal = winner.hold.customerUserId === firstCustomer.userId ? firstCustomer : secondCustomer
-    const loserPrincipal = winnerPrincipal.userId === firstCustomer.userId ? secondCustomer : firstCustomer
+    const winner = (results[winnerIndex] as PromiseFulfilledResult<Awaited<ReturnType<typeof createBookingHold>>>).value
+    const winnerPrincipal = winnerIndex === 0 ? firstCustomer : secondCustomer
+    const loserPrincipal = winnerIndex === 0 ? secondCustomer : firstCustomer
     const released = await releaseOwnedBookingHold(winnerPrincipal, winner.hold.id, context("release"))
     expect(released.hold.status).toBe("RELEASED")
 
@@ -275,9 +281,13 @@ describe("transactional booking holds", () => {
       `hold-${randomUUID()}`,
       context("expiry-create"),
     )
+    const now = Date.now()
     await prisma.bookingHold.update({
       where: { id: created.hold.id },
-      data: { expiresAt: new Date(Date.now() - 1000) },
+      data: {
+        createdAt: new Date(now - 10 * 60 * 1000),
+        expiresAt: new Date(now - 1000),
+      },
     })
     const expired = await getOwnedBookingHold(firstCustomer, created.hold.id)
     expect(expired.status).toBe("EXPIRED")
