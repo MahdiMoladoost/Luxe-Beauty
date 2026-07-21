@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react"
-import { CalendarDays, ChevronDown, Clock3, Crosshair, Loader2, Map, MapPin, Search } from "lucide-react"
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { CalendarDays, Check, ChevronDown, Clock3, Crosshair, Loader2, Map, MapPin, Search } from "lucide-react"
 
 const CITY_STORAGE_KEY = "luxe-beauty-selected-city"
 
@@ -22,6 +22,21 @@ const services = [
 
 const supportedCities = ["تهران", "کرج", "مشهد", "اصفهان", "شیراز", "تبریز", "قم", "اهواز"]
 
+const dateModeOptions = [
+  { value: "first-available", label: "اولین نوبت خالی" },
+  { value: "today", label: "امروز" },
+  { value: "tomorrow", label: "فردا" },
+  { value: "weekend", label: "آخر هفته" },
+  { value: "date", label: "انتخاب تاریخ" },
+]
+
+const dayPartOptions = [
+  { value: "any", label: "همه" },
+  { value: "morning", label: "صبح" },
+  { value: "noon", label: "ظهر" },
+  { value: "evening", label: "عصر" },
+]
+
 const typoCorrections: Record<string, string> = {
   کراتینن: "کراتین",
   کراتینه: "کراتین",
@@ -37,6 +52,9 @@ type AvailabilitySummary = {
   nearestTime?: string
   activeProviders?: number
 }
+
+type DropdownKey = "service" | "location" | "dateMode" | "dayPart"
+type Option = { value: string; label: string }
 
 function normalizeService(value: string) {
   const trimmed = value.trim().replace(/\s+/g, " ")
@@ -73,12 +91,7 @@ function FieldShell({ children }: { children: ReactNode }) {
 
 function HeroWave() {
   return (
-    <svg
-      viewBox="0 0 1440 140"
-      className="block h-[60px] w-full sm:h-[72px] lg:h-[82px]"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 1440 140" className="block h-[58px] w-full sm:h-[68px] lg:h-[76px]" preserveAspectRatio="none" aria-hidden="true">
       <path
         d="M0 42C108 72 215 86 348 82C500 77 604 30 752 31C880 31 994 76 1130 88C1257 99 1360 88 1440 66V140H0V42Z"
         fill="var(--background)"
@@ -87,8 +100,75 @@ function HeroWave() {
   )
 }
 
+function DesktopDropdownField({
+  icon,
+  value,
+  placeholder,
+  open,
+  options,
+  divider = false,
+  onToggle,
+  onSelect,
+}: {
+  icon: ReactNode
+  value: string
+  placeholder: string
+  open: boolean
+  options: Option[]
+  divider?: boolean
+  onToggle: () => void
+  onSelect: (value: string) => void
+}) {
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? placeholder
+
+  return (
+    <div className={`relative min-w-0 ${divider ? "border-r border-[#eadbd4]" : ""}`}>
+      <button
+        type="button"
+        dir="rtl"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="group flex min-h-[64px] w-full items-center gap-3 px-5 text-right transition focus:outline-none focus-visible:bg-[#fff7f3]"
+      >
+        {icon}
+        <span className={`min-w-0 flex-1 truncate text-sm font-bold ${value ? "text-[#2f2522]" : "text-[#6c5750]"}`}>
+          {selectedLabel}
+        </span>
+        <ChevronDown className={`h-[18px] w-[18px] shrink-0 text-[#6c4e46] transition ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open ? (
+        <div className="absolute inset-x-2 top-[calc(100%+10px)] z-50 rounded-[22px] border border-[#dbc5bc] bg-[#fffdfa] p-2 shadow-[0_20px_48px_rgba(54,35,30,0.16)] backdrop-blur-sm">
+          <div className="mb-1 px-3 py-1 text-right text-[11px] font-bold text-[#8a6258]">{placeholder}</div>
+          <div className="max-h-64 overflow-y-auto">
+            {options.map((option) => {
+              const active = option.value === value
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  dir="rtl"
+                  onClick={() => onSelect(option.value)}
+                  className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${
+                    active ? "bg-[#f6ece7] text-[#8c5244]" : "text-[#3a2d2a] hover:bg-[#fbf2ed]"
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {active ? <Check className="h-4 w-4 shrink-0" /> : <span className="h-4 w-4 shrink-0" aria-hidden="true" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export function BookingHero() {
   const router = useRouter()
+  const desktopFieldsRef = useRef<HTMLDivElement | null>(null)
   const [service, setService] = useState("")
   const [location, setLocation] = useState("")
   const [dateMode, setDateMode] = useState("")
@@ -100,16 +180,34 @@ export function BookingHero() {
   const [availability, setAvailability] = useState<AvailabilitySummary | null>(null)
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
+  const [openField, setOpenField] = useState<DropdownKey | null>(null)
 
   useEffect(() => {
     if (location) window.localStorage.setItem(CITY_STORAGE_KEY, location)
   }, [location])
 
   useEffect(() => {
-    if (!location || location === "موقعیت فعلی") {
-      setAvailability(null)
-      return
+    function handlePointerDown(event: MouseEvent) {
+      if (desktopFieldsRef.current && !desktopFieldsRef.current.contains(event.target as Node)) {
+        setOpenField(null)
+      }
     }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpenField(null)
+    }
+
+    document.addEventListener("mousedown", handlePointerDown)
+    document.addEventListener("keydown", handleEscape)
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!location || location === "موقعیت فعلی") return
 
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
@@ -189,7 +287,7 @@ export function BookingHero() {
     }
 
     if (!location.trim()) {
-      setError("شهر، منطقه یا محله را انتخاب کنید.")
+      setError("شهر، منطقه یا محله را وارد کنید.")
       setMobileStep(2)
       return
     }
@@ -197,18 +295,6 @@ export function BookingHero() {
     if (!isSupportedLocation(location)) {
       setError("این شهر هنوز تحت پوشش لوکس بیوتی نیست. می‌توانید شهر دیگری را انتخاب کنید.")
       setMobileStep(2)
-      return
-    }
-
-    if (!dateMode) {
-      setError("زمان موردنظر را انتخاب کنید.")
-      setMobileStep(3)
-      return
-    }
-
-    if (!dayPart) {
-      setError("بازه زمانی را انتخاب کنید.")
-      setMobileStep(3)
       return
     }
 
@@ -223,8 +309,8 @@ export function BookingHero() {
     const params = new URLSearchParams({
       service: normalizedService,
       location,
-      availability: dateMode,
-      dayPart,
+      availability: dateMode || "first-available",
+      dayPart: dayPart || "any",
     })
 
     if (dateMode === "date") params.set("date", customDate)
@@ -246,34 +332,42 @@ export function BookingHero() {
     }
 
     if (mobileStep === 2 && !location.trim()) {
-      setError("موقعیت موردنظر را انتخاب کنید.")
+      setError("موقعیت موردنظر را وارد کنید.")
       return
     }
 
     setMobileStep((step) => Math.min(3, step + 1))
   }
 
-  const mobileStepTitle = mobileStep === 1 ? "انتخاب خدمت" : mobileStep === 2 ? "انتخاب شهر" : "انتخاب زمان"
+  const mobileStepTitle = mobileStep === 1 ? "انتخاب خدمت" : mobileStep === 2 ? "انتخاب موقعیت" : "انتخاب زمان"
   const mobileInputClassName =
-    "mt-1 w-full bg-transparent text-sm font-semibold text-[#302523] outline-none placeholder:text-[#66514a] placeholder:opacity-100"
+    "mt-1 w-full bg-transparent text-sm font-semibold text-[#302523] outline-none placeholder:text-[#6a5751] placeholder:opacity-100"
 
   return (
-    <div className="relative bg-background pb-[280px] sm:pb-[250px] md:pb-[165px]">
-      <section className="relative isolate h-[500px] overflow-visible sm:h-[540px] lg:h-[580px] xl:h-[610px]">
+    <div className="relative bg-background pb-[235px] sm:pb-[190px] lg:pb-[145px]">
+      <section className="relative isolate h-[350px] overflow-visible sm:h-[390px] lg:h-[425px]">
         <div
-          className="absolute inset-0 -z-20 bg-cover bg-[position:center_58%] sm:bg-[position:center_62%] lg:bg-[position:center_65%]"
+          className="absolute inset-0 -z-30 bg-cover bg-[position:center_58%] sm:bg-[position:center_62%] lg:bg-[position:center_66%]"
           style={{ backgroundImage: "url('/hero.png')" }}
           aria-hidden="true"
         />
 
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-start px-4 pt-14 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
-          <div className="mr-auto w-full max-w-[650px] text-right" dir="rtl">
-            <p className="font-sans text-[3.2rem] font-black leading-none tracking-[-0.045em] text-[#a85f4f] drop-shadow-[0_3px_12px_rgba(255,255,255,0.85)] sm:text-[4.4rem] lg:text-[5.6rem]">
-              لوکس بیوتی
-            </p>
-            <h1 className="mt-4 max-w-[600px] font-sans text-[1.65rem] font-extrabold leading-[1.5] tracking-[-0.02em] text-[#342421] drop-shadow-[0_2px_10px_rgba(255,255,255,0.9)] sm:text-[2.15rem] lg:text-[2.75rem]">
-              انتخاب بهترین آرایشگاه برای شما
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 -z-20 w-full bg-[linear-gradient(270deg,rgba(255,249,246,0.80)_0%,rgba(255,249,246,0.58)_30%,rgba(255,249,246,0.14)_58%,transparent_76%)] sm:w-[76%] lg:w-[62%]"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-start justify-end px-4 pt-10 sm:px-6 sm:pt-12 lg:px-8 lg:pt-14">
+          <div className="w-full max-w-[650px] text-right">
+            <h1 dir="rtl" className="font-sans font-extrabold tracking-[-0.03em] text-[#342421]">
+              <span className="block text-[2.35rem] leading-[1.05] text-[#8a5648] sm:text-[3.1rem] lg:text-[4.35rem]">لوکس بیوتی</span>
+              <span className="mt-3 block text-[1.2rem] leading-[1.65] text-[#342421] sm:text-[1.55rem] lg:text-[2rem]">
+                انتخاب بهترین آرایشگاه برای شما
+              </span>
             </h1>
+            <p className="mt-3 max-w-[500px] text-sm font-medium leading-7 text-[#5f4a44] sm:text-base">
+              سالن‌ها و متخصصان منتخب را یک‌جا ببینید، مقایسه کنید و با خیال راحت آنلاین نوبت بگیرید.
+            </p>
           </div>
         </div>
 
@@ -281,70 +375,66 @@ export function BookingHero() {
           <HeroWave />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-20 translate-y-1/2 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-x-0 bottom-[40px] z-20 translate-y-1/2 px-4 sm:bottom-[48px] sm:px-6 lg:bottom-[56px] lg:px-8">
           <form
             onSubmit={submitSearch}
             className="mx-auto max-w-6xl rounded-[30px] border border-[#d9c1b6] bg-[#fffaf7] p-3 shadow-[0_28px_74px_rgba(54,35,30,0.18),0_8px_22px_rgba(54,35,30,0.08)]"
           >
-            <div className="hidden overflow-hidden rounded-2xl border border-[#d8c1b7] bg-white shadow-[0_2px_10px_rgba(65,42,34,0.05)] md:grid md:grid-cols-4">
-              <label className="flex min-h-[62px] min-w-0 items-center gap-3 px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <Search className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
-                <input
-                  value={service}
-                  onChange={(event) => setService(event.target.value)}
-                  onBlur={(event) => parseNaturalSearch(event.target.value)}
-                  list="hero-service-suggestions"
-                  placeholder="انتخاب خدمت"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-[#2f2522] outline-none placeholder:text-[#5f4943] placeholder:opacity-100"
-                  autoComplete="off"
-                  aria-label="انتخاب خدمت"
-                />
-              </label>
+            <div ref={desktopFieldsRef} className="hidden overflow-visible rounded-2xl border border-[#d8c1b7] bg-white shadow-[0_2px_10px_rgba(65,42,34,0.05)] md:grid md:grid-cols-4">
+              <DesktopDropdownField
+                icon={<Search className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />}
+                value={service}
+                placeholder="انتخاب خدمت"
+                open={openField === "service"}
+                options={services.map((item) => ({ value: item, label: item }))}
+                onToggle={() => setOpenField((field) => (field === "service" ? null : "service"))}
+                onSelect={(value) => {
+                  setService(value)
+                  setOpenField(null)
+                }}
+              />
 
-              <label className="flex min-h-[62px] min-w-0 items-center gap-3 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <MapPin className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
-                <input
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  list="hero-city-suggestions"
-                  placeholder="انتخاب شهر"
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold text-[#2f2522] outline-none placeholder:text-[#5f4943] placeholder:opacity-100"
-                  aria-label="انتخاب شهر"
-                />
-              </label>
+              <DesktopDropdownField
+                divider
+                icon={<MapPin className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />}
+                value={location}
+                placeholder="انتخاب شهر"
+                open={openField === "location"}
+                options={supportedCities.map((item) => ({ value: item, label: item }))}
+                onToggle={() => setOpenField((field) => (field === "location" ? null : "location"))}
+                onSelect={(value) => {
+                  setLocation(value)
+                  setOpenField(null)
+                }}
+              />
 
-              <label className="flex min-h-[62px] min-w-0 items-center gap-3 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <CalendarDays className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
-                <select
-                  value={dateMode}
-                  onChange={(event) => setDateMode(event.target.value)}
-                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-bold text-[#2f2522] outline-none"
-                  aria-label="انتخاب زمان"
-                >
-                  <option value="" disabled>انتخاب زمان</option>
-                  <option value="first-available">اولین نوبت خالی</option>
-                  <option value="today">امروز</option>
-                  <option value="tomorrow">فردا</option>
-                  <option value="weekend">آخر هفته</option>
-                  <option value="date">انتخاب تاریخ</option>
-                </select>
-              </label>
+              <DesktopDropdownField
+                divider
+                icon={<CalendarDays className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />}
+                value={dateMode}
+                placeholder="انتخاب زمان"
+                open={openField === "dateMode"}
+                options={dateModeOptions}
+                onToggle={() => setOpenField((field) => (field === "dateMode" ? null : "dateMode"))}
+                onSelect={(value) => {
+                  setDateMode(value)
+                  setOpenField(null)
+                }}
+              />
 
-              <label className="flex min-h-[62px] min-w-0 items-center gap-3 border-r border-[#ead9d1] px-4 transition focus-within:bg-[#fff7f3] focus-within:shadow-[inset_0_0_0_2px_rgba(183,111,94,0.26)]">
-                <Clock3 className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
-                <select
-                  value={dayPart}
-                  onChange={(event) => setDayPart(event.target.value)}
-                  className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm font-bold text-[#2f2522] outline-none"
-                  aria-label="انتخاب بازه"
-                >
-                  <option value="" disabled>انتخاب بازه</option>
-                  <option value="any">همه بازه‌ها</option>
-                  <option value="morning">صبح</option>
-                  <option value="noon">ظهر</option>
-                  <option value="evening">عصر</option>
-                </select>
-              </label>
+              <DesktopDropdownField
+                divider
+                icon={<Clock3 className="h-[18px] w-[18px] shrink-0 text-[#a85f4f]" />}
+                value={dayPart}
+                placeholder="انتخاب بازه"
+                open={openField === "dayPart"}
+                options={dayPartOptions}
+                onToggle={() => setOpenField((field) => (field === "dayPart" ? null : "dayPart"))}
+                onSelect={(value) => {
+                  setDayPart(value)
+                  setOpenField(null)
+                }}
+              />
             </div>
 
             <div className="md:hidden">
@@ -356,16 +446,19 @@ export function BookingHero() {
               {mobileStep === 1 && (
                 <FieldShell>
                   <label className="flex items-start gap-3">
-                    <Search className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
-                    <input
-                      value={service}
-                      onChange={(event) => setService(event.target.value)}
-                      onBlur={(event) => parseNaturalSearch(event.target.value)}
-                      list="hero-service-suggestions"
-                      placeholder="انتخاب خدمت"
-                      className={mobileInputClassName}
-                      autoComplete="off"
-                    />
+                    <Search className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[11px] font-bold text-[#704b42]">چه خدمتی؟</span>
+                      <input
+                        value={service}
+                        onChange={(event) => setService(event.target.value)}
+                        onBlur={(event) => parseNaturalSearch(event.target.value)}
+                        list="hero-service-suggestions"
+                        placeholder="نام خدمت را بنویسید"
+                        className={mobileInputClassName}
+                        autoComplete="off"
+                      />
+                    </span>
                   </label>
                 </FieldShell>
               )}
@@ -374,14 +467,17 @@ export function BookingHero() {
                 <div className="space-y-3">
                   <FieldShell>
                     <label className="flex items-start gap-3">
-                      <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
-                      <input
-                        value={location}
-                        onChange={(event) => setLocation(event.target.value)}
-                        list="hero-city-suggestions"
-                        placeholder="انتخاب شهر"
-                        className={mobileInputClassName}
-                      />
+                      <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#a85f4f]" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[11px] font-bold text-[#704b42]">کجا؟</span>
+                        <input
+                          value={location}
+                          onChange={(event) => setLocation(event.target.value)}
+                          list="hero-city-suggestions"
+                          placeholder="شهر، منطقه یا محله"
+                          className={mobileInputClassName}
+                        />
+                      </span>
                     </label>
                   </FieldShell>
 
@@ -409,35 +505,38 @@ export function BookingHero() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <FieldShell>
                     <label className="flex items-center gap-3">
-                      <CalendarDays className="h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
+                      <CalendarDays className="h-5 w-5 shrink-0 text-[#a85f4f]" />
+                      <span className="shrink-0 text-xs font-bold text-[#704b42]">زمان</span>
                       <select
                         value={dateMode}
                         onChange={(event) => setDateMode(event.target.value)}
                         className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#312725] outline-none"
                       >
-                        <option value="" disabled>انتخاب زمان</option>
-                        <option value="first-available">اولین نوبت خالی</option>
-                        <option value="today">امروز</option>
-                        <option value="tomorrow">فردا</option>
-                        <option value="weekend">آخر هفته</option>
-                        <option value="date">انتخاب تاریخ</option>
+                        <option value="">انتخاب زمان</option>
+                        {dateModeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                     </label>
                   </FieldShell>
 
                   <FieldShell>
                     <label className="flex items-center gap-3">
-                      <Clock3 className="h-5 w-5 shrink-0 text-[#a85f4f]" strokeWidth={1.8} />
+                      <Clock3 className="h-5 w-5 shrink-0 text-[#a85f4f]" />
+                      <span className="shrink-0 text-xs font-bold text-[#704b42]">بازه</span>
                       <select
                         value={dayPart}
                         onChange={(event) => setDayPart(event.target.value)}
                         className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#312725] outline-none"
                       >
-                        <option value="" disabled>انتخاب بازه</option>
-                        <option value="any">همه بازه‌ها</option>
-                        <option value="morning">صبح</option>
-                        <option value="noon">ظهر</option>
-                        <option value="evening">عصر</option>
+                        <option value="">انتخاب بازه</option>
+                        {dayPartOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                     </label>
                   </FieldShell>
@@ -479,7 +578,7 @@ export function BookingHero() {
 
             {dateMode === "date" && (
               <div className="mt-2 md:grid md:grid-cols-4">
-                <div className="md:col-start-3">
+                <div className="md:col-start-2 md:col-span-2">
                   <FieldShell>
                     <label className="flex items-center gap-3 text-sm font-semibold text-[#5f4943]">
                       <span className="shrink-0">انتخاب تاریخ</span>
@@ -495,11 +594,11 @@ export function BookingHero() {
               </div>
             )}
 
-            <div className="mt-2 hidden grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] gap-2.5 md:grid">
+            <div className="mt-2 hidden grid-cols-2 gap-2.5 md:grid">
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_24px_rgba(174,102,85,0.24)] transition hover:-translate-y-0.5 hover:bg-[#985545] hover:shadow-[0_13px_28px_rgba(174,102,85,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f5144] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#ae6655] px-5 text-sm font-bold leading-none text-white shadow-[0_10px_24px_rgba(174,102,85,0.24)] transition hover:bg-[#985545] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f5144] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
               >
                 {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
                 مشاهده نوبت‌های خالی
@@ -513,7 +612,7 @@ export function BookingHero() {
               </Link>
             </div>
 
-            <div className="mt-2 rounded-2xl border border-[#dfcbc2] bg-white px-4 py-2.5 text-[13px] font-medium leading-6 text-[#493a36]">
+            <div className="mt-2 rounded-2xl border border-[#dfcbc2] bg-white px-4 py-2.5 text-[13px] font-medium leading-6 text-[#51413c]">
               {availabilityLoading ? (
                 <span className="inline-flex items-center gap-2 font-semibold text-[#5e453e]">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -532,10 +631,14 @@ export function BookingHero() {
       </section>
 
       <datalist id="hero-service-suggestions">
-        {services.map((item) => <option key={item} value={item} />)}
+        {services.map((item) => (
+          <option key={item} value={item} />
+        ))}
       </datalist>
       <datalist id="hero-city-suggestions">
-        {supportedCities.map((item) => <option key={item} value={item} />)}
+        {supportedCities.map((item) => (
+          <option key={item} value={item} />
+        ))}
       </datalist>
     </div>
   )
