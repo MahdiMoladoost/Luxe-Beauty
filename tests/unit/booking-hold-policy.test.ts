@@ -34,7 +34,8 @@ describe("booking hold policy", () => {
   it("accepts only final fixed-price directly bookable quotes", () => {
     expect(parseBookableQuoteSnapshot(snapshot()).offering.version).toBe(3)
 
-    expect(() =>
+    let rejected: unknown
+    try {
       parseBookableQuoteSnapshot(
         snapshot({
           calculation: {
@@ -44,8 +45,12 @@ describe("booking hold policy", () => {
             directlyBookable: false,
           },
         }),
-      ),
-    ).toThrowError(expect.objectContaining({ code: "QUOTE_NOT_DIRECTLY_BOOKABLE" }))
+      )
+    } catch (error) {
+      rejected = error
+    }
+    expect(rejected).toBeInstanceOf(BookingHoldPolicyError)
+    expect((rejected as BookingHoldPolicyError).code).toBe("QUOTE_NOT_DIRECTLY_BOOKABLE")
   })
 
   it("rejects past start times and creates stable request hashes", () => {
