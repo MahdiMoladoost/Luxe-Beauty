@@ -41,6 +41,19 @@ const rangeOptions = [
 
 type DropdownKey = "service" | "location" | "date" | "range"
 type Option = { value: string; label: string }
+
+function readSavedCity() {
+  const entry = document.cookie.split("; ").find((item) => item.startsWith(`${CITY_COOKIE_KEY}=`))
+  const cookieCity = entry ? decodeURIComponent(entry.slice(CITY_COOKIE_KEY.length + 1)) : ""
+  return cookieCity || window.localStorage.getItem(CITY_STORAGE_KEY) || ""
+}
+
+function persistCity(city: string) {
+  if (!city || city === "موقعیت فعلی") return
+  document.cookie = `${CITY_COOKIE_KEY}=${encodeURIComponent(city)}; Max-Age=${CITY_COOKIE_MAX_AGE}; Path=/; SameSite=Lax`
+  window.localStorage.setItem(CITY_STORAGE_KEY, city)
+}
+
 function HeroWave() {
   return (
     <svg
