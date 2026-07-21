@@ -10,7 +10,7 @@ header a[aria-label="لوکس بیوتی، صفحه اصلی"] > span:first-chil
   display: none !important;
 }
 
-/* Keep the hero visually generous without pushing the booking card below the first viewport. */
+/* Keep the hero generous while leaving the complete booking card visible. */
 main > div[class~="pb-[235px]"] > section {
   height: 460px !important;
 }
@@ -30,5 +30,134 @@ main > div[class~="pb-[235px]"] > section {
 @media (min-width: 1440px) {
   main > div[class~="pb-[235px]"] > section {
     height: 600px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Preserve more detail in the artwork and reduce the washed-out appearance. */
+  main > div[class~="pb-[235px]"] > section > div:nth-child(2) {
+    background-image: linear-gradient(
+      270deg,
+      rgba(255, 249, 246, 0.64) 0%,
+      rgba(255, 249, 246, 0.42) 30%,
+      rgba(255, 249, 246, 0.08) 58%,
+      transparent 76%
+    ) !important;
+  }
+
+  /* Move the card slightly upward so its bottom edge remains visible. */
+  main > div[class~="pb-[235px]"] > section > div[class*="translate-y"] {
+    transform: translateY(43%) !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] {
+    padding: 10px !important;
+    border-color: rgba(182, 126, 109, 0.42) !important;
+    background: #fffaf7 !important;
+    box-shadow:
+      0 22px 54px rgba(54, 35, 30, 0.14),
+      0 5px 16px rgba(54, 35, 30, 0.07) !important;
+  }
+
+  /* One geometric row: four equal columns and only internal dividers. */
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    min-height: 58px !important;
+    border: 1px solid #d8c1b7 !important;
+    border-radius: 15px !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(65, 42, 34, 0.04) !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > label {
+    min-width: 0 !important;
+    min-height: 58px !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    gap: 9px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > label + label {
+    border-right: 1px solid #eadbd4 !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child > label:focus-within {
+    position: relative;
+    z-index: 1;
+    background: #fff7f3 !important;
+    box-shadow: inset 0 0 0 2px rgba(183, 111, 94, 0.34) !important;
+  }
+
+  /* All Lucide icons use one optical size and stroke weight. */
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex: 0 0 18px !important;
+    stroke-width: 1.8 !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child span[class*="text-xs"] {
+    font-size: 12px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child input,
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child select {
+    min-width: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    color: #302522 !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div:first-child input::placeholder {
+    color: #65514b !important;
+    opacity: 1 !important;
+  }
+
+  /* Balanced action hierarchy: clear primary, quiet secondary, no 80/20 imbalance. */
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="grid-cols-2"] {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="grid-cols-2"] > button,
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="grid-cols-2"] > a {
+    height: 48px !important;
+    border-radius: 14px !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="grid-cols-2"] > button {
+    box-shadow: 0 9px 22px rgba(174, 102, 85, 0.22) !important;
+    transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="grid-cols-2"] > button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(174, 102, 85, 0.27) !important;
+  }
+
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="grid-cols-2"] > a {
+    border-color: rgba(174, 102, 85, 0.62) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Important helper text must remain readable and visually secondary. */
+  main > div[class~="pb-[235px]"] form[class*="max-w-6xl"] > div[class*="text-[13px]"] {
+    margin-top: 10px !important;
+    padding: 8px 14px !important;
+    border-color: #dfcbc2 !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    color: #493a36 !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
   }
 }
