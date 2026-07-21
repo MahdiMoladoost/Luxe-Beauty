@@ -86,6 +86,7 @@ function repositoryError(kind: string): never {
 
 function policyError(error: BookingHoldPolicyError): never {
   const messages: Record<string, string> = {
+    QUOTE_SNAPSHOT_INVALID: "اطلاعات ذخیره‌شده پیش‌فاکتور معتبر نیست. قیمت را دوباره دریافت کنید.",
     QUOTE_NOT_DIRECTLY_BOOKABLE: "این پیش‌فاکتور برای رزرو مستقیم نهایی نیست.",
     INVALID_START_TIME: "زمان انتخاب‌شده معتبر نیست.",
     START_TIME_IN_PAST: "زمان انتخاب‌شده گذشته است.",
@@ -105,6 +106,13 @@ export async function createBookingHold(
       "IDENTITY_VERIFICATION_REQUIRED",
       "پیش از رزرو باید احراز هویت حساب تکمیل شود.",
       403,
+    )
+  }
+  if (!rawIdempotencyKey) {
+    throw new AuthError(
+      "IDEMPOTENCY_KEY_REQUIRED",
+      "برای ایجاد رزرو موقت، هدر Idempotency-Key الزامی است.",
+      400,
     )
   }
   const input = createHoldSchema.parse(rawInput)
