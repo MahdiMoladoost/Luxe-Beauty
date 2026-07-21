@@ -142,7 +142,7 @@ export default function HomePage() {
       <main className="flex-1 pt-16">
         <BookingHero />
 
-        <section className="relative isolate -mt-px overflow-hidden bg-[#3b2722] py-20 sm:py-24">
+        <section className="relative isolate -mt-px overflow-hidden bg-[#3b2722] pb-20 pt-6 sm:pb-24 sm:pt-8">
           <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#c79a64]/12 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-[#f1d7ad]/8 blur-3xl" />
 
