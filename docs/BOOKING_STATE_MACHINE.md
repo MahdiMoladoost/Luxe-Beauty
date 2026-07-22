@@ -13,7 +13,7 @@ A Booking transition is valid only through an application service. Direct status
 
 Creating a Hold does not create a Booking and does not imply payment or provider approval.
 
-The Hold-to-Booking command is now implemented for one fixed-price Offering. In one Serializable transaction it:
+The Hold-to-Booking command is implemented for one fixed-price Offering. In one Serializable transaction it:
 
 1. locks and reloads the owning active Hold;
 2. rejects elapsed, released or already consumed Holds;
@@ -71,9 +71,9 @@ PAYMENT_PENDING
   -> CONFIRMED
   -> EXPIRED / REFUNDED
 AWAITING_PROVIDER_APPROVAL
-  -> CONFIRMED
-  -> REJECTED
-  -> EXPIRED
+  -> CONFIRMED (provider owner approves before deadline)
+  -> REJECTED (provider owner rejects with reason; allocation released)
+  -> EXPIRED (deadline worker or late provider command; allocation released)
 CONFIRMED
   -> CHECKED_IN
   -> RESCHEDULE_PROPOSED
@@ -88,7 +88,18 @@ AWAITING_CUSTOMER_DISPUTE_WINDOW -> FINALIZED | DISPUTED
 DISPUTED -> FINALIZED | REFUNDED | PARTIALLY_REFUNDED
 ```
 
-Only the initial no-payment Hold conversion is operational. Later transitions shown above remain target contracts unless explicitly implemented elsewhere.
+The initial no-payment Hold conversion and provider decision/expiry transitions are operational. Payment, cancellation, rescheduling, attendance, completion and dispute transitions remain target contracts unless explicitly implemented elsewhere.
+
+## Provider decision transition
+
+Provider approval and rejection are owner-scoped, idempotent and optimistic-versioned. One Serializable transaction locks the Booking, checks ownership, rejects payment-linked records from this bounded path, validates the consumed allocation, status, deadline and `expectedVersion`, then writes status, transition, Audit, Outbox and replay state.
+
+- Approval preserves the consumed allocation and moves to `CONFIRMED`.
+- Rejection stores a controlled reason, releases the allocation and moves to `REJECTED`.
+- A late command cannot decide the Booking; it expires and releases the allocation atomically.
+- The scheduled worker uses the same Booking advisory lock, so API decisions and deadline expiry cannot both win.
+
+See `docs/PROVIDER_BOOKING_APPROVAL.md`.
 
 ## Invariants
 
@@ -96,8 +107,9 @@ Only the initial no-payment Hold conversion is operational. Later transitions sh
 - Booking creation is idempotent and tied to the exact Hold, Recipient, Quote, price/duration/policy snapshots, questionnaire and accepted legal versions.
 - The client cannot submit price, duration or final status.
 - Current Offering, provider, branch, professional and affiliation eligibility are checked in the conversion transaction.
-- A consumed allocation remains blocking until a future cancellation/reschedule workflow releases or swaps it atomically.
-- Rejected/expired manual requests must release resources and release/refund money according to the snapshot; this workflow remains open.
+- A consumed allocation remains blocking until approval preserves it or a valid rejection/expiry/cancellation/reschedule workflow releases or swaps it atomically.
+- No-payment rejected and approval-expired manual requests release resources immediately.
+- Payment-linked rejection/expiry is blocked until refund orchestration exists; financial state is never silently discarded.
 - Rescheduling must hold the new resources before releasing the old allocation.
 - Cancellation/no-show outcomes must use snapshotted policy versions, never current settings.
 - Provider cancellation/no-show cannot retain customer funds.
@@ -106,7 +118,9 @@ Only the initial no-payment Hold conversion is operational. Later transitions sh
 
 ## Manual approval timing
 
-The conversion command persists a bounded `approvalDeadlineAt`, limited by configured response time and minimum lead time before the appointment. Provider approve/reject APIs and the idempotent deadline-expiry worker remain open.
+The conversion command persists a bounded `approvalDeadlineAt`, limited by configured response time and minimum lead time before the appointment.
+
+Provider approve/reject APIs are implemented for no-payment bookings. BullMQ schedules `booking.provider-approvals.expire` every minute. Each run rechecks status, deadline, payment absence and allocation in a Serializable transaction before moving an overdue Booking to `EXPIRED` and releasing its allocation.
 
 ## Attendance and rescheduling targets
 
@@ -118,6 +132,8 @@ Attendance requires an expiring per-Booking challenge with rate limits and Audit
 - Exact replay and changed-payload idempotency conflict.
 - Stale Booking version.
 - Expired Hold and approval deadline.
+- Provider approve/reject IDOR and concurrent-decision race.
+- Scheduled approval expiry and allocation release.
 - Concurrent Hold conversion and double-booking race.
 - Payment callback before/after expiry.
 - Cancellation/refund/no-show boundaries.
