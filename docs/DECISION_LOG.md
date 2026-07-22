@@ -100,7 +100,7 @@ The initial conversion supports only no-payment instant/manual policies. Online,
 ## 2026-07-22 — تصمیم تخصصی افزوده‌شده: Provider decisions and deadline expiry share one Booking lock
 **Status:** Accepted
 
-Provider approval, provider rejection, late provider commands and the scheduled approval-expiry worker use the same PostgreSQL advisory lock for a Booking. Approval preserves the consumed allocation. Rejection and no-payment deadline expiry change the allocation to `RELEASED` in the same Serializable transaction as the Booking transition. Payment-linked records are not automatically mutated until refund and ledger orchestration exists.
+Provider approval, provider rejection, late provider commands and the scheduled approval-expiry worker use the same PostgreSQL advisory lock for a Booking. Approval revalidates current provider, branch, Offering, standard service, professional and affiliation eligibility and preserves the consumed allocation. Rejection and no-payment deadline expiry change the allocation to `RELEASED` in the same Serializable transaction as the Booking transition. Payment-linked records are not automatically mutated until refund and ledger orchestration exists.
 
 ## 2026-07-20 — Execution limitation
 **Status:** Active
