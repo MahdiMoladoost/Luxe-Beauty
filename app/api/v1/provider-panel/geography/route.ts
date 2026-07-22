@@ -8,8 +8,8 @@ import { providerPanelGeography } from "@/lib/provider-panel/geography"
 export async function GET(request: NextRequest) {
   const context = requestContext(request)
   try {
-    const principal = await requirePrincipalFromRequest(request)
-    return apiSuccess(await providerPanelGeography(principal))
+    await requirePrincipalFromRequest(request)
+    return apiSuccess(await providerPanelGeography())
   } catch (error) {
     return apiError(error, context.correlationId)
   }
