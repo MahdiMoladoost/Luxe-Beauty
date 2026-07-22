@@ -49,7 +49,7 @@ export async function expireProviderApprovals({
         }
         if (booking.payments.length > 0) return "PAYMENT_BLOCKED"
 
-        const allocation = await tx.bookingHold.findUnique({
+        const allocation = await tx.bookingHold.findFirst({
           where: { consumedBookingId: booking.id },
         })
         if (!allocation || allocation.status !== "CONSUMED") {
