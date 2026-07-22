@@ -5,7 +5,7 @@ Accepted requirements are not changed or removed without an entry here. New tech
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Modular monolith
 **Status:** Accepted
 
-Use a feature/domain-oriented modular monolith before considering services. This keeps transactions for booking and ledger reliable while preserving extraction boundaries.
+Use a feature/domain-oriented modular monolith before considering services. This keeps transactions for Booking and ledger reliable while preserving extraction boundaries.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: PostgreSQL is the booking authority
 **Status:** Accepted
@@ -30,64 +30,74 @@ KYC, payment, SMS, maps, storage and malware scanning use ports/adapters. Develo
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: One professional calendar across affiliations
 **Status:** Accepted
 
-Professional identity and schedule conflicts persist across every salon, branch and independent location. Affiliation changes do not erase ratings or booking history.
+Professional identity and schedule conflicts persist across every salon, branch and independent location. Affiliation changes do not erase ratings or Booking history.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Private location disclosure
 **Status:** Accepted
 
-Exact customer and home-studio addresses are private. Search and pre-confirmation use approximate geography. Exact details are released only to authorized booking participants at the valid stage and all sensitive access is audited.
+Exact customer and home-studio addresses are private. Search and pre-confirmation use approximate geography. Exact details are released only to authorized Booking participants at the valid stage and all sensitive access is audited.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Preserve generic UI, replace business prototypes
 **Status:** Accepted
 
-Reviewed generic shadcn/ui primitives and useful design utilities may remain. Current admin/customer/provider business pages are replacement targets because they use client-only state and hardcoded data. Authentication screens may be removed from this list only when their full database/API/security flow is operational and tested.
+Reviewed generic UI primitives and useful design utilities may remain. Current admin/customer/provider business pages are replacement targets because they use client-only state and hardcoded data.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Early draft PR
 **Status:** Accepted
 
-Open a draft pull request after phase-zero foundations so progress, commits, CI and limitations are continuously visible. The PR remains draft and is never merged without explicit owner instruction.
+Open a Draft PR after phase-zero foundations so progress, commits, CI and limitations are continuously visible. It is never merged without explicit owner instruction.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Versioned scrypt password KDF
 **Status:** Accepted
 
-Use Node.js scrypt as the approved memory-hard password hashing equivalent, with a random per-password salt, an environment-managed pepper and an encoded algorithm/version/parameter envelope. This avoids fragile native-build dependencies in the current deployment while preserving an explicit migration path to Argon2id. Passwords and pepper values are never logged or stored in seeds/source.
+Use Node.js scrypt with random salt, environment pepper and encoded algorithm/version/parameters, preserving a future Argon2id migration path. Passwords and pepper values are never logged or seeded.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Development OTP observability without production leakage
 **Status:** Accepted
 
-The mock SMS adapter may return the OTP to the development UI only when the application is not in production and `SMS_PROVIDER=mock`. The adapter refuses production use, logs only masked mobile/correlation metadata, and never logs the OTP. Real SMS delivery remains adapter-driven.
+The mock SMS adapter may return OTP to the development UI only outside production with `SMS_PROVIDER=mock`. It never logs the OTP and refuses production use.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Authentication state is PostgreSQL-authoritative
 **Status:** Accepted
 
-OTP challenges, attempt counters, resend cooldowns, application rate-limit windows, credentials, active sessions, idle/absolute expiry, device revocation and RBAC assignments are stored in PostgreSQL. Redis may later accelerate distributed limits but cannot be the only authority for authentication correctness.
+OTP challenges, cooldowns, rate limits, credentials, sessions, expiry, revocation and RBAC assignments are stored in PostgreSQL. Redis may accelerate but cannot be the only correctness authority.
 
 ## 2026-07-20 — تصمیم تخصصی افزوده‌شده: Multi-file Prisma schema by domain
 **Status:** Accepted
 
-Prisma reads the `prisma` directory as one schema. Authentication tables are defined in `prisma/auth.prisma` while the existing marketplace models remain in `prisma/schema.prisma`; committed SQL migrations remain the deployment source of truth. This permits gradual domain separation without rewriting the accepted foundation schema.
+Prisma reads the `prisma` directory as one schema. Domain files can be separated gradually while committed SQL migrations remain the deployment source of truth.
 
 ## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Stable professional identity before affiliations
 **Status:** Accepted
 
-A professional has one user-linked `ProfessionalProfile` that survives salon changes and independent/provider-mode changes. An approved professional-type provider application is required before that profile becomes verified and active. Affiliations reference the stable profile rather than creating duplicate professional identities inside each salon.
+A professional has one user-linked `ProfessionalProfile` that survives salon and provider-mode changes. Affiliations reference the stable profile rather than creating duplicate identities.
 
 ## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Bilateral affiliation activation and termination
 **Status:** Accepted
 
-Provider-professional relationships become active only after acceptance by the counterparty. Ending an active relationship also requires a termination request and counterparty response. PostgreSQL serializable transactions protect request creation and transitions, while every transition is preserved in `AuditLog`. Until provider/branch scoped ABAC is complete, provider-side authority is intentionally limited to the provider owner rather than inferred from a global permission.
+Provider-professional relationships activate only after counterparty acceptance. Ending an active relationship also requires a request and counterparty response. Serializable transactions and Audit preserve history. Provider authority stays owner-only until scoped ABAC exists.
 
 ## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Final and indicative prices are distinct
 **Status:** Accepted
 
-Only a server-calculated `FIXED` Offering quote is marked final and directly bookable in the initial pricing slice. `STARTING_FROM` and `RANGE` are persisted as explicit estimates, and `AFTER_CONSULTATION` never invents a price. Calculated, package, variant, add-on and location-aware pricing remain rejected until their dedicated rule engines and tests exist. Every quote stores the Offering version and calculation snapshot.
+Only a server-calculated fixed Quote is final/directly bookable in the initial slice. Starting/range values are explicit estimates and consultation never invents a price. Every Quote stores Offering version and calculation snapshot.
 
 ## 2026-07-21 — تصمیم تخصصی افزوده‌شده: Professional calendar takes precedence
 **Status:** Accepted
 
-An Offering assigned to a professional always resolves availability through the stable professional calendar, even when the Offering belongs to a salon or branch. A branch calendar is used only when no professional is assigned. This prevents the same professional from appearing free at two affiliated salons and preserves one conflict authority across affiliations.
+An Offering assigned to a professional always resolves availability through the stable professional calendar. Branch calendar is used only without an assigned professional.
+
+## 2026-07-22 — تصمیم تخصصی افزوده‌شده: Consumed Hold is the durable Booking allocation
+**Status:** Accepted
+
+Hold-to-Booking conversion must not temporarily release the resource. The same Serializable transaction creates Booking/BookingItem and changes `BookingHold` from `ACTIVE` to `CONSUMED`. A PostgreSQL GiST exclusion constraint covers both statuses, so another transaction cannot reserve the interval during or after conversion. Future cancellation and accepted rescheduling may change the consumed allocation to `RELEASED` only after their state and financial operations succeed atomically.
+
+## 2026-07-22 — تصمیم تخصصی افزوده‌شده: Payment-required Booking cannot bypass finance
+**Status:** Accepted
+
+The initial conversion supports only no-payment instant/manual policies. Online, deposit and prepaid policies return `PAYMENT_FLOW_REQUIRED`; they do not create a confirmed or approval-pending Booking until mock payment, callbacks and ledger posting exist.
 
 ## 2026-07-20 — Execution limitation
 **Status:** Active
 
-The local execution sandbox cannot reliably clone `github.com`, so direct local dependency-based checks are unavailable. Repository inspection and writes continue through the authenticated GitHub connector. GitHub Actions is the reproducible validation authority for this session; failed or unrun checks remain visible and are never represented as passing.
+The local execution sandbox cannot reliably clone `github.com`, so dependency-based local checks are unavailable. Repository inspection/writes use the authenticated connector. GitHub Actions remains the reproducible validation authority; unrun checks are never represented as passing.
