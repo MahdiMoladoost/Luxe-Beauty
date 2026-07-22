@@ -4,10 +4,18 @@ import { bookingConfig } from "@/lib/booking/config"
 import {
   bookingConversionRequestHash,
   bookingDecision,
-  BookingConversionPolicyError,
   validateLegalAcceptance,
   validateRecipientAndQuestionnaire,
 } from "@/lib/booking/conversion-policy"
+
+function expectPolicyCode(operation: () => unknown, code: string) {
+  try {
+    operation()
+    throw new Error(`Expected policy error ${code}`)
+  } catch (error) {
+    expect(error).toMatchObject({ code })
+  }
+}
 
 describe("hold to booking conversion policy", () => {
   it("accepts only the current immutable legal versions", () => {
@@ -19,13 +27,15 @@ describe("hold to booking conversion policy", () => {
       }),
     ).toMatchObject({ termsVersion: bookingConfig.legalVersions.terms })
 
-    expect(() =>
-      validateLegalAcceptance({
-        termsVersion: "stale-terms",
-        privacyVersion: bookingConfig.legalVersions.privacy,
-        bookingVersion: bookingConfig.legalVersions.booking,
-      }),
-    ).toThrowError(expect.objectContaining({ code: "LEGAL_VERSION_STALE" }))
+    expectPolicyCode(
+      () =>
+        validateLegalAcceptance({
+          termsVersion: "stale-terms",
+          privacyVersion: bookingConfig.legalVersions.privacy,
+          bookingVersion: bookingConfig.legalVersions.booking,
+        }),
+      "LEGAL_VERSION_STALE",
+    )
   })
 
   it("validates audience, age and required questionnaire answers", () => {
@@ -46,15 +56,20 @@ describe("hold to booking conversion policy", () => {
     })
     expect(result.recipientAgeAtAppointment).toBe(35)
 
-    expect(() =>
-      validateRecipientAndQuestionnaire({
-        recipient: { birthDate: null, genderCode: "MALE", relationLabel: null },
-        audienceRulesValue: { audience: "WOMEN", requiredQuestionnaireKeys: ["hairLength"] },
-        bookingPolicyValue: { approval: "INSTANT" },
-        questionnaireAnswers: null,
-        appointmentStartsAt: new Date("2030-02-11T10:00:00.000Z"),
-      }),
-    ).toThrowError(expect.objectContaining({ code: "RECIPIENT_NOT_ELIGIBLE" }))
+    expectPolicyCode(
+      () =>
+        validateRecipientAndQuestionnaire({
+          recipient: { birthDate: null, genderCode: "MALE", relationLabel: null },
+          audienceRulesValue: {
+            audience: "WOMEN",
+            requiredQuestionnaireKeys: ["hairLength"],
+          },
+          bookingPolicyValue: { approval: "INSTANT" },
+          questionnaireAnswers: null,
+          appointmentStartsAt: new Date("2030-02-11T10:00:00.000Z"),
+        }),
+      "RECIPIENT_NOT_ELIGIBLE",
+    )
   })
 
   it("selects instant or manual approval and refuses payment-required policies", () => {
@@ -73,13 +88,19 @@ describe("hold to booking conversion policy", () => {
     expect(manual.finalStatus).toBe("AWAITING_PROVIDER_APPROVAL")
     expect(manual.approvalDeadlineAt?.toISOString()).toBe("2030-01-01T08:30:00.000Z")
 
-    expect(() =>
-      bookingDecision({
-        bookingPolicyValue: { approval: "INSTANT", payment: "DEPOSIT", depositToman: "100000" },
-        startsAt,
-        now,
-      }),
-    ).toThrowError(expect.objectContaining({ code: "PAYMENT_FLOW_REQUIRED" }))
+    expectPolicyCode(
+      () =>
+        bookingDecision({
+          bookingPolicyValue: {
+            approval: "INSTANT",
+            payment: "DEPOSIT",
+            depositToman: "100000",
+          },
+          startsAt,
+          now,
+        }),
+      "PAYMENT_FLOW_REQUIRED",
+    )
   })
 
   it("creates a stable request hash and changes it for material input changes", () => {
@@ -107,5 +128,3 @@ describe("hold to booking conversion policy", () => {
     expect(changed).not.toBe(first)
   })
 })
-
-void BookingConversionPolicyError
