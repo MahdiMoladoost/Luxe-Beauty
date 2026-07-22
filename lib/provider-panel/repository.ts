@@ -178,6 +178,13 @@ export class ProviderPanelRepository {
     }
   }
 
+  async booking(providerId: string, bookingId: string) {
+    return this.database.booking.findFirst({
+      where: { id: bookingId, providerId },
+      include: bookingInclude,
+    })
+  }
+
   async listBookings(providerId: string, filters: ProviderBookingFilters) {
     const conditions: Prisma.BookingWhereInput[] = [{ providerId }]
 
