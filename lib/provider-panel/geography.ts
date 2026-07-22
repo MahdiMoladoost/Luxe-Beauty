@@ -1,7 +1,6 @@
-import type { SessionPrincipal } from "@/lib/auth/types"
 import { prisma } from "@/lib/infrastructure/prisma"
 
-export async function providerPanelGeography(_principal: SessionPrincipal) {
+export async function providerPanelGeography() {
   const provinces = await prisma.province.findMany({
     where: { active: true },
     select: {
