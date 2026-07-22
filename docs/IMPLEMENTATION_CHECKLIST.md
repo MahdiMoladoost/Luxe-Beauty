@@ -2,32 +2,32 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider verification, affiliation, branch management, catalog, quote, availability and booking-hold commits require a fresh CI run before their implementation status can be upgraded to verified complete.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider, catalog, availability, Booking Hold and Hold-to-Booking commits require a fresh CI run before their status can be upgraded to verified complete.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
 - [x] Confirm repository admin/read/write access and default branch `main`.
 - [x] Create `rebuild/full-platform` from `main`.
 - [x] Inspect repository metadata and initial commit.
-- [x] Inventory current business routes and identify hardcoded panel data.
-- [!] Run current local install/build/lint; direct DNS access to GitHub is unavailable in the execution sandbox and no dependency checkout is present.
+- [x] Inventory current business routes and hardcoded panel data.
+- [!] Run local install/build/lint; direct DNS access to GitHub is unavailable in the execution sandbox and no dependency checkout is present.
 - [x] Create required project-memory documents.
 - [x] Document target architecture and migration strategy.
-- [x] Mark legacy admin/customer/provider/auth routes as replacement targets.
+- [x] Mark legacy business routes as replacement targets.
 - [x] Create initial executable Prisma schema.
-- [x] Validate Prisma schema and committed migrations against a clean PostgreSQL instance in CI.
-- [~] Complete repository-wide secret scanning and dependency auditing; production dependency audit passes, dedicated source/secret scanning is still open.
+- [x] Validate foundation migrations against clean PostgreSQL in CI.
+- [~] Production dependency audit passes; dedicated source/history secret scanning remains open.
 
 ## Phase 1 — Infrastructure
-- [x] Normalize package name, scripts, dependency versions and committed lockfile.
+- [x] Normalize package name, scripts, dependency versions and lockfile.
 - [x] Add `.env.example` with names/placeholders only.
-- [x] Add PostgreSQL, Prisma Client, baseline schema and committed migration foundation.
-- [~] Redis/BullMQ foundation now includes a scheduled booking-hold expiry job with retry/backoff; complete queue monitoring, dead-letter operations and remaining jobs are open.
-- [~] Worker handles health and booking-hold expiry with structured logs; additional domain jobs and operational dashboards remain open.
-- [~] Add MinIO development namespaces and S3-compatible environment contract; application storage adapter remains open.
-- [x] Add Dockerfile, Docker Compose, production-like Nginx and liveness/readiness endpoints; full runtime smoke test remains open.
-- [~] Add structured worker logs; request correlation middleware and full observability remain open.
-- [x] Add read-only reproducible CI gates for locked install, Prisma, migrations, seed, lint, typecheck, unit/integration tests, build, Compose, Docker image and production dependency audit.
+- [x] Add PostgreSQL, Prisma Client and committed migrations.
+- [~] Redis/BullMQ includes scheduled Booking-Hold expiry with retry/backoff; complete queue monitoring and dead-letter operations remain open.
+- [~] Worker handles health and Hold expiry with structured logs; additional domain jobs remain open.
+- [~] Add MinIO namespaces and S3-compatible contract; complete storage operations remain open.
+- [x] Add Dockerfile, Compose, Nginx and health endpoints; full runtime smoke test remains open.
+- [~] Structured worker logs exist; full request correlation/observability remains open.
+- [x] Add CI gates for locked install, Prisma, migrations, seed, lint, typecheck, tests, build, Compose, Docker and dependency audit.
 
 ## Phase 2 — Design system and public experience
 - [ ] RTL layout, licensed Persian font and theme tokens.
@@ -36,59 +36,59 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Data-backed homepage/search entry.
 - [ ] Public provider/professional/service/geography pages.
 - [ ] Legal/static/content pages backed by CMS data.
-- [~] Authentication and security screens now have real loading/error/success states; public and business panels remain open.
+- [~] Authentication/security screens have real states; public and business panels remain open.
 - [ ] WCAG checks and responsive verification.
 
 ## Phase 3 — Authentication and security
-- [x] Customer mobile OTP registration/login, expiry, attempt limits, resend cooldown, rate limiting and persistent session lifecycle.
-- [x] Staff/provider mobile-password login using versioned scrypt with an environment pepper as an approved memory-hard KDF equivalent.
-- [x] SMS 2FA and password recovery through a replaceable provider with a development-only mock; login lockout and suspicious/failure audit are active.
-- [~] RBAC is deny-by-default with ten seeded roles, custom roles/permissions, protected APIs/layouts and atomic audit; provider/branch/professional scoped ABAC is still open.
-- [~] Sensitive national-ID HMAC/encryption, mock verification adapter and audited administrative access are implemented; production identity provider and complete retention workflows remain open.
-- [~] Forced initial super-admin password change and staff SMS 2FA are active; freshness-based step-up for every future financial/identity action remains open.
-- [~] Same-origin mutation checks, secure cookies, session expiry/revocation, OTP/password rate limits and safe error envelopes are active; CSP/XSS/SSRF/upload controls remain open.
-- [x] Super-admin bootstrap uses mobile `09399496078`; the initial password is read only from `SEED_SUPER_ADMIN_INITIAL_PASSWORD`, never from code or a public seed.
-- [x] Active device/session listing, per-device revocation, current logout and logout-all are persisted and audited.
-- [x] Authentication/RBAC migration, multi-file Prisma schema, development seed, UI, API, permission matrix, unit tests and PostgreSQL integration tests pass CI.
+- [x] Customer mobile OTP registration/login, expiry, attempt limits, cooldown, rate limiting and persistent sessions.
+- [x] Staff/provider mobile-password login with versioned memory-hard scrypt and environment pepper.
+- [x] SMS 2FA and password recovery through replaceable provider with development-only mock.
+- [~] Deny-by-default RBAC with seeded/custom roles and protected APIs; scoped provider/branch/professional ABAC remains open.
+- [~] National-ID HMAC/encryption and audited administrative access exist; production identity provider and retention workflows remain open.
+- [~] Forced initial password change and staff 2FA are active; step-up for every future sensitive action remains open.
+- [~] Same-origin mutation checks, secure cookies, expiry/revocation and safe envelopes exist; CSP/XSS/SSRF/upload controls remain open.
+- [x] Super-admin mobile is `09399496078`; initial password is environment-only.
+- [x] Session/device listing and revocation are persisted and audited.
+- [x] Authentication/RBAC migrations, seed, API/UI and tests pass verified CI.
 
 ## Phase 4 — Providers and verification
-- [~] Provider-type onboarding supports persisted applications for salon and professional modes; dynamic per-type requirement configuration and the complete workspace remain open.
-- [~] Provider organizations, stable professional profiles and owner-scoped branch CRUD exist. Branch creation validates city/district/neighborhood hierarchy, remains inactive by default, supports soft delete and optimistic concurrency, and can activate only after provider approval. Delegated branch staff, private address verification, business hours and public branch pages remain open.
-- [~] Private provider documents support validation, malware-scan adapter state, private storage, audited reads and review; configurable document requirement definitions remain open.
-- [~] Verification supports submit, review, correction, rejection, approval and appeals; scheduled expiry/re-review and complete appeal operations remain open.
+- [~] Persisted onboarding exists for salon/professional modes; dynamic requirements and complete workspace remain open.
+- [~] Provider organizations, stable professional profiles and owner-scoped branch CRUD exist; delegated staff, private address verification and public pages remain open.
+- [~] Private documents support validation, scan adapter, private storage, audited reads and review; configurable requirements remain open.
+- [~] Verification supports submit, correction, rejection, approval and appeals; scheduled expiry/re-review remains open.
 - [ ] Home-location verification.
-- [~] Bilateral professional affiliations support provider/professional requests, counterparty acceptance/rejection, bilateral termination, serializable transactions and audit. Shared professional calendar ownership is represented and booking holds lock that stable calendar; delegated provider-staff ABAC remains open.
+- [~] Bilateral affiliations support requests, counterparty decisions, termination, Serializable transactions and Audit. Booking revalidates active affiliation; scoped delegated ABAC remains open.
 
 ## Phase 5 — Catalog, pricing and availability
-- [~] Platform-owned categories and standard services have protected creation, public reads and audit. Provider-owner Offering create/list/update/archive, branch/professional ownership checks, publication guards and optimistic `version` are implemented; full admin editing/order and delegated provider ABAC remain open.
+- [~] Platform categories/services and provider-owner Offering operations are implemented with publication guards and optimistic versioning; full admin ordering/edit and delegated ABAC remain open.
 - [ ] Variants, add-ons, packages and complete consultation workflows.
-- [~] Integer-toman policy supports fixed, starting-from, range and consultation-required modes. Server Quotes persist Offering version, duration formula and rule snapshots with expiry; calculated/location/package/variant pricing and quote-expiry jobs remain open.
-- [~] Audience, booking and pricing rule objects are persisted and snapshotted, but age/guardian/questionnaire/location rule engines are still open.
-- [~] Weekly schedules, open/closed exceptions, timezone-aware slot generation and professional-first shared calendar resolution are implemented. Holiday templates, leave workflow and schedule administration UI remain open.
-- [~] Preparation, cleanup and before/after buffers are enforced. Resource capacity, equipment/room constraints and travel-time scheduling remain open.
-- [~] Single-Offering slot preview and transactional single-slot Hold both subtract blocking Booking intervals, active Holds and past time. Multi-service contiguous search, alternatives and waitlist remain open.
+- [~] Integer-toman fixed/starting/range/consultation policy and immutable Quote snapshots exist; calculated/location/package/variant pricing and Quote-expiry jobs remain open.
+- [~] Audience and required-questionnaire rules are enforced during initial Booking conversion; guardian workflow, rich definitions and location rules remain open.
+- [~] Weekly schedules, exceptions, timezone-aware slots and professional-first shared calendars exist; holidays, leave and administration UI remain open.
+- [~] Preparation, cleanup and buffers are enforced; resource/equipment capacity and travel-time scheduling remain open.
+- [~] Single-Offering preview and Hold subtract Booking intervals, allocations and past time. Multi-service search, alternatives and waitlist remain open.
 
 ## Phase 6 — Booking, mock payment and ledger
-- [~] Booking recipient, booking, booking-item and transition persistence models exist; Hold-to-Booking conversion and complete application workflows remain open.
-- [~] Transactional Booking Holds are implemented with verified identity, final Quote validation, TTL, per-customer idempotency, Serializable transactions, PostgreSQL advisory locks, active-range exclusion constraint, Audit, Outbox, read/release APIs and scheduled/lazy expiry. Conversion to Booking and confirmed-Booking exclusion constraints remain open.
-- [~] Booking transition guard and initial unit coverage exist; complete use-case/state-machine integration tests remain open.
-- [ ] Instant/manual approval and approval-deadline jobs.
-- [ ] Mock payment callbacks/webhooks/refunds/reconciliation.
-- [~] Ledger account/transaction/entry persistence and integer-toman helpers exist; posting services and balance invariants remain open.
+- [~] Customer-owned service-recipient APIs and exact date validation are implemented; editing/deletion, guardian relationships and richer recipient workflows remain open.
+- [~] Transactional Booking Holds use verified identity, final Quote validation, TTL, idempotency, Serializable transactions, advisory locks, GiST exclusion, Audit, Outbox and scheduled/lazy expiry.
+- [~] Atomic Hold-to-Booking conversion creates Booking, BookingItem, immutable price/duration/policy/questionnaire/legal snapshots, two transitions, Audit and Outbox without releasing the resource allocation. Exact replay, IDOR, expired Hold and concurrent consumption tests are present; fresh CI is pending.
+- [~] No-payment instant approval produces `CONFIRMED`; no-payment manual approval produces `AWAITING_PROVIDER_APPROVAL` with a bounded deadline. Provider approve/reject APIs and deadline-expiry worker remain open.
+- [ ] Payment-required conversion, mock payment callbacks/webhooks/refunds/reconciliation.
+- [~] Ledger persistence and integer-toman helpers exist; posting services and balance invariants remain open.
 - [ ] Cancellation, delay, reschedule and no-show policies.
 - [ ] Attendance OTP, completion and dispute window.
 - [ ] Dispute workflow and financial hold.
 
 ## Phase 7 — Operational panels
-- [~] Customer authentication, profile completion and security/device management are data-backed; the complete customer panel remains open.
+- [~] Customer authentication/profile/security is data-backed; complete customer panel remains open.
 - [ ] Salon/group panel.
 - [ ] Independent professional panel.
-- [~] Platform role/permission management and provider verification queue are data-backed and protected; the complete administration panel remains open.
-- [x] Seeded and configurable roles/permissions with server-side API and layout enforcement.
+- [~] Role/permission management and provider verification queue are protected and data-backed; complete admin panel remains open.
+- [x] Seeded/configurable roles and permissions with server-side enforcement.
 - [ ] Real reports and CSV/Excel exports.
 
 ## Phase 8 — Communications
-- [~] Replaceable SMS port and explicit development mock support OTP, staff 2FA and password recovery; Kavenegar production adapter remains open.
+- [~] Replaceable SMS port and development mock support authentication flows; Kavenegar production adapter remains open.
 - [ ] SMS templates, quota, packs, delivery state, retries and reports.
 - [ ] In-app notifications and PWA push.
 - [ ] Internal messaging with private files and moderation signals.
@@ -96,8 +96,8 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 9 — Content and growth
 - [ ] Verified reviews and moderation/appeals.
-- [ ] Consent-aware portfolios linked to booking.
-- [ ] CMS, articles, FAQ and homepage ordering.
+- [ ] Consent-aware portfolios linked to Booking.
+- [ ] CMS, articles, FAQ, legal version publication and homepage ordering.
 - [ ] Coupons, promotions, campaigns and ads.
 - [ ] Ledger wallet, referrals and loyalty.
 - [ ] Waitlist and release holds.
@@ -106,42 +106,40 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Neshan adapter and explicit development mode.
 - [ ] Address selection/geocoding/reverse/distance.
 - [ ] Radius/polygon service areas and privacy rules.
-- [~] Persian letter/digit/search normalization exists with unit tests; PostgreSQL FTS and pg_trgm remain open.
+- [~] Persian normalization exists; PostgreSQL FTS and pg_trgm remain open.
 - [ ] Autocomplete, ranking, filters and sponsored labels.
 - [ ] SEO geography/service pages and structured data.
 
 ## Phase 11 — Professional extensions
-- [ ] Wedding/group/multi-person booking flags.
+- [ ] Wedding/group/multi-person Booking flags.
 - [ ] Inventory and consumable usage.
 - [ ] Permitted product commerce.
 - [ ] Accounting/webhook adapters.
 - [ ] Rule-based recommendation engine and future model adapter.
 
 ## Phase 12 — Hardening and release readiness
-- [ ] Complete development-only seed for nine cities and test roles.
-- [~] Unit tests cover authentication cryptography, RBAC, route permission matrices, money, Persian normalization, booking transitions, identity/provider/affiliation policies, catalog pricing, availability intervals and Booking Hold policy; later domains remain open.
-- [~] PostgreSQL integration tests cover OTP/session/profile, staff password/2FA, RBAC APIs/audit, device IDOR, identity verification, provider onboarding/private documents, affiliation lifecycle, branch concurrency, Catalog→Offering→Quote→Schedule→Availability and concurrent/idempotent Booking Holds. Fresh CI verification of the newest slices is pending.
+- [ ] Complete development seed for nine cities and test roles.
+- [~] Unit tests cover auth, RBAC, money, Persian normalization, transitions, identity/provider/affiliation, pricing, availability, Hold and Hold-to-Booking policy.
+- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds and atomic Hold conversion. Fresh CI verification of newest slices is pending.
 - [ ] Playwright E2E matrix.
-- [~] Permission denial, role escalation boundaries, OTP/rate/session/logout/device IDOR, CSRF-origin behavior, provider-document/affiliation IDOR, branch isolation, Offering/schedule isolation and Booking Hold IDOR/idempotency/concurrency have automated coverage; upload and full security matrix remain open.
+- [~] Automated security coverage includes role boundaries, OTP/session/device IDOR, CSRF-origin, provider documents/affiliations/branches, Offering/schedule isolation, Hold IDOR/idempotency/concurrency and Booking owner IDOR.
 - [ ] Accessibility automated and manual checks.
-- [x] Current authentication/RBAC production build, clean migration deployment, seed, Compose validation and Docker image build pass in CI.
-- [x] Current production dependency audit passes at high severity threshold.
+- [x] Verified authentication/RBAC build, migration, seed, Compose, image build and dependency audit pass CI.
 - [ ] Backup and restore test.
 - [ ] Operations/health/queue dashboards.
 - [ ] Persian README, installation, production, backup and restore docs.
 - [x] External integration limitations and environment contract documented.
-- [x] Draft PR description continuously records current architecture, migrations, capabilities, tests, build, environment, security and limitations.
-- [~] MR-001 through MR-071 are documented and traceable; authentication/RBAC, provider/identity, catalog/availability and initial Booking Hold slices have advanced while most marketplace domains remain open.
+- [x] Draft PR continuously records architecture, migrations, tests and limitations.
+- [~] MR-001 through MR-071 are traceable; auth, provider, catalog/availability and initial Booking slices have advanced while most marketplace scope remains open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
-The following current routes remain presentation prototypes unless explicitly noted:
-- `app/admin/page.tsx` — protected, but its business dashboard content remains a replacement target.
-- `app/dashboard/page.tsx` — protected, but the full customer business panel remains open.
-- `app/salon-dashboard/page.tsx` — protected, but its business dashboard content remains a replacement target.
-- `app/auth/login/page.tsx` — replaced with operational customer OTP and staff mobile/password/2FA flows.
-- `app/auth/register/page.tsx` — replaced with operational mobile OTP registration and persisted profile completion.
-- `app/salon-register/page.tsx` — still a provider-onboarding replacement target.
-- hardcoded public listing/statistics sections in current public pages.
+- `app/admin/page.tsx` — business dashboard remains a replacement target.
+- `app/dashboard/page.tsx` — complete customer business panel remains open.
+- `app/salon-dashboard/page.tsx` — business dashboard remains a replacement target.
+- `app/auth/login/page.tsx` — operational OTP/staff login replacement exists.
+- `app/auth/register/page.tsx` — operational OTP registration/profile completion exists.
+- `app/salon-register/page.tsx` — provider-onboarding replacement remains open.
+- Hardcoded public listings/statistics remain replacement targets.
 
 Generic reviewed `components/ui/*` primitives may be retained.
