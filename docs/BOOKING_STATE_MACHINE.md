@@ -94,7 +94,7 @@ The initial no-payment Hold conversion and provider decision/expiry transitions 
 
 Provider approval and rejection are owner-scoped, idempotent and optimistic-versioned. One Serializable transaction locks the Booking, checks ownership, rejects payment-linked records from this bounded path, validates the consumed allocation, status, deadline and `expectedVersion`, then writes status, transition, Audit, Outbox and replay state.
 
-- Approval preserves the consumed allocation and moves to `CONFIRMED`.
+- Approval revalidates current provider, branch, Offering, standard service, professional and affiliation eligibility, preserves the consumed allocation and moves to `CONFIRMED`.
 - Rejection stores a controlled reason, releases the allocation and moves to `REJECTED`.
 - A late command cannot decide the Booking; it expires and releases the allocation atomically.
 - The scheduled worker uses the same Booking advisory lock, so API decisions and deadline expiry cannot both win.
@@ -132,7 +132,7 @@ Attendance requires an expiring per-Booking challenge with rate limits and Audit
 - Exact replay and changed-payload idempotency conflict.
 - Stale Booking version.
 - Expired Hold and approval deadline.
-- Provider approve/reject IDOR and concurrent-decision race.
+- Provider approve/reject IDOR, operational eligibility and concurrent-decision race.
 - Scheduled approval expiry and allocation release.
 - Concurrent Hold conversion and double-booking race.
 - Payment callback before/after expiry.
