@@ -71,13 +71,6 @@ function recipientError(kind: string): never {
       409,
     )
   }
-  if (kind === "IN_USE") {
-    throw new AuthError(
-      "BOOKING_RECIPIENT_IN_USE",
-      "این دریافت‌کننده در سابقه نوبت استفاده شده و قابل حذف نیست.",
-      409,
-    )
-  }
   throw new AuthError("BOOKING_RECIPIENT_OPERATION_FAILED", "عملیات دریافت‌کننده انجام نشد.", 400)
 }
 
