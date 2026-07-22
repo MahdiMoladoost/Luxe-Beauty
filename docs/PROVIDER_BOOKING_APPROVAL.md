@@ -70,10 +70,11 @@ Each decision runs in one PostgreSQL Serializable transaction:
 5. reject payment-linked bookings from this no-payment path;
 6. verify the consumed BookingHold allocation;
 7. validate status, deadline and `expectedVersion`;
-8. update Booking from `AWAITING_PROVIDER_APPROVAL`;
-9. preserve the allocation for approval or release it for rejection;
-10. write the BookingTransition, Audit Log and Outbox event;
-11. persist the replayable idempotent response.
+8. for approval, revalidate provider, branch, Offering, standard service, professional and active affiliation eligibility;
+9. update Booking from `AWAITING_PROVIDER_APPROVAL`;
+10. preserve the allocation for approval or release it for rejection;
+11. write the BookingTransition, Audit Log and Outbox event;
+12. persist the replayable idempotent response.
 
 Any failure rolls back every write.
 
@@ -84,6 +85,11 @@ Any failure rolls back every write.
 `AWAITING_PROVIDER_APPROVAL -> CONFIRMED`
 
 - Booking version increments atomically.
+- Provider must still be approved, booking-enabled and undeleted.
+- The assigned branch must still be active.
+- Every Booking item must still reference an active/published Offering and active standard service.
+- Any assigned professional must remain active, verified and actively affiliated unless they are the provider owner.
+- Failed revalidation returns `BOOKING_APPROVAL_ELIGIBILITY_FAILED` without changing Booking or allocation.
 - The consumed Hold remains `CONSUMED` and continues to protect the interval.
 - Transition reason is `PROVIDER_APPROVED`.
 
@@ -94,6 +100,7 @@ Any failure rolls back every write.
 - A controlled reason code and explanatory text are stored.
 - Booking version increments atomically.
 - The consumed Hold changes to `RELEASED` with `releasedAt`.
+- Rejection remains available when operational eligibility has failed, so an unusable pending Booking can still release its interval safely.
 - `REJECTED` is not a blocking Availability status, so the interval can be offered again.
 
 ### Late provider command
@@ -152,11 +159,13 @@ The existing Hold allocation constraint remains authoritative:
 - stale version and non-pending state;
 - stable request hash;
 - provider-owner approval and exact replay;
+- changed-payload idempotency conflict;
 - provider rejection and allocation release;
 - cross-provider IDOR;
+- approval eligibility revalidation with rejection fallback;
 - concurrent approve/reject race;
 - late command expiry;
-- scheduled worker expiry.
+- scheduled worker expiry scoped to the target Booking.
 
 ## Explicit remaining work
 
