@@ -142,6 +142,12 @@ function repositoryError(kind: string): never {
         "تخصیص زمانی معتبر این نوبت یافت نشد. موضوع برای بررسی ثبت شود.",
         409,
       )
+    case "APPROVAL_ELIGIBILITY_FAILED":
+      throw new AuthError(
+        "BOOKING_APPROVAL_ELIGIBILITY_FAILED",
+        "شرایط فعلی سالن، شعبه، خدمت یا متخصص برای تأیید نهایی معتبر نیست. نوبت را رد یا وضعیت ارائه را اصلاح کنید.",
+        409,
+      )
     case "CONCURRENCY_CONFLICT":
       throw new AuthError(
         "BOOKING_CONCURRENCY_RETRY",
