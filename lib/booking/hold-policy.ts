@@ -10,24 +10,30 @@ export class BookingHoldPolicyError extends Error {
   }
 }
 
-export const quoteSnapshotSchema = z.object({
-  schemaVersion: z.literal(1),
-  offering: z.object({
-    id: z.string().uuid(),
-    version: z.number().int().positive(),
-    providerId: z.string().uuid(),
-    branchId: z.string().uuid().nullable(),
-    professionalId: z.string().uuid().nullable(),
-    priceModel: z.string(),
-  }),
-  calculation: z.object({
-    totalToman: z.string().regex(/^\d+$/),
-    durationMinute: z.number().int().min(1).max(1440),
-    finalPrice: z.boolean(),
-    directlyBookable: z.boolean(),
-  }),
-  expiresAt: z.string().datetime({ offset: true }),
-}).passthrough()
+export const quoteSnapshotSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    offering: z
+      .object({
+        id: z.string().uuid(),
+        version: z.number().int().positive(),
+        providerId: z.string().uuid(),
+        branchId: z.string().uuid().nullable(),
+        professionalId: z.string().uuid().nullable(),
+        priceModel: z.string(),
+      })
+      .passthrough(),
+    calculation: z
+      .object({
+        totalToman: z.string().regex(/^\d+$/),
+        durationMinute: z.number().int().min(1).max(1440),
+        finalPrice: z.boolean(),
+        directlyBookable: z.boolean(),
+      })
+      .passthrough(),
+    expiresAt: z.string().datetime({ offset: true }),
+  })
+  .passthrough()
 
 export type ParsedQuoteSnapshot = z.infer<typeof quoteSnapshotSchema>
 
