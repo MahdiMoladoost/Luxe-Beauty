@@ -60,7 +60,8 @@ export const bookingHoldConversionSnapshotSchema = z.object({
   resourceId: z.string().uuid(),
   occupiedFrom: z.string().datetime({ offset: true }),
   occupiedUntil: z.string().datetime({ offset: true }),
-  holdTtlSeconds: z.number().int().positive(),
+  configuredHoldTtlSeconds: z.number().int().positive(),
+  effectiveExpiresAt: z.string().datetime({ offset: true }),
 })
 
 const legalAcceptanceSchema = z.object({
