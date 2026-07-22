@@ -136,13 +136,11 @@ export class BookingRecipientRepository {
             customerUserId: input.principal.userId,
             deletedAt: null,
           },
-          include: { bookings: { select: { id: true }, take: 1 } },
         })
         if (!current) return { kind: "NOT_FOUND" as const }
         if (current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
           return { kind: "VERSION_CONFLICT" as const }
         }
-        if (current.bookings.length > 0) return { kind: "IN_USE" as const }
 
         const deletedAt = new Date()
         await tx.serviceRecipient.update({
