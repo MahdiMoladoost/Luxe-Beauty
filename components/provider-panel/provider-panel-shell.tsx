@@ -4,14 +4,18 @@ import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import {
+  Building2,
   CalendarCheck2,
+  CalendarClock,
   ChevronLeft,
   ExternalLink,
   LayoutDashboard,
   LogOut,
   Menu,
+  Scissors,
   ShieldCheck,
   Store,
+  UsersRound,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +50,10 @@ type ProviderPanelShellProps = {
 const navigation = [
   { href: "/salon-dashboard", label: "نمای کلی", icon: LayoutDashboard },
   { href: "/salon-dashboard/bookings", label: "نوبت‌ها", icon: CalendarCheck2 },
+  { href: "/salon-dashboard/branches", label: "شعب", icon: Building2 },
+  { href: "/salon-dashboard/services", label: "خدمات", icon: Scissors },
+  { href: "/salon-dashboard/professionals", label: "متخصصان", icon: UsersRound },
+  { href: "/salon-dashboard/schedule", label: "برنامه کاری", icon: CalendarClock },
 ]
 
 const statusLabels: Record<string, string> = {
@@ -59,7 +67,10 @@ const statusLabels: Record<string, string> = {
 
 function providerStatus(provider: ProviderSummary) {
   if (provider.status === "APPROVED" && provider.bookingEnabled) {
-    return { label: "فعال برای رزرو", className: "border-emerald-300/40 bg-emerald-500/10 text-emerald-100" }
+    return {
+      label: "فعال برای رزرو",
+      className: "border-emerald-300/40 bg-emerald-500/10 text-emerald-100",
+    }
   }
   return {
     label: statusLabels[provider.status] ?? provider.status,
@@ -67,12 +78,21 @@ function providerStatus(provider: ProviderSummary) {
   }
 }
 
-function Navigation({ providerId, onNavigate }: { providerId: string | null; onNavigate?: () => void }) {
+function Navigation({
+  providerId,
+  onNavigate,
+}: {
+  providerId: string | null
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
   return (
     <nav aria-label="ناوبری پنل سالن" className="space-y-2">
       {navigation.map((item) => {
-        const active = item.href === "/salon-dashboard" ? pathname === item.href : pathname.startsWith(item.href)
+        const active =
+          item.href === "/salon-dashboard"
+            ? pathname === item.href
+            : pathname.startsWith(item.href)
         const href = providerId ? `${item.href}?providerId=${providerId}` : item.href
         const Icon = item.icon
         return (
@@ -118,7 +138,8 @@ export function ProviderPanelShell({ providers, children }: ProviderPanelShellPr
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const requestedId = searchParams.get("providerId")
-  const selectedProvider = providers.find((provider) => provider.id === requestedId) ?? providers[0] ?? null
+  const selectedProvider =
+    providers.find((provider) => provider.id === requestedId) ?? providers[0] ?? null
   const status = selectedProvider ? providerStatus(selectedProvider) : null
 
   function changeProvider(providerId: string) {
@@ -131,7 +152,10 @@ export function ProviderPanelShell({ providers, children }: ProviderPanelShellPr
   async function logout() {
     setLoggingOut(true)
     try {
-      await fetch("/api/auth/logout", { method: "POST", headers: { "Content-Type": "application/json" } })
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
       router.replace("/auth/login")
       router.refresh()
     } finally {
@@ -173,10 +197,17 @@ export function ProviderPanelShell({ providers, children }: ProviderPanelShellPr
       <PanelBrand />
       <div className="mt-7">{providerSelector}</div>
       <div className="mt-6 flex-1">
-        <Navigation providerId={selectedProvider?.id ?? null} onNavigate={() => setMobileOpen(false)} />
+        <Navigation
+          providerId={selectedProvider?.id ?? null}
+          onNavigate={() => setMobileOpen(false)}
+        />
       </div>
       <div className="space-y-2 border-t border-white/10 pt-4">
-        <Button asChild variant="ghost" className="w-full justify-start text-[#ead9ca]/75 hover:bg-white/8 hover:text-white">
+        <Button
+          asChild
+          variant="ghost"
+          className="w-full justify-start text-[#ead9ca]/75 hover:bg-white/8 hover:text-white"
+        >
           <Link href="/">
             <ExternalLink className="size-4" />
             مشاهده سایت
@@ -208,11 +239,19 @@ export function ProviderPanelShell({ providers, children }: ProviderPanelShellPr
             <div className="flex items-center gap-3">
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="lg:hidden" aria-label="بازکردن منوی پنل">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="lg:hidden"
+                    aria-label="بازکردن منوی پنل"
+                  >
                     <Menu className="size-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[310px] border-l-white/10 bg-[#251713] p-0 text-white sm:max-w-[340px]">
+                <SheetContent
+                  side="right"
+                  className="w-[310px] border-l-white/10 bg-[#251713] p-0 text-white sm:max-w-[340px]"
+                >
                   <SheetHeader className="sr-only">
                     <SheetTitle>منوی پنل ارائه‌دهنده</SheetTitle>
                     <SheetDescription>دسترسی به بخش‌های عملیاتی پنل</SheetDescription>
@@ -238,7 +277,9 @@ export function ProviderPanelShell({ providers, children }: ProviderPanelShellPr
             </Button>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {children}
+        </main>
       </div>
     </div>
   )
