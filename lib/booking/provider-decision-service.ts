@@ -30,13 +30,13 @@ const rejectSchema = z.object({
   reason: z.string().trim().min(5).max(500),
 })
 
-type ProviderBookingDetails = NonNullable<
-  Awaited<ReturnType<typeof providerBookingDecisionRepository.decideOrReplay>> extends infer Result
-    ? Result extends { booking: infer Booking }
-      ? Booking
-      : never
-    : never
->
+type ProviderBookingDetails = Prisma.BookingGetPayload<{
+  include: {
+    items: true
+    transitions: true
+    recipient: true
+  }
+}>
 
 function recipientDto(recipient: ServiceRecipient) {
   return {
