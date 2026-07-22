@@ -102,6 +102,13 @@ The initial conversion supports only no-payment instant/manual policies. Online,
 
 Provider approval, provider rejection, late provider commands and the scheduled approval-expiry worker use the same PostgreSQL advisory lock for a Booking. Approval revalidates current provider, branch, Offering, standard service, professional and affiliation eligibility and preserves the consumed allocation. Rejection and no-payment deadline expiry change the allocation to `RELEASED` in the same Serializable transaction as the Booking transition. Payment-linked records are not automatically mutated until refund and ledger orchestration exists.
 
+## 2026-07-22 — تصمیم تخصصی افزوده‌شده: Operational panels are clients of domain APIs
+**Status:** Accepted
+
+Business panels must not duplicate Booking, pricing, affiliation, branch or availability rules in browser state. A panel may provide validation and presentation, but every mutation calls the existing domain API and the server rechecks ownership, version, eligibility, transaction, Audit and Outbox rules. Dashboard metrics come from PostgreSQL queries and unavailable finance metrics remain hidden rather than mocked. No navigation item, button or dialog is shown as operational unless its endpoint and failure states exist.
+
+The salon owner manages branch schedules. A professional's stable cross-affiliation calendar remains under the professional account until explicit scoped delegation is implemented.
+
 ## 2026-07-20 — Execution limitation
 **Status:** Active
 
