@@ -1,14 +1,20 @@
 -- Atomic conversion from a temporary hold to a persisted booking allocation.
 
 ALTER TABLE "BookingHold"
-    ADD CONSTRAINT "BookingHold_consumedBookingId_key" UNIQUE ("consumedBookingId");
+    ADD CONSTRAINT "BookingHold_consumedBookingId_key" UNIQUE ("consumedBookingId"),
+    ADD CONSTRAINT "BookingHold_consumption_state_check" CHECK (
+        ("status" = 'CONSUMED' AND "consumedBookingId" IS NOT NULL) OR
+        ("status" = 'RELEASED') OR
+        ("status" IN ('ACTIVE', 'EXPIRED') AND "consumedBookingId" IS NULL)
+    );
 
 ALTER TABLE "BookingHold"
     DROP CONSTRAINT "BookingHold_active_resource_overlap_excl";
 
 -- A consumed hold remains the authoritative resource allocation for its Booking.
 -- Keeping ACTIVE and CONSUMED in one exclusion constraint prevents a gap while
--- the conversion transaction creates Booking/BookingItem rows.
+-- the conversion transaction creates Booking/BookingItem rows. A later booking
+-- cancellation/reschedule workflow can move the consumed allocation to RELEASED.
 ALTER TABLE "BookingHold"
     ADD CONSTRAINT "BookingHold_allocated_resource_overlap_excl"
     EXCLUDE USING gist (
