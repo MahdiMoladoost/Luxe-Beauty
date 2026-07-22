@@ -233,30 +233,37 @@ export class ProviderPanelRepository {
     }
 
     const where: Prisma.BookingWhereInput = { AND: conditions }
-    const orderBy: Prisma.BookingOrderByWithRelationInput[] =
-      filters.sort === "appointment"
-        ? [{ items: { _count: "desc" } }, { createdAt: "desc" }]
-        : [{ createdAt: "desc" }]
-
-    const [total, rows] = await this.database.$transaction([
-      this.database.booking.count({ where }),
-      this.database.booking.findMany({
-        where,
-        include: bookingInclude,
-        orderBy,
-        skip: (filters.page - 1) * filters.pageSize,
-        take: filters.pageSize,
-      }),
-    ])
+    const total = await this.database.booking.count({ where })
+    const skip = (filters.page - 1) * filters.pageSize
 
     if (filters.sort === "appointment") {
-      rows.sort((left, right) => {
-        const leftStart = left.items[0]?.startsAt.getTime() ?? Number.MAX_SAFE_INTEGER
-        const rightStart = right.items[0]?.startsAt.getTime() ?? Number.MAX_SAFE_INTEGER
-        return leftStart - rightStart
+      const grouped = await this.database.bookingItem.groupBy({
+        by: ["bookingId"],
+        where: { booking: where },
+        _min: { startsAt: true },
+        orderBy: { _min: { startsAt: "asc" } },
+        skip,
+        take: filters.pageSize,
       })
+      const ids = grouped.map((row) => row.bookingId)
+      const rows = ids.length
+        ? await this.database.booking.findMany({
+            where: { id: { in: ids }, providerId },
+            include: bookingInclude,
+          })
+        : []
+      const position = new Map(ids.map((id, index) => [id, index]))
+      rows.sort((left, right) => (position.get(left.id) ?? 0) - (position.get(right.id) ?? 0))
+      return { total, rows }
     }
 
+    const rows = await this.database.booking.findMany({
+      where,
+      include: bookingInclude,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: filters.pageSize,
+    })
     return { total, rows }
   }
 }
