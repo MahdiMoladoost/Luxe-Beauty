@@ -152,10 +152,14 @@ export class BookingConversionRepository {
       if (
         quote.expiresAt < hold.expiresAt ||
         quote.expiresAt <= input.now ||
+        snapshot.quoteExpiresAt !== quote.expiresAt.toISOString() ||
+        snapshot.quoteSnapshot.expiresAt !== quote.expiresAt.toISOString() ||
         (quote.customerUserId && quote.customerUserId !== input.principal.userId) ||
         quote.offeringId !== hold.offeringId ||
         quote.providerId !== hold.providerId ||
         quote.durationMinute !== snapshot.quoteSnapshot.calculation.durationMinute ||
+        quote.quantity !== snapshot.quoteSnapshot.calculation.quantity ||
+        quote.unitPriceToman.toString() !== snapshot.quoteSnapshot.calculation.unitPriceToman ||
         quote.totalToman.toString() !== snapshot.quoteSnapshot.calculation.totalToman
       ) {
         return { kind: "QUOTE_STALE" }
@@ -178,8 +182,31 @@ export class BookingConversionRepository {
             { OR: [{ professionalId: null }, { professional: { active: true, verified: true } }] },
           ],
         },
+        include: {
+          provider: { select: { ownerUserId: true } },
+          professional: { select: { userId: true } },
+        },
       })
       if (!offering) return { kind: "OFFERING_NOT_AVAILABLE" }
+
+      if (
+        offering.professionalId &&
+        offering.professional &&
+        offering.professional.userId !== offering.provider.ownerUserId
+      ) {
+        const affiliation = await tx.professionalAffiliation.findFirst({
+          where: {
+            professionalId: offering.professionalId,
+            organizationId: offering.providerId,
+            status: "ACTIVE",
+            OR: offering.branchId
+              ? [{ branchId: null }, { branchId: offering.branchId }]
+              : [{ branchId: null }, { branchId: { not: null } }],
+          },
+          select: { id: true },
+        })
+        if (!affiliation) return { kind: "OFFERING_NOT_AVAILABLE" }
+      }
 
       await this.advisoryLock(tx, `booking-resource:${hold.resourceType}:${hold.resourceId}`)
 
