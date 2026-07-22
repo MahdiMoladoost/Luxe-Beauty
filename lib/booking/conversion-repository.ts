@@ -1,4 +1,4 @@
-import { Prisma, type Booking, type PrismaClient } from "@prisma/client"
+import { Prisma, type PrismaClient } from "@prisma/client"
 
 import type { RequestContext, SessionPrincipal } from "@/lib/auth/types"
 import {
@@ -91,9 +91,33 @@ export class BookingConversionRepository {
       if (hold.status === "CONSUMED") return { kind: "HOLD_ALREADY_CONSUMED" }
       if (hold.status !== "ACTIVE") return { kind: "HOLD_NOT_ACTIVE" }
       if (hold.expiresAt <= input.now) {
-        await tx.bookingHold.update({
+        const expired = await tx.bookingHold.update({
           where: { id: hold.id },
           data: { status: "EXPIRED" },
+        })
+        await tx.auditLog.create({
+          data: {
+            actorUserId: input.principal.userId,
+            action: "booking.hold.expired-before-conversion",
+            resourceType: "BookingHold",
+            resourceId: hold.id,
+            scopeType: "PROVIDER",
+            scopeId: hold.providerId,
+            correlationId: input.context.correlationId,
+          },
+        })
+        await tx.outboxEvent.create({
+          data: {
+            aggregateType: "BookingHold",
+            aggregateId: hold.id,
+            eventType: "booking.hold.expired",
+            dedupeKey: `booking-hold-expired:${hold.id}`,
+            payload: {
+              id: expired.id,
+              status: expired.status,
+              expiredAt: input.now.toISOString(),
+            } as Prisma.InputJsonValue,
+          },
         })
         return { kind: "HOLD_EXPIRED" }
       }
@@ -190,7 +214,7 @@ export class BookingConversionRepository {
         offering: snapshot.quoteSnapshot.offering,
         calculation: snapshot.quoteSnapshot.calculation,
         pricingRules: snapshot.quoteSnapshot.pricingRules ?? null,
-      } satisfies Prisma.InputJsonValue
+      } as Prisma.InputJsonValue
       const policySnapshot = {
         schemaVersion: 1,
         bookingPolicy: eligibility.bookingPolicy,
@@ -200,7 +224,7 @@ export class BookingConversionRepository {
           status: decision.finalStatus,
           approvalDeadlineAt: decision.approvalDeadlineAt?.toISOString() ?? null,
         },
-      } satisfies Prisma.InputJsonValue
+      } as Prisma.InputJsonValue
       const questionnaireSnapshot = input.questionnaireAnswers
         ? ({ schemaVersion: 1, answers: input.questionnaireAnswers } as Prisma.InputJsonValue)
         : Prisma.JsonNull
@@ -211,7 +235,7 @@ export class BookingConversionRepository {
         termsVersion: input.legalAcceptance.termsVersion,
         privacyVersion: input.legalAcceptance.privacyVersion,
         bookingVersion: input.legalAcceptance.bookingVersion,
-      } satisfies Prisma.InputJsonValue
+      } as Prisma.InputJsonValue
 
       const booking = await tx.booking.create({
         data: {
