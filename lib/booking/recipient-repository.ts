@@ -67,6 +67,105 @@ export class BookingRecipientRepository {
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     )
   }
+
+  update(input: {
+    principal: SessionPrincipal
+    recipientId: string
+    expectedUpdatedAt: Date
+    changes: {
+      firstName?: string
+      lastName?: string
+      birthDate?: Date | null
+      genderCode?: string | null
+      relationLabel?: string | null
+      contactMobile?: string | null
+      accessibilityNeeds?: string | null
+    }
+    context: RequestContext
+  }) {
+    return this.database.$transaction(
+      async (tx) => {
+        const current = await tx.serviceRecipient.findFirst({
+          where: {
+            id: input.recipientId,
+            customerUserId: input.principal.userId,
+            deletedAt: null,
+          },
+        })
+        if (!current) return { kind: "NOT_FOUND" as const }
+        if (current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
+          return { kind: "VERSION_CONFLICT" as const }
+        }
+
+        const recipient = await tx.serviceRecipient.update({
+          where: { id: current.id },
+          data: input.changes,
+        })
+        await tx.auditLog.create({
+          data: {
+            actorUserId: input.principal.userId,
+            action: "booking.recipient.updated",
+            resourceType: "ServiceRecipient",
+            resourceId: recipient.id,
+            scopeType: "CUSTOMER",
+            scopeId: input.principal.userId,
+            correlationId: input.context.correlationId,
+            metadata: {
+              changedFields: Object.keys(input.changes),
+              previousUpdatedAt: current.updatedAt.toISOString(),
+            } as Prisma.InputJsonValue,
+          },
+        })
+        return { kind: "UPDATED" as const, recipient }
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    )
+  }
+
+  softDelete(input: {
+    principal: SessionPrincipal
+    recipientId: string
+    expectedUpdatedAt: Date
+    context: RequestContext
+  }) {
+    return this.database.$transaction(
+      async (tx) => {
+        const current = await tx.serviceRecipient.findFirst({
+          where: {
+            id: input.recipientId,
+            customerUserId: input.principal.userId,
+            deletedAt: null,
+          },
+          include: { bookings: { select: { id: true }, take: 1 } },
+        })
+        if (!current) return { kind: "NOT_FOUND" as const }
+        if (current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
+          return { kind: "VERSION_CONFLICT" as const }
+        }
+        if (current.bookings.length > 0) return { kind: "IN_USE" as const }
+
+        const deletedAt = new Date()
+        await tx.serviceRecipient.update({
+          where: { id: current.id },
+          data: { deletedAt },
+        })
+        await tx.auditLog.create({
+          data: {
+            actorUserId: input.principal.userId,
+            action: "booking.recipient.deleted",
+            resourceType: "ServiceRecipient",
+            resourceId: current.id,
+            scopeType: "CUSTOMER",
+            scopeId: input.principal.userId,
+            correlationId: input.context.correlationId,
+            metadata: { deletedAt: deletedAt.toISOString() } as Prisma.InputJsonValue,
+          },
+        })
+        return { kind: "DELETED" as const }
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    )
+  }
 }
 
 export const bookingRecipientRepository = new BookingRecipientRepository()
