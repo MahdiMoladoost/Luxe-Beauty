@@ -24,7 +24,7 @@ model BookingHold {
   idempotencyKey    String            @db.VarChar(160)
   requestHash       String            @db.VarChar(128)
   snapshot          Json
-  consumedBookingId String?           @db.Uuid
+  consumedBookingId String?           @unique(map: "BookingHold_consumedBookingId_key") @db.Uuid
   releasedAt        DateTime?         @db.Timestamptz(6)
   createdAt         DateTime          @default(now()) @db.Timestamptz(6)
   updatedAt         DateTime          @updatedAt @db.Timestamptz(6)
