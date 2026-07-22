@@ -1,75 +1,82 @@
 # Known Limitations
 
-This file records incomplete, blocked, unverified, mocked, or externally dependent work. An item remains here until evidence supports removing it.
+This file records incomplete, blocked, unverified, mocked or externally dependent work. An item remains until evidence supports removing it.
 
 ## KL-001 — Local clone/build unavailable in current execution sandbox
 **Status:** Active
 
-The sandbox cannot reliably clone the repository from `github.com`, so repository inspection and writes use the authenticated GitHub connector. Remote GitHub Actions provides reproducible validation. A developer-machine runtime smoke test is still required and local commands are documented in the pull request/report.
+The sandbox cannot reliably clone from `github.com`, so repository inspection and writes use the authenticated GitHub connector. GitHub Actions is the reproducible validation authority. A developer-machine runtime smoke test is still required.
 
 ## KL-002 — Most business panels remain UI prototypes
 **Status:** Active
 
-Customer OTP registration/login, profile completion, session/device security, staff password/2FA/recovery and role/permission management now use PostgreSQL-backed APIs. The main admin, customer and salon business dashboards still contain legacy hardcoded arrays/statistics and must not be represented as operational marketplace panels.
+Authentication, profile, session/device security and role/permission management use PostgreSQL-backed APIs. The main admin, customer and salon business dashboards still contain legacy presentation data and must not be represented as operational marketplace panels.
 
 ## KL-003 — Infrastructure is foundational, not production-complete
 **Status:** Active
 
-The rebuild branch contains Prisma/PostgreSQL schemas and migrations, Redis/BullMQ worker, MinIO namespaces, Docker Compose, Nginx and health endpoints. The worker now schedules booking-hold expiry, but complete queue monitoring, dead-letter operations, remaining scheduled workflows, observability, backup/restore and production deployment validation remain open.
+The branch contains PostgreSQL/Prisma, Redis/BullMQ, MinIO namespaces, Compose, Nginx and health endpoints. Hold expiry is scheduled, but complete queue monitoring, dead-letter operations, remaining jobs, observability, backup/restore and production deployment validation remain open.
 
 ## KL-004 — External production providers are unconfigured
 **Status:** Expected
 
-KYC and payment providers are not selected/configured. Kavenegar and Neshan credentials/templates are intentionally absent from Git/chat. Authentication uses an explicit mock SMS provider outside production; it exposes the OTP only in the development response/UI and refuses to run as a production provider. Production must configure real adapters and secrets outside Git.
+KYC and payment providers are not selected/configured. Kavenegar and Neshan credentials/templates are intentionally absent from Git/chat. Development mocks are explicit and refuse production use where implemented.
 
-## KL-005 — Legal review pending
-**Status:** Expected
+## KL-005 — Legal review and publication workflow pending
+**Status:** Active
 
-Required legal pages will be software drafts and must be reviewed by qualified legal counsel before production publication.
+Legal pages require qualified review. The initial Booking conversion compares environment-configured immutable version identifiers; a CMS-backed legal publication/version history and user-facing acceptance UI remain open. Development `dev-*` identifiers are not production legal approval.
 
 ## KL-006 — Real payment marketplace/legal structure pending
 **Status:** Active
 
-A compliant marketplace/payment-facilitator arrangement and provider contract have not been finalized. Service funds must not be routed through a personal platform account. The implementation must remain adapter-based and mock/sandbox only until resolved.
+A compliant marketplace/payment-facilitator arrangement and provider contract are not finalized. Service funds must not be routed through a personal platform account. Payment work remains adapter-based and mock/sandbox only until resolved.
 
-## KL-007 — Data retention periods pending legal/business approval
+## KL-007 — Data retention periods pending approval
 **Status:** Active
 
-Retention is configurable by policy, but final production durations for identity, finance, documents, messages, consultations, support evidence and backups require legal/business approval.
+Final production durations for identity, finance, documents, messages, consultations, support evidence and backups require legal/business approval.
 
-## KL-008 — Latest verified quality evidence predates the newest marketplace slices
+## KL-008 — Verified quality evidence predates newest marketplace slices
 **Status:** Active
 
-GitHub Actions workflow run `29740506514` passed locked installation, multi-file Prisma validation/client generation, clean deployment of the committed foundation and authentication migrations, migration status, system role/super-admin seed, lint, strict TypeScript, unit and PostgreSQL integration tests, production build, Docker Compose validation, application image build and production dependency audit. Auth tests cover OTP cooldown/attempts, session lifecycle/logout-all, staff password/2FA, device IDOR, RBAC permission denial/allow and mutation audit.
+GitHub Actions workflow run `29740506514` passed locked installation, Prisma validation/generation, clean foundation/auth migration deployment, seed, lint, strict TypeScript, unit/integration tests, production build, Compose, Docker image and production dependency audit.
 
-Identity verification, provider onboarding/private documents, bilateral professional affiliations, provider branch management, Catalog/Offering, Quote snapshots, shared availability and transactional Booking Holds were added after that verified run. Connector-created commits have not produced a fresh visible workflow run. These slices remain partial and pending validation; they are not represented as CI-passing. E2E, accessibility, full upload/security coverage, booking/payment load testing, queue failure injection, backup/restore and full runtime smoke tests remain open.
+Identity/provider verification, affiliations, branches, Catalog/Offering, Quote, availability, transactional Holds and atomic Hold-to-Booking conversion were added after that run. Connector-created commits have not produced a fresh visible workflow run. These slices remain partial/pending validation and are not represented as CI-passing. E2E, accessibility, load/failure testing, backup/restore and runtime smoke tests remain open.
 
 ## KL-009 — Secret scanning is incomplete
 **Status:** Active
 
-No real secret was intentionally added. `.env.example` contains names and blank placeholders for sensitive values, and the dependency audit passes. A dedicated repository-history and source secret-scanning job is not yet installed.
+No real secret was intentionally added. `.env.example` contains placeholders and the dependency audit passes. Dedicated repository-history/source secret scanning remains open.
 
 ## KL-010 — Full platform scope is not complete
 **Status:** Active
 
-Phase zero, infrastructure and operational authentication/RBAC are established. Initial identity, provider verification, private documents, professional affiliation, branch, catalog, Quote, single-Offering availability and transactional Booking Hold slices exist. Configurable document requirements, private address verification, provider staff ABAC, variants/packages/questionnaires, resource capacity, multi-service availability, Hold-to-Booking conversion, payment/ledger, subscriptions, complete panels, public search, integrations, communications, reviews/disputes, full seed data, E2E and release hardening remain open. Do not use «پروژه کامل شد» or equivalent wording. The authoritative status is `docs/IMPLEMENTATION_CHECKLIST.md`.
+Foundation, authentication/RBAC and initial identity/provider/catalog/availability/Booking slices exist. Dynamic document requirements, private address verification, scoped staff ABAC, variants/packages, capacity/travel/multi-service availability, provider approval commands, payment/ledger posting, cancellation/rescheduling/no-show, subscriptions, panels, search, communications, reviews/disputes, complete seed, E2E and release hardening remain open. Do not use «پروژه کامل شد». The authoritative status is `docs/IMPLEMENTATION_CHECKLIST.md`.
 
-## KL-011 — Password KDF migration remains a maintained security decision
+## KL-011 — Password KDF migration remains an active decision
 **Status:** Active review
 
-The implementation uses versioned Node.js scrypt with per-password random salt and an environment-managed pepper as the approved memory-hard equivalent permitted by the requirements. The encoded format records the algorithm/version/parameters so a future Argon2id migration can occur during successful login or password change without invalidating accounts.
+The implementation uses versioned Node.js scrypt with per-password random salt and environment pepper. The encoded format preserves an explicit future Argon2id migration path.
 
 ## KL-012 — Provider authority is temporarily owner-only
 **Status:** Active
 
-Provider branch and Offering mutations, branch schedules, and provider-originated professional affiliation requests currently require the owning user of the provider organization. This is intentional and safer than treating a global permission as tenant authority. Provider/branch/professional scoped ABAC, delegated managers and branch staff remain open. Exact branch/home-studio addresses and address verification also remain unavailable until private location storage and the Neshan adapter are implemented.
+Provider branch/Offering/schedule operations and provider-originated affiliations currently require the provider owner. Scoped provider/branch/professional ABAC, delegated managers and branch staff remain open. Exact addresses and verification remain unavailable until private-location storage and the Neshan adapter exist.
 
-## KL-013 — Pricing and availability are an initial bounded slice
+## KL-013 — Pricing and availability are bounded
 **Status:** Active
 
-Only fixed prices are final/directly bookable. Starting-from and range prices are explicit estimates; consultation-based services do not invent a price. Calculated, package, variant, add-on and location-aware pricing remain rejected. Availability supports one Offering, one professional-or-branch schedule owner, weekly rules, exceptions and subtraction of blocking Booking/Hold intervals. Resources, capacity, travel time, multi-service adjacency, alternatives, waitlist and cache invalidation remain open.
+Only fixed prices are final/directly bookable. Starting/range are estimates and consultation services do not invent prices. Calculated/package/variant/add-on/location pricing remains rejected. Availability supports one Offering and one professional-or-branch calendar; resources, capacity, travel, multi-service adjacency, alternatives, waitlist and cache invalidation remain open.
 
-## KL-014 — Booking Hold is not a completed Booking workflow
+## KL-014 — Hold-to-Booking is an initial no-payment slice
 **Status:** Active
 
-A Hold reserves one fixed-price Offering interval for a verified customer with TTL, idempotency, PostgreSQL locking/exclusion, Audit, Outbox, release and scheduled/lazy expiry. It does not yet select a persisted recipient, evaluate full audience/questionnaire rules, take payment, obtain provider approval, create Booking/BookingItem records or consume the Hold. The current selected `startsAt` represents the occupied interval start in the initial API; richer service-start/buffer presentation remains open. The `btree_gist` extension must be available to the migration role or preinstalled operationally.
+One active fixed-price Hold can now become one Booking/BookingItem atomically. The path enforces Recipient ownership, audience/age rules, required answers, legal versions, current Offering/affiliation eligibility, immutable snapshots and exact replay. A consumed Hold remains the blocking allocation.
+
+This is not the complete Booking lifecycle. Payment-required policies are rejected rather than bypassed. Provider approve/reject, manual-deadline expiry, cancellation, refund, reschedule allocation swap, attendance, no-show and dispute workflows remain open. Guardian processing and rich questionnaire definitions are also open.
+
+## KL-015 — PostgreSQL extension and operational migration permissions
+**Status:** Active
+
+Booking allocation exclusion constraints require `btree_gist`. The deployment role must be permitted to install it or operations must preinstall the extension before migration deployment.
