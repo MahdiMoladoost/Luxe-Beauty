@@ -237,6 +237,33 @@ A late provider command atomically expires the Booking and releases the allocati
 
 Cross-provider IDs return `BOOKING_NOT_FOUND`. Exact replay returns the same Booking; changed payload with the same key returns `IDEMPOTENCY_CONFLICT`. See `docs/PROVIDER_BOOKING_APPROVAL.md`.
 
+### Provider panel read models
+
+These endpoints are authenticated read models for the operational salon/provider panel. They do not replace domain mutation APIs.
+
+- `GET /api/v1/provider-panel/bootstrap?providerId={uuid?}`
+  - returns only Provider organizations owned by the current user;
+  - an unknown or cross-owner ID returns `PROVIDER_NOT_FOUND`.
+- `GET /api/v1/provider-panel/dashboard?providerId={uuid}`
+  - returns real counts for branches, Offerings, active affiliations and Bookings;
+  - returns recent Booking summaries;
+  - never invents revenue, growth or review statistics.
+- `GET /api/v1/provider-panel/bookings?providerId={uuid}&status={status?}&query={text?}&dateFrom={YYYY-MM-DD?}&dateTo={YYYY-MM-DD?}&page={n}&pageSize={n}&sort=newest|appointment`
+  - server-side owner isolation, Persian normalization, date filtering and Pagination;
+  - appointment sort uses the first `BookingItem.startsAt`;
+  - monetary fields are decimal strings.
+- `GET /api/v1/provider-panel/bookings/{bookingId}?providerId={uuid}`
+  - returns provider-owned operational recipient identity, Branch, items and transition history;
+  - does not return customer mobile, national ID, private address or private questionnaire content.
+- `GET /api/v1/provider-panel/geography`
+  - authenticated active Province/City/District/Neighborhood data for Branch forms.
+- `GET /api/v1/provider-panel/professionals?providerId={uuid}&query={name?}`
+  - returns the provider's affiliation workspace;
+  - optional search returns at most 20 active verified professional public profiles by normalized display name;
+  - mobile, national ID and private profile fields are not searchable or returned.
+
+The panel uses the existing Branch, Offering, Affiliation, Availability and Provider Booking Decision APIs for every mutation. Business invariants remain server-authoritative. See `docs/PROVIDER_PANEL.md`.
+
 ## Target endpoint families still open
 
 ### Geography and search
@@ -253,9 +280,9 @@ Cross-provider IDs return `BOOKING_NOT_FOUND`. Exact replay returns the same Boo
 
 - private-address verification;
 - provider staff memberships and scoped role assignments;
-- professional discovery and privacy-safe invitation lookup;
 - service areas, travel rules and resource/capacity configuration;
-- provider pending-booking list and delegated decision authority.
+- delegated pending-Booking decision authority;
+- provider finance/reporting read models.
 
 ### Catalog and availability
 
