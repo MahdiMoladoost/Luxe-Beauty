@@ -92,14 +92,14 @@ export class ProviderBookingDecisionRepository {
       if (!booking) return { kind: "BOOKING_NOT_FOUND" }
       if (booking.payments.length > 0) return { kind: "PAYMENT_WORKFLOW_REQUIRED" }
 
-      const allocation = await tx.bookingHold.findUnique({
+      const allocation = await tx.bookingHold.findFirst({
         where: { consumedBookingId: booking.id },
       })
       if (!allocation || allocation.status !== "CONSUMED") {
         return { kind: "BOOKING_ALLOCATION_NOT_FOUND" }
       }
 
-      let decision
+      let decision: ReturnType<typeof validateProviderBookingDecision>
       try {
         decision = validateProviderBookingDecision({
           action: input.action,
