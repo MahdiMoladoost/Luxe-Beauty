@@ -2,7 +2,7 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider, catalog, availability, Booking Hold, Hold-to-Booking and provider-decision commits require a fresh CI run before their status can be upgraded to verified complete.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider, catalog, availability, Booking lifecycle and operational provider-panel commits require a fresh CI run before their status can be upgraded to verified complete.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
@@ -36,7 +36,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Data-backed homepage/search entry.
 - [ ] Public provider/professional/service/geography pages.
 - [ ] Legal/static/content pages backed by CMS data.
-- [~] Authentication/security screens have real states; public and business panels remain open.
+- [~] Authentication/security screens and provider operational panel have real states; public experience and remaining panels remain open.
 - [ ] WCAG checks and responsive verification.
 
 ## Phase 3 — Authentication and security
@@ -64,7 +64,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Variants, add-ons, packages and complete consultation workflows.
 - [~] Integer-toman fixed/starting/range/consultation policy and immutable Quote snapshots exist; calculated/location/package/variant pricing and Quote-expiry jobs remain open.
 - [~] Audience and required-questionnaire rules are enforced during initial Booking conversion; guardian workflow, rich definitions and location rules remain open.
-- [~] Weekly schedules, exceptions, timezone-aware slots and professional-first shared calendars exist; holidays, leave and administration UI remain open.
+- [~] Weekly schedules, exceptions, timezone-aware slots and professional-first shared calendars exist; holidays and richer leave policies remain open.
 - [~] Preparation, cleanup and buffers are enforced; resource/equipment capacity and travel-time scheduling remain open.
 - [~] Single-Offering preview and Hold subtract Booking intervals, allocations and past time. Multi-service search, alternatives and waitlist remain open.
 
@@ -83,8 +83,8 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 7 — Operational panels
 - [~] Customer authentication/profile/security is data-backed; complete customer panel remains open.
-- [ ] Salon/group panel, including pending Booking queue and decision UI.
-- [ ] Independent professional panel.
+- [~] Salon/provider panel now has a responsive data-backed shell, provider switcher, real dashboard counts, booking filters/detail/approve/reject dialogs, branch CRUD, Offering management/publication, bilateral professional collaboration UI and branch weekly schedules/exceptions. Payment, cancellation/reschedule/attendance, messaging, finance, reports, delegated staff ABAC and E2E remain open; fresh CI is pending.
+- [ ] Independent professional panel, including personal calendar, affiliations, appointments and portfolio.
 - [~] Role/permission management and provider verification queue are protected and data-backed; complete admin panel remains open.
 - [x] Seeded/configurable roles and permissions with server-side enforcement.
 - [ ] Real reports and CSV/Excel exports.
@@ -122,9 +122,9 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development seed for nine cities and test roles.
 - [~] Unit tests cover auth, RBAC, money, Persian normalization, transitions, identity/provider/affiliation, pricing, availability, Hold, Hold-to-Booking and provider-decision policy.
-- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds, atomic Hold conversion, provider approve/reject, operational revalidation and scheduled approval expiry. Fresh CI verification of newest slices is pending.
-- [ ] Playwright E2E matrix.
-- [~] Automated security coverage includes role boundaries, OTP/session/device IDOR, CSRF-origin, provider documents/affiliations/branches, Offering/schedule isolation, Hold IDOR/idempotency/concurrency, Booking owner IDOR and cross-provider Booking decision IDOR.
+- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds, atomic Hold conversion, provider approve/reject, operational revalidation, scheduled approval expiry and provider-panel ownership/query counts. Fresh CI verification of newest slices is pending.
+- [ ] Playwright E2E matrix, including every provider-panel navigation item, form, dialog, mobile Sheet and mutation.
+- [~] Automated security coverage includes role boundaries, OTP/session/device IDOR, CSRF-origin, provider documents/affiliations/branches, Offering/schedule isolation, Hold IDOR/idempotency/concurrency, Booking owner IDOR, cross-provider Booking decision IDOR and provider-panel query isolation.
 - [ ] Accessibility automated and manual checks.
 - [x] Verified authentication/RBAC build, migration, seed, Compose, image build and dependency audit pass CI.
 - [ ] Backup and restore test.
@@ -132,13 +132,13 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Persian README, installation, production, backup and restore docs.
 - [x] External integration limitations and environment contract documented.
 - [x] Draft PR continuously records architecture, migrations, tests and limitations.
-- [~] MR-001 through MR-071 are traceable; auth, provider, catalog/availability and initial Booking lifecycle slices have advanced while most marketplace scope remains open.
+- [~] MR-001 through MR-071 are traceable; auth, provider, catalog/availability, initial Booking lifecycle and provider-panel slices have advanced while most marketplace scope remains open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
 - `app/admin/page.tsx` — business dashboard remains a replacement target.
 - `app/dashboard/page.tsx` — complete customer business panel remains open.
-- `app/salon-dashboard/page.tsx` — business dashboard remains a replacement target.
+- `app/salon-dashboard/page.tsx` — operational data-backed replacement exists; finance, advanced Booking lifecycle and delegated-staff extensions remain open.
 - `app/auth/login/page.tsx` — operational OTP/staff login replacement exists.
 - `app/auth/register/page.tsx` — operational OTP registration/profile completion exists.
 - `app/salon-register/page.tsx` — provider-onboarding replacement remains open.
