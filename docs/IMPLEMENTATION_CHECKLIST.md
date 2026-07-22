@@ -73,7 +73,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [~] Transactional Booking Holds use verified identity, final Quote validation, TTL, idempotency, Serializable transactions, advisory locks, GiST exclusion, Audit, Outbox and scheduled/lazy expiry.
 - [~] Atomic Hold-to-Booking conversion creates Booking, BookingItem, immutable price/duration/policy/questionnaire/legal snapshots, two transitions, Audit and Outbox without releasing the resource allocation. Exact replay, IDOR, expired Hold and concurrent consumption tests are present; fresh CI is pending.
 - [~] No-payment instant approval produces `CONFIRMED`; no-payment manual approval produces `AWAITING_PROVIDER_APPROVAL` with a bounded deadline.
-- [~] Provider-owner approve/reject APIs use `Idempotency-Key`, `expectedVersion`, Serializable locking, controlled rejection reasons, Audit and Outbox. Approval preserves the allocation; rejection releases it. Delegated provider/branch/professional ABAC remains open.
+- [~] Provider-owner approve/reject APIs use `Idempotency-Key`, `expectedVersion`, Serializable locking, controlled rejection reasons, Audit and Outbox. Approval revalidates provider/branch/Offering/service/professional/affiliation eligibility and preserves the allocation; rejection releases it. Delegated provider/branch/professional ABAC remains open.
 - [~] BullMQ expires overdue no-payment manual approvals and releases allocations. Payment-linked and allocation-invalid records are counted but not mutated; operations escalation and dashboarding remain open.
 - [ ] Payment-required conversion, payment-backed provider decisions, mock callbacks/webhooks/refunds/reconciliation.
 - [~] Ledger persistence and integer-toman helpers exist; posting services and balance invariants remain open.
@@ -122,7 +122,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development seed for nine cities and test roles.
 - [~] Unit tests cover auth, RBAC, money, Persian normalization, transitions, identity/provider/affiliation, pricing, availability, Hold, Hold-to-Booking and provider-decision policy.
-- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds, atomic Hold conversion, provider approve/reject and scheduled approval expiry. Fresh CI verification of newest slices is pending.
+- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds, atomic Hold conversion, provider approve/reject, operational revalidation and scheduled approval expiry. Fresh CI verification of newest slices is pending.
 - [ ] Playwright E2E matrix.
 - [~] Automated security coverage includes role boundaries, OTP/session/device IDOR, CSRF-origin, provider documents/affiliations/branches, Offering/schedule isolation, Hold IDOR/idempotency/concurrency, Booking owner IDOR and cross-provider Booking decision IDOR.
 - [ ] Accessibility automated and manual checks.
