@@ -1,6 +1,7 @@
 "use client"
 
 import { FormEvent, useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   AlertCircle,
   CalendarDays,
@@ -72,6 +73,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function AccountManager() {
+  const router = useRouter()
   const [account, setAccount] = useState<Account | null>(null)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -122,6 +124,7 @@ export function AccountManager() {
       })
       setNotice("اطلاعات حساب با موفقیت ذخیره شد.")
       await load()
+      router.refresh()
     } catch (saveError) {
       const typed = saveError as Error & { code?: string }
       setError(typed.message || "ذخیره اطلاعات حساب ناموفق بود.")
@@ -135,7 +138,7 @@ export function AccountManager() {
     return <div className="grid gap-4 lg:grid-cols-[1fr_360px]"><div className="h-96 animate-pulse rounded-[28px] bg-stone-200/70" /><div className="h-72 animate-pulse rounded-[28px] bg-stone-200/70" /></div>
   }
 
-  if (!account || error && !account) {
+  if (!account) {
     return <div className="rounded-[26px] border border-rose-200 bg-rose-50 p-8 text-center"><AlertCircle className="mx-auto size-10 text-rose-500" /><p className="mt-4 font-bold text-rose-900">بارگیری حساب ناموفق بود</p><p className="mt-2 text-sm text-rose-700">{error}</p><Button type="button" variant="outline" className="mt-5" onClick={() => void load()}>تلاش دوباره</Button></div>
   }
 
