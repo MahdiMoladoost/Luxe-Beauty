@@ -31,6 +31,7 @@ export type ProviderBookingDecisionResult =
         | "VERSION_CONFLICT"
         | "PAYMENT_WORKFLOW_REQUIRED"
         | "BOOKING_ALLOCATION_NOT_FOUND"
+        | "APPROVAL_ELIGIBILITY_FAILED"
         | "CONCURRENCY_CONFLICT"
     }
 
@@ -133,6 +134,13 @@ export class ProviderBookingDecisionRepository {
         throw error
       }
 
+      if (
+        decision.targetStatus === "CONFIRMED" &&
+        !(await this.isApprovalEligible(tx, booking, input.principal.userId))
+      ) {
+        return { kind: "APPROVAL_ELIGIBILITY_FAILED" }
+      }
+
       const changed = await tx.booking.updateMany({
         where: {
           id: booking.id,
@@ -232,6 +240,84 @@ export class ProviderBookingDecisionRepository {
 
       return { kind: "UPDATED", booking: updated }
     })
+  }
+
+  private async isApprovalEligible(
+    tx: Prisma.TransactionClient,
+    booking: ProviderBooking,
+    providerOwnerUserId: string,
+  ): Promise<boolean> {
+    const provider = await tx.providerOrganization.findFirst({
+      where: {
+        id: booking.providerId,
+        ownerUserId: providerOwnerUserId,
+        status: "APPROVED",
+        bookingEnabled: true,
+        deletedAt: null,
+      },
+      select: { id: true, ownerUserId: true },
+    })
+    if (!provider) return false
+
+    if (booking.branchId) {
+      const branch = await tx.branch.findFirst({
+        where: {
+          id: booking.branchId,
+          organizationId: booking.providerId,
+          active: true,
+          deletedAt: null,
+        },
+        select: { id: true },
+      })
+      if (!branch) return false
+    }
+
+    if (booking.items.length === 0) return false
+    for (const item of booking.items) {
+      const offering = await tx.serviceOffering.findFirst({
+        where: {
+          id: item.offeringId,
+          providerId: booking.providerId,
+          branchId: booking.branchId,
+          professionalId: item.professionalId,
+          active: true,
+          published: true,
+          deletedAt: null,
+          standardService: { active: true },
+          AND: [
+            { OR: [{ branchId: null }, { branch: { active: true, deletedAt: null } }] },
+            {
+              OR: [
+                { professionalId: null },
+                { professional: { active: true, verified: true } },
+              ],
+            },
+          ],
+        },
+        select: {
+          professionalId: true,
+          professional: { select: { userId: true } },
+        },
+      })
+      if (!offering) return false
+      if (!offering.professionalId) continue
+      if (offering.professional?.userId === provider.ownerUserId) continue
+
+      const affiliation = await tx.professionalAffiliation.findFirst({
+        where: {
+          professionalId: offering.professionalId,
+          organizationId: booking.providerId,
+          status: "ACTIVE",
+          OR: booking.branchId
+            ? [{ branchId: null }, { branchId: booking.branchId }]
+            : [{ branchId: null }, { branchId: { not: null } }],
+        },
+        select: { id: true },
+      })
+      if (!affiliation) return false
+    }
+
+    return true
   }
 
   private async expireLockedBooking(
