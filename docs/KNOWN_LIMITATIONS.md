@@ -74,7 +74,7 @@ Only fixed prices are final/directly bookable. Starting/range are estimates and 
 
 One active fixed-price Hold can become one Booking/BookingItem atomically. The path enforces Recipient ownership, audience/age rules, required answers, legal versions, current Offering/affiliation eligibility, immutable snapshots and exact replay. A consumed Hold remains the blocking allocation.
 
-No-payment manual Bookings can now be approved or rejected by the provider owner. Rejection and approval-deadline expiry release the allocation; approval preserves it. Payment-required policies are rejected rather than bypassed, and payment-linked pending approvals are not mutated by the current API/worker.
+No-payment manual Bookings can now be approved or rejected by the provider owner. Approval revalidates current provider, branch, Offering, service, professional and affiliation eligibility. Rejection and approval-deadline expiry release the allocation; approval preserves it. Payment-required policies are rejected rather than bypassed, and payment-linked pending approvals are not mutated by the current API/worker.
 
 This is not the complete Booking lifecycle. Payment/refund orchestration, delegated decision authority, customer cancellation, reschedule allocation swap, attendance, no-show and dispute workflows remain open. Guardian processing and rich questionnaire definitions are also open.
 
