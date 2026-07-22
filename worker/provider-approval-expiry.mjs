@@ -5,11 +5,15 @@ export async function expireProviderApprovals({
   jobId,
   now = new Date(),
   limit = 500,
+  bookingIds,
 }) {
   const candidates = await prisma.booking.findMany({
     where: {
       status: "AWAITING_PROVIDER_APPROVAL",
       approvalDeadlineAt: { lte: now },
+      ...(Array.isArray(bookingIds) && bookingIds.length > 0
+        ? { id: { in: bookingIds } }
+        : {}),
     },
     select: {
       id: true,
