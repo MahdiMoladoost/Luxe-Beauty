@@ -229,7 +229,9 @@ See `docs/HOLD_TO_BOOKING.md`.
   - same ownership and idempotency requirements;
   - body: `{ "expectedVersion": 1, "reasonCode": "PROFESSIONAL_UNAVAILABLE", "reason": "..." }`.
 
-Only `AWAITING_PROVIDER_APPROVAL` bookings before `approvalDeadlineAt` are eligible. Approval moves the Booking to `CONFIRMED` and preserves the consumed allocation. Rejection moves it to `REJECTED`, records a controlled reason and releases the allocation.
+Only `AWAITING_PROVIDER_APPROVAL` bookings before `approvalDeadlineAt` are eligible. Approval revalidates provider, branch, Offering, standard service, professional and affiliation eligibility, moves the Booking to `CONFIRMED` and preserves the consumed allocation. Failed operational revalidation returns `BOOKING_APPROVAL_ELIGIBILITY_FAILED` without changing the Booking.
+
+Rejection moves the Booking to `REJECTED`, records a controlled reason and releases the allocation. It remains available when approval eligibility has failed so an unusable pending Booking can be closed safely.
 
 A late provider command atomically expires the Booking and releases the allocation. A BullMQ scheduler runs the same expiry transition every minute for overdue no-payment bookings. Payment-linked records are not mutated by this bounded path.
 
