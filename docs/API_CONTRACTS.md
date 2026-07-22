@@ -13,7 +13,7 @@ Content type is JSON unless an upload/download contract states otherwise.
 - Never expose ORM objects, credentials, OTP hashes, session hashes or sensitive identity values directly.
 - Use opaque IDs and stable error codes.
 - Cookie-authenticated mutations require same-origin/same-site checks.
-- Require `Idempotency-Key` for booking holds, Booking creation, payments, callbacks, refunds, wallet credits and other repeat-sensitive commands.
+- Require `Idempotency-Key` for booking holds, Booking creation, provider Booking decisions, payments, callbacks, refunds, wallet credits and other repeat-sensitive commands.
 - Carry a correlation ID through requests, audit events and async work.
 - Dates are ISO-8601 UTC values. UI-localized values are presentation concerns.
 - Money is integer toman and serialized as decimal strings in API DTOs.
@@ -219,6 +219,22 @@ A consumed Hold remains the authoritative resource allocation. The `ACTIVE` + `C
 
 See `docs/HOLD_TO_BOOKING.md`.
 
+### Provider Booking approval and rejection
+
+- `POST /api/v1/bookings/{bookingId}/provider-approve`
+  - current authority is the owning `ProviderOrganization.ownerUserId`;
+  - requires same-origin request and `Idempotency-Key`;
+  - body: `{ "expectedVersion": 1 }`.
+- `POST /api/v1/bookings/{bookingId}/provider-reject`
+  - same ownership and idempotency requirements;
+  - body: `{ "expectedVersion": 1, "reasonCode": "PROFESSIONAL_UNAVAILABLE", "reason": "..." }`.
+
+Only `AWAITING_PROVIDER_APPROVAL` bookings before `approvalDeadlineAt` are eligible. Approval moves the Booking to `CONFIRMED` and preserves the consumed allocation. Rejection moves it to `REJECTED`, records a controlled reason and releases the allocation.
+
+A late provider command atomically expires the Booking and releases the allocation. A BullMQ scheduler runs the same expiry transition every minute for overdue no-payment bookings. Payment-linked records are not mutated by this bounded path.
+
+Cross-provider IDs return `BOOKING_NOT_FOUND`. Exact replay returns the same Booking; changed payload with the same key returns `IDEMPOTENCY_CONFLICT`. See `docs/PROVIDER_BOOKING_APPROVAL.md`.
+
 ## Target endpoint families still open
 
 ### Geography and search
@@ -236,7 +252,8 @@ See `docs/HOLD_TO_BOOKING.md`.
 - private-address verification;
 - provider staff memberships and scoped role assignments;
 - professional discovery and privacy-safe invitation lookup;
-- service areas, travel rules and resource/capacity configuration.
+- service areas, travel rules and resource/capacity configuration;
+- provider pending-booking list and delegated decision authority.
 
 ### Catalog and availability
 
@@ -249,8 +266,7 @@ See `docs/HOLD_TO_BOOKING.md`.
 
 ### Booking lifecycle
 
-- `POST /api/v1/bookings/{bookingId}/provider-approve`
-- `POST /api/v1/bookings/{bookingId}/provider-reject`
+- payment-backed provider approval/rejection and refund orchestration;
 - `POST /api/v1/bookings/{bookingId}/cancel`
 - `POST /api/v1/bookings/{bookingId}/reschedule-proposals`
 - `POST /api/v1/reschedule-proposals/{proposalId}/accept`
