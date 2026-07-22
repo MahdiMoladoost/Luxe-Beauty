@@ -46,7 +46,11 @@ function statusClass(status: string) {
 }
 
 function formatToman(value: string) {
-  return `${new Intl.NumberFormat("fa-IR").format(Number(value))} تومان`
+  try {
+    return `${new Intl.NumberFormat("fa-IR").format(BigInt(value))} تومان`
+  } catch {
+    return `${value} تومان`
+  }
 }
 
 function formatDateTime(value: Date | string) {
@@ -114,21 +118,21 @@ export default async function SalonDashboardPage({
       value: data.counts.publishedOfferings,
       hint: `از ${data.counts.offeringTotal.toLocaleString("fa-IR")} خدمت ثبت‌شده`,
       icon: Scissors,
-      href: `/salon-dashboard?providerId=${provider.id}`,
+      href: `/salon-dashboard/services?providerId=${provider.id}`,
     },
     {
       label: "شعب فعال",
       value: data.counts.activeBranches,
       hint: `از ${data.counts.branchTotal.toLocaleString("fa-IR")} شعبه`,
       icon: Store,
-      href: `/salon-dashboard?providerId=${provider.id}`,
+      href: `/salon-dashboard/branches?providerId=${provider.id}`,
     },
     {
       label: "متخصصان فعال",
       value: data.counts.activeProfessionals,
       hint: "همکاری تأییدشده",
       icon: UserRoundCheck,
-      href: `/salon-dashboard?providerId=${provider.id}`,
+      href: `/salon-dashboard/professionals?providerId=${provider.id}`,
     },
   ]
 
