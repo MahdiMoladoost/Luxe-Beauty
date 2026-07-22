@@ -2,7 +2,6 @@ import { createHash } from "node:crypto"
 import { z } from "zod"
 
 import { bookingConfig } from "@/lib/booking/config"
-import { quoteSnapshotSchema } from "@/lib/booking/hold-policy"
 
 export class BookingConversionPolicyError extends Error {
   constructor(public readonly code: string, message: string) {
@@ -12,11 +11,20 @@ export class BookingConversionPolicyError extends Error {
 }
 
 const jsonObjectSchema = z.record(z.string().min(1).max(120), z.any())
+const tomanSchema = z.string().regex(/^\d+$/)
 
-const conversionQuoteSnapshotSchema = quoteSnapshotSchema.extend({
-  audienceRules: jsonObjectSchema.default({}),
-  bookingPolicy: jsonObjectSchema.default({}),
-  pricingRules: z.any().optional(),
+const conversionQuoteSnapshotSchema = z.object({
+  schemaVersion: z.literal(1),
+  offering: z.object({
+    id: z.string().uuid(),
+    version: z.number().int().positive(),
+    titleFa: z.string().min(1).max(180),
+    standardServiceId: z.string().uuid(),
+    providerId: z.string().uuid(),
+    branchId: z.string().uuid().nullable(),
+    professionalId: z.string().uuid().nullable(),
+    priceModel: z.literal("FIXED"),
+  }),
   durationFormula: z.object({
     baseMinutePerQuantity: z.number().int().min(1).max(720),
     preparationMinute: z.number().int().min(0).max(180),
@@ -24,6 +32,22 @@ const conversionQuoteSnapshotSchema = quoteSnapshotSchema.extend({
     bufferBeforeMinute: z.number().int().min(0).max(180),
     bufferAfterMinute: z.number().int().min(0).max(180),
   }),
+  audienceRules: jsonObjectSchema.default({}),
+  bookingPolicy: jsonObjectSchema.default({}),
+  pricingRules: z.any().nullable().optional(),
+  calculation: z.object({
+    priceKind: z.literal("FINAL"),
+    unitPriceToman: tomanSchema,
+    totalToman: tomanSchema,
+    priceMinToman: tomanSchema.nullable(),
+    priceMaxToman: tomanSchema.nullable(),
+    durationMinute: z.number().int().min(1).max(1440),
+    quantity: z.number().int().min(1).max(20),
+    finalPrice: z.literal(true),
+    directlyBookable: z.literal(true),
+    currency: z.literal("TOMAN"),
+  }),
+  expiresAt: z.string().datetime({ offset: true }),
 })
 
 export const bookingHoldConversionSnapshotSchema = z.object({
