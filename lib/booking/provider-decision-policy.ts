@@ -47,16 +47,16 @@ export function validateProviderBookingDecision(input: {
       "Booking is not waiting for a provider decision",
     )
   }
-  if (input.actualVersion !== input.expectedVersion) {
-    throw new ProviderBookingDecisionPolicyError(
-      "BOOKING_VERSION_CONFLICT",
-      "Booking version is stale",
-    )
-  }
   if (!input.approvalDeadlineAt || input.approvalDeadlineAt <= input.now) {
     throw new ProviderBookingDecisionPolicyError(
       "APPROVAL_DEADLINE_EXPIRED",
       "Provider approval deadline has expired",
+    )
+  }
+  if (input.actualVersion !== input.expectedVersion) {
+    throw new ProviderBookingDecisionPolicyError(
+      "BOOKING_VERSION_CONFLICT",
+      "Booking version is stale",
     )
   }
 
