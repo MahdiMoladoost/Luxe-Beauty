@@ -1,28 +1,35 @@
 # Booking State Machine
 
-A booking transition is valid only through the booking application service. Direct status mutation is forbidden. Every transition records actor, source state, destination state, reason, timestamp, version, correlation ID, and safe metadata.
+A Booking transition is valid only through an application service. Direct status mutation is forbidden. Every transition records actor, source state, destination state, reason, timestamp, correlation ID and safe metadata.
 
-## Temporary hold before Booking creation
+## Temporary Hold and durable allocation
 
-`BookingHold` is a separate pre-booking aggregate. Its states are:
+`BookingHold` is a separate pre-booking aggregate with states:
 
 - `ACTIVE`
 - `CONSUMED`
 - `EXPIRED`
 - `RELEASED`
 
-Creating a Hold does not create a `Booking` and does not imply payment or provider approval. A future Hold-to-Booking command must atomically:
+Creating a Hold does not create a Booking and does not imply payment or provider approval.
 
-1. lock and reload the owning active Hold;
-2. reject elapsed, released or already consumed Holds;
-3. validate the accepted recipient, questionnaire, legal versions and current eligibility;
-4. create the Booking and initial Booking item/snapshots;
-5. transition the Hold to `CONSUMED` with `consumedBookingId`;
-6. preserve the same resource lock so no gap opens between Hold and Booking occupancy.
+The Hold-to-Booking command is now implemented for one fixed-price Offering. In one Serializable transaction it:
 
-The current implemented slice covers Hold creation/read/release/expiry only. See `docs/BOOKING_HOLDS.md`.
+1. locks and reloads the owning active Hold;
+2. rejects elapsed, released or already consumed Holds;
+3. validates Recipient ownership, questionnaire, audience/age rules, legal versions and current Offering eligibility;
+4. creates Booking in `HOLDING_SLOT` and creates its BookingItem/snapshots;
+5. records `null -> HOLDING_SLOT`;
+6. records `HOLDING_SLOT -> CONFIRMED` for no-payment instant approval, or `HOLDING_SLOT -> AWAITING_PROVIDER_APPROVAL` for no-payment manual approval;
+7. changes the Hold to `CONSUMED` with `consumedBookingId`;
+8. writes Audit, Outbox and replayable Idempotency state.
+
+The consumed Hold remains the authoritative resource allocation. PostgreSQL excludes overlaps for both `ACTIVE` and `CONSUMED` Holds, so no allocation gap opens during conversion.
+
+Payment-required policies are explicitly rejected with `PAYMENT_FLOW_REQUIRED` until the payment and ledger path is implemented. See `docs/BOOKING_HOLDS.md` and `docs/HOLD_TO_BOOKING.md`.
 
 ## Booking states
+
 - `DRAFT`
 - `AWAITING_IDENTITY`
 - `HOLDING_SLOT`
@@ -47,23 +54,22 @@ The current implemented slice covers Hold creation/read/release/expiry only. See
 - `REFUNDED`
 - `PARTIALLY_REFUNDED`
 
-## Primary booking path
+## Primary path
 
 ```text
-DRAFT
-  -> AWAITING_IDENTITY (identity incomplete)
-  -> HOLDING_SLOT (identity and eligibility pass)
+ACTIVE BookingHold
+  -> Booking(HOLDING_SLOT) + BookingItem + BookingHold(CONSUMED)
 HOLDING_SLOT
-  -> AWAITING_PAYMENT (online payment required)
-  -> AWAITING_PROVIDER_APPROVAL (manual approval, no online payment required)
-  -> CONFIRMED (instant approval, no online payment required)
+  -> AWAITING_PROVIDER_APPROVAL (manual approval, no online payment)
+  -> CONFIRMED (instant approval, no online payment)
+  -> AWAITING_PAYMENT (target path; not implemented yet)
 AWAITING_PAYMENT
   -> PAYMENT_PENDING
   -> EXPIRED
 PAYMENT_PENDING
-  -> AWAITING_PROVIDER_APPROVAL (successful payment + manual approval)
-  -> CONFIRMED (successful payment + instant approval)
-  -> EXPIRED / REFUNDED (failed/expired according to payment state)
+  -> AWAITING_PROVIDER_APPROVAL
+  -> CONFIRMED
+  -> EXPIRED / REFUNDED
 AWAITING_PROVIDER_APPROVAL
   -> CONFIRMED
   -> REJECTED
@@ -78,47 +84,42 @@ CONFIRMED
 CHECKED_IN -> IN_SERVICE
 IN_SERVICE -> COMPLETED_BY_PROVIDER
 COMPLETED_BY_PROVIDER -> AWAITING_CUSTOMER_DISPUTE_WINDOW
-AWAITING_CUSTOMER_DISPUTE_WINDOW
-  -> FINALIZED (window expires without dispute)
-  -> DISPUTED
-DISPUTED
-  -> FINALIZED
-  -> REFUNDED
-  -> PARTIALLY_REFUNDED
+AWAITING_CUSTOMER_DISPUTE_WINDOW -> FINALIZED | DISPUTED
+DISPUTED -> FINALIZED | REFUNDED | PARTIALLY_REFUNDED
 ```
 
+Only the initial no-payment Hold conversion is operational. Later transitions shown above remain target contracts unless explicitly implemented elsewhere.
+
 ## Invariants
-- A slot hold has a TTL and cannot outlive its payment/provider-approval deadline.
-- Booking creation is idempotent and tied to the exact hold, price snapshot, duration snapshot, recipient, policies, and accepted legal versions.
-- Confirmation succeeds only if professional, branch, resources, buffers, travel, subscription, verification, and document eligibility remain valid in the same transaction.
-- A rejected or expired manual request releases resources and releases/refunds money according to the payment snapshot.
-- Rescheduling is proposal-based when bilateral acceptance is required; old resources are not released until new resources are safely held, then changes occur transactionally.
-- Cancellation/no-show transitions calculate policy outcome from the snapshotted accepted policy, never current settings.
+
+- A temporary Hold has a TTL and never outlives its Quote.
+- Booking creation is idempotent and tied to the exact Hold, Recipient, Quote, price/duration/policy snapshots, questionnaire and accepted legal versions.
+- The client cannot submit price, duration or final status.
+- Current Offering, provider, branch, professional and affiliation eligibility are checked in the conversion transaction.
+- A consumed allocation remains blocking until a future cancellation/reschedule workflow releases or swaps it atomically.
+- Rejected/expired manual requests must release resources and release/refund money according to the snapshot; this workflow remains open.
+- Rescheduling must hold the new resources before releasing the old allocation.
+- Cancellation/no-show outcomes must use snapshotted policy versions, never current settings.
 - Provider cancellation/no-show cannot retain customer funds.
-- Completing a service starts the configured dispute window (default 24 hours).
 - Funds remain held while a valid dispute is open.
 - Terminal history is never deleted.
 
 ## Manual approval timing
-The platform configures allowed response bounds; suggested range is 15 minutes to 2 hours, shortened for near-term appointments. The customer sees the deadline. Expiry is performed by an idempotent scheduled job.
 
-## Attendance challenge
-An expiring per-booking one-time code is generated near the appointment. Failed attempts are rate-limited and audited. Fallback confirmation by customer or support requires reason and audit evidence.
+The conversion command persists a bounded `approvalDeadlineAt`, limited by configured response time and minimum lead time before the appointment. Provider approve/reject APIs and the idempotent deadline-expiry worker remain open.
 
-## Rescheduling
-- First customer reschedule may be free within the configured window.
-- Later or late reschedules follow provider approval and cancellation-cost rules.
-- Price, discount, payment, availability, recipient eligibility, and policy validity are rechecked.
-- All proposals and decisions remain in history.
+## Attendance and rescheduling targets
+
+Attendance requires an expiring per-Booking challenge with rate limits and Audit. Rescheduling is proposal-based when bilateral acceptance is required and must recheck price, payment, availability, Recipient eligibility and policy versions.
 
 ## Required tests
-- Every allowed transition.
-- Every forbidden transition.
-- Duplicate/idempotent transition requests.
-- Stale booking version.
-- Expired hold and approval deadline.
-- Double-booking race.
+
+- Every allowed and forbidden transition.
+- Exact replay and changed-payload idempotency conflict.
+- Stale Booking version.
+- Expired Hold and approval deadline.
+- Concurrent Hold conversion and double-booking race.
 - Payment callback before/after expiry.
-- Cancellation/refund/no-show policy boundaries.
+- Cancellation/refund/no-show boundaries.
 - Reschedule rollback when new locking fails.
 - Dispute-window finalization race.
