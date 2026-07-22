@@ -350,6 +350,20 @@ describe("provider booking decisions", () => {
     expect(replay.replayed).toBe(true)
     expect(replay.booking.id).toBe(booking.id)
     expect(replay.booking.version).toBe(2)
+
+    await expect(
+      rejectProviderBooking(
+        owner,
+        booking.id,
+        {
+          expectedVersion: 1,
+          reasonCode: "OTHER",
+          reason: "این بار همان کلید برای تصمیم متفاوت استفاده شده است.",
+        },
+        key,
+        context("changed-payload"),
+      ),
+    ).rejects.toMatchObject({ code: "IDEMPOTENCY_CONFLICT" })
   })
 
   it("rejects a pending booking and releases its allocation", async () => {
