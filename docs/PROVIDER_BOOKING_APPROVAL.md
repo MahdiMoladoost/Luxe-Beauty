@@ -144,7 +144,7 @@ Payment-blocked or allocation-invalid records are counted but not mutated. Opera
 
 ## Database support
 
-Migration `20260722020000_provider_booking_approval` adds an operational index over Booking status, approval deadline and ID for bounded expiry scans.
+Migration `20260722020000_provider_booking_approval` adds an operational index over Booking status, approval deadline and ID for bounded expiry scans. The same named index is represented in Prisma Schema to prevent future schema/migration drift.
 
 The existing Hold allocation constraint remains authoritative:
 
