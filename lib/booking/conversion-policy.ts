@@ -11,12 +11,12 @@ export class BookingConversionPolicyError extends Error {
   }
 }
 
-const jsonObjectSchema = z.record(z.string().min(1).max(120), z.unknown())
+const jsonObjectSchema = z.record(z.string().min(1).max(120), z.any())
 
 const conversionQuoteSnapshotSchema = quoteSnapshotSchema.extend({
   audienceRules: jsonObjectSchema.default({}),
   bookingPolicy: jsonObjectSchema.default({}),
-  pricingRules: z.unknown().optional(),
+  pricingRules: z.any().optional(),
   durationFormula: z.object({
     baseMinutePerQuantity: z.number().int().min(1).max(720),
     preparationMinute: z.number().int().min(0).max(180),
@@ -52,13 +52,18 @@ const bookingPolicySchema = z
     approvalDeadlineMinute: z.number().int().min(15).max(120).optional(),
     payment: paymentModeSchema.optional(),
     requiresOnlinePayment: z.boolean().optional(),
-    depositToman: z.union([z.string().regex(/^\d+$/), z.number().int().nonnegative()]).optional(),
+    depositToman: z
+      .union([
+        z.string().regex(/^\d+$/),
+        z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+      ])
+      .optional(),
     depositPercent: z.number().int().min(0).max(100).optional(),
     questionnaire: z
       .object({ requiredKeys: z.array(z.string().min(1).max(100)).max(50).default([]) })
       .optional(),
   })
-  .passthrough()
+  .catchall(z.any())
 
 const audienceRulesSchema = z
   .object({
@@ -68,14 +73,13 @@ const audienceRulesSchema = z
     requiredQuestionnaireKeys: z.array(z.string().min(1).max(100)).max(50).optional(),
     guardianWorkflowRequired: z.boolean().optional(),
   })
-  .passthrough()
+  .catchall(z.any())
 
 export type BookingConversionSnapshot = z.infer<typeof bookingHoldConversionSnapshotSchema>
 export type BookingDecision = {
   finalStatus: "CONFIRMED" | "AWAITING_PROVIDER_APPROVAL"
   approvalDeadlineAt: Date | null
   bookingPolicy: z.infer<typeof bookingPolicySchema>
-  audienceRules: z.infer<typeof audienceRulesSchema>
 }
 
 export function parseBookingConversionSnapshot(value: unknown): BookingConversionSnapshot {
@@ -201,7 +205,6 @@ export function bookingDecision(input: {
       finalStatus: "CONFIRMED",
       approvalDeadlineAt: null,
       bookingPolicy,
-      audienceRules: audienceRulesSchema.parse({}),
     }
   }
 
@@ -224,12 +227,12 @@ export function bookingDecision(input: {
     finalStatus: "AWAITING_PROVIDER_APPROVAL",
     approvalDeadlineAt,
     bookingPolicy,
-    audienceRules: audienceRulesSchema.parse({}),
   }
 }
 
 function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value)
+  if (value === undefined) return "null"
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null"
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`
   const entries = Object.entries(value as Record<string, unknown>)
     .filter(([, item]) => item !== undefined)
