@@ -2,6 +2,8 @@ import { Prisma, PrismaClient } from "@prisma/client"
 import { Queue, Worker } from "bullmq"
 import IORedis from "ioredis"
 
+import { expireProviderApprovals } from "./provider-approval-expiry.mjs"
+
 const redisUrl = process.env.REDIS_URL
 if (!redisUrl) {
   throw new Error("REDIS_URL is required for the worker")
@@ -87,6 +89,8 @@ const worker = new Worker(
         }
       case "booking.holds.expire":
         return expireBookingHolds(job)
+      case "booking.provider-approvals.expire":
+        return expireProviderApprovals({ prisma, jobId: job.id })
       default:
         throw new Error(`Unsupported job type: ${job.name}`)
     }
@@ -103,6 +107,21 @@ await queue.upsertJobScheduler(
   { every: 60_000 },
   {
     name: "booking.holds.expire",
+    data: { schemaVersion: 1 },
+    opts: {
+      removeOnComplete: 100,
+      removeOnFail: 500,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 5_000 },
+    },
+  },
+)
+
+await queue.upsertJobScheduler(
+  "provider-booking-approval-expiry",
+  { every: 60_000 },
+  {
+    name: "booking.provider-approvals.expire",
     data: { schemaVersion: 1 },
     opts: {
       removeOnComplete: 100,
@@ -171,5 +190,5 @@ console.info(JSON.stringify({
   event: "worker.started",
   queueName,
   concurrency,
-  schedulers: ["booking-hold-expiry"],
+  schedulers: ["booking-hold-expiry", "provider-booking-approval-expiry"],
 }))
