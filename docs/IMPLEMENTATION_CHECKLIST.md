@@ -2,7 +2,7 @@
 
 Legend: `[ ]` open, `[x]` verified complete, `[~]` started/partial, `[!]` blocked and recorded in known limitations.
 
-Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider, catalog, availability, Booking Hold and Hold-to-Booking commits require a fresh CI run before their status can be upgraded to verified complete.
+Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20. Provider, catalog, availability, Booking Hold, Hold-to-Booking and provider-decision commits require a fresh CI run before their status can be upgraded to verified complete.
 
 ## Phase 0 — Audit and project memory
 - [x] Confirm connected GitHub account is `MahdiMoladoost`.
@@ -22,8 +22,8 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [x] Normalize package name, scripts, dependency versions and lockfile.
 - [x] Add `.env.example` with names/placeholders only.
 - [x] Add PostgreSQL, Prisma Client and committed migrations.
-- [~] Redis/BullMQ includes scheduled Booking-Hold expiry with retry/backoff; complete queue monitoring and dead-letter operations remain open.
-- [~] Worker handles health and Hold expiry with structured logs; additional domain jobs remain open.
+- [~] Redis/BullMQ includes scheduled Booking-Hold and provider-approval expiry with retry/backoff; complete queue monitoring and dead-letter operations remain open.
+- [~] Worker handles health, Hold expiry and manual-approval expiry with structured logs; additional domain jobs remain open.
 - [~] Add MinIO namespaces and S3-compatible contract; complete storage operations remain open.
 - [x] Add Dockerfile, Compose, Nginx and health endpoints; full runtime smoke test remains open.
 - [~] Structured worker logs exist; full request correlation/observability remains open.
@@ -72,8 +72,10 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [~] Customer-owned service-recipient APIs and exact date validation are implemented; editing/deletion, guardian relationships and richer recipient workflows remain open.
 - [~] Transactional Booking Holds use verified identity, final Quote validation, TTL, idempotency, Serializable transactions, advisory locks, GiST exclusion, Audit, Outbox and scheduled/lazy expiry.
 - [~] Atomic Hold-to-Booking conversion creates Booking, BookingItem, immutable price/duration/policy/questionnaire/legal snapshots, two transitions, Audit and Outbox without releasing the resource allocation. Exact replay, IDOR, expired Hold and concurrent consumption tests are present; fresh CI is pending.
-- [~] No-payment instant approval produces `CONFIRMED`; no-payment manual approval produces `AWAITING_PROVIDER_APPROVAL` with a bounded deadline. Provider approve/reject APIs and deadline-expiry worker remain open.
-- [ ] Payment-required conversion, mock payment callbacks/webhooks/refunds/reconciliation.
+- [~] No-payment instant approval produces `CONFIRMED`; no-payment manual approval produces `AWAITING_PROVIDER_APPROVAL` with a bounded deadline.
+- [~] Provider-owner approve/reject APIs use `Idempotency-Key`, `expectedVersion`, Serializable locking, controlled rejection reasons, Audit and Outbox. Approval preserves the allocation; rejection releases it. Delegated provider/branch/professional ABAC remains open.
+- [~] BullMQ expires overdue no-payment manual approvals and releases allocations. Payment-linked and allocation-invalid records are counted but not mutated; operations escalation and dashboarding remain open.
+- [ ] Payment-required conversion, payment-backed provider decisions, mock callbacks/webhooks/refunds/reconciliation.
 - [~] Ledger persistence and integer-toman helpers exist; posting services and balance invariants remain open.
 - [ ] Cancellation, delay, reschedule and no-show policies.
 - [ ] Attendance OTP, completion and dispute window.
@@ -81,7 +83,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 7 — Operational panels
 - [~] Customer authentication/profile/security is data-backed; complete customer panel remains open.
-- [ ] Salon/group panel.
+- [ ] Salon/group panel, including pending Booking queue and decision UI.
 - [ ] Independent professional panel.
 - [~] Role/permission management and provider verification queue are protected and data-backed; complete admin panel remains open.
 - [x] Seeded/configurable roles and permissions with server-side enforcement.
@@ -90,7 +92,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 ## Phase 8 — Communications
 - [~] Replaceable SMS port and development mock support authentication flows; Kavenegar production adapter remains open.
 - [ ] SMS templates, quota, packs, delivery state, retries and reports.
-- [ ] In-app notifications and PWA push.
+- [ ] Booking/provider-decision notifications and PWA push.
 - [ ] Internal messaging with private files and moderation signals.
 - [ ] Tickets and support access audit.
 
@@ -119,10 +121,10 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 
 ## Phase 12 — Hardening and release readiness
 - [ ] Complete development seed for nine cities and test roles.
-- [~] Unit tests cover auth, RBAC, money, Persian normalization, transitions, identity/provider/affiliation, pricing, availability, Hold and Hold-to-Booking policy.
-- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds and atomic Hold conversion. Fresh CI verification of newest slices is pending.
+- [~] Unit tests cover auth, RBAC, money, Persian normalization, transitions, identity/provider/affiliation, pricing, availability, Hold, Hold-to-Booking and provider-decision policy.
+- [~] PostgreSQL integration tests cover auth/RBAC, identity/provider, affiliation/branch, Catalog→Quote→Availability, concurrent Holds, atomic Hold conversion, provider approve/reject and scheduled approval expiry. Fresh CI verification of newest slices is pending.
 - [ ] Playwright E2E matrix.
-- [~] Automated security coverage includes role boundaries, OTP/session/device IDOR, CSRF-origin, provider documents/affiliations/branches, Offering/schedule isolation, Hold IDOR/idempotency/concurrency and Booking owner IDOR.
+- [~] Automated security coverage includes role boundaries, OTP/session/device IDOR, CSRF-origin, provider documents/affiliations/branches, Offering/schedule isolation, Hold IDOR/idempotency/concurrency, Booking owner IDOR and cross-provider Booking decision IDOR.
 - [ ] Accessibility automated and manual checks.
 - [x] Verified authentication/RBAC build, migration, seed, Compose, image build and dependency audit pass CI.
 - [ ] Backup and restore test.
@@ -130,7 +132,7 @@ Latest verified authentication/RBAC CI: workflow run `29740506514` on 2026-07-20
 - [ ] Persian README, installation, production, backup and restore docs.
 - [x] External integration limitations and environment contract documented.
 - [x] Draft PR continuously records architecture, migrations, tests and limitations.
-- [~] MR-001 through MR-071 are traceable; auth, provider, catalog/availability and initial Booking slices have advanced while most marketplace scope remains open.
+- [~] MR-001 through MR-071 are traceable; auth, provider, catalog/availability and initial Booking lifecycle slices have advanced while most marketplace scope remains open.
 - [ ] Owner review completed; merge remains owner-controlled.
 
 ## Legacy replacement targets
