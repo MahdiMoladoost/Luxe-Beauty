@@ -2,126 +2,84 @@
 
 ## Status
 
-This is the first Phase 6 booking vertical slice. It creates, reads and releases temporary slot holds. It does not yet convert a hold into a Booking, create a payment, apply cancellation rules or complete the full booking state machine. The newest commits remain pending a fresh CI run.
+This Phase 6 slice creates, reads and releases temporary slot Holds. A second implemented slice now converts one active fixed-price Hold into a Booking atomically; see `docs/HOLD_TO_BOOKING.md`. Newest commits remain pending fresh CI.
 
-## Contract
-
-### Create
+## Create contract
 
 `POST /api/v1/booking-holds`
 
 Required:
 
-- authenticated customer;
-- `identityStatus=VERIFIED`;
-- same-origin mutation request;
-- `Idempotency-Key` header, 8–160 safe characters;
+- authenticated customer with `identityStatus=VERIFIED`;
+- same-origin mutation;
+- `Idempotency-Key`, 8–160 safe characters;
 - body `{ "quoteId": "uuid", "startsAt": "ISO-8601 with offset" }`.
 
-The Quote must:
+The Quote must exist, be unexpired, belong to the customer or be guest-owned, contain a valid immutable snapshot, be final/directly bookable with fixed pricing, and still match current Offering/provider/branch/professional/version, amount and duration.
 
-- exist and be unexpired;
-- belong to the customer or be a guest Quote;
-- contain a valid immutable schema-v1 snapshot;
-- be final and directly bookable;
-- use the initial supported `FIXED` price model;
-- still match the current Offering ID, provider, branch, professional and version;
-- match its stored total and occupied duration.
+The selected interval must be future, within the advance window, completely inside an available schedule window, outside closed exceptions, and non-overlapping with blocking Booking allocations or active Holds.
 
-The selected time must:
+A new Hold expires after the configured TTL, but never after its Quote.
 
-- be in the future and within `BOOKING_MAX_ADVANCE_DAYS`;
-- fit completely inside a weekly or temporary `AVAILABLE` window;
-- not cross a `CLOSED` exception;
-- not overlap an active Booking item;
-- not overlap another unexpired active Hold.
+## Read and release
 
-A newly created Hold expires after `BOOKING_HOLD_TTL_SECONDS`, default 420 seconds.
+- `GET /api/v1/booking-holds/{holdId}` is owner-only and lazily expires elapsed active Holds.
+- `DELETE /api/v1/booking-holds/{holdId}` is owner-only and moves an active temporary Hold to `RELEASED`. Terminal release is idempotent.
 
-### Read
-
-`GET /api/v1/booking-holds/{holdId}`
-
-Only the owning customer can read a Hold. Cross-customer IDs return not found. An elapsed active Hold is atomically marked `EXPIRED` before returning.
-
-### Release
-
-`DELETE /api/v1/booking-holds/{holdId}`
-
-Only the owning customer can release a Hold. Releasing an active Hold changes it to `RELEASED` and frees the interval. Releasing an already terminal Hold is idempotent and returns the current state.
+A `CONSUMED` Hold belongs to an existing Booking and cannot be manually released through this temporary-Hold endpoint. Future cancellation/reschedule workflows control release of consumed allocations.
 
 ## Idempotency
 
-The scope is per customer and command: `booking-hold:create:{customerUserId}`.
+Scope: `booking-hold:create:{customerUserId}`.
 
-The application:
+1. lock scope/key with a PostgreSQL advisory transaction lock;
+2. compare a SHA-256 hash of Quote ID and normalized start time;
+3. return existing Hold for exact replay;
+4. return `IDEMPOTENCY_CONFLICT` for changed payload;
+5. persist Idempotency, Hold and response atomically.
 
-1. obtains a PostgreSQL advisory transaction lock for the scope/key;
-2. compares a SHA-256 request hash derived from Quote ID and normalized start timestamp;
-3. returns the existing Hold for an exact replay;
-4. returns `IDEMPOTENCY_CONFLICT` if the same key is reused with a different payload;
-5. persists the `IdempotencyRecord`, Hold and response atomically in one Serializable transaction.
+Invalid requests leave no incomplete idempotency record.
 
-Invalid Quote/time requests do not leave an incomplete idempotency record.
+## Concurrency
 
-## Concurrency and double-booking protection
+PostgreSQL is authoritative. A Serializable transaction locks the stable professional calendar or branch calendar, expires elapsed Holds, reloads schedules/exceptions/Booking intervals/Holds, verifies the interval and inserts the Hold.
 
-PostgreSQL is authoritative.
+The database has a GiST exclusion constraint. After Hold-to-Booking support, the predicate covers both `ACTIVE` and `CONSUMED`, making the consumed Hold the durable Booking allocation and preventing a gap during conversion.
 
-For each command the repository:
-
-1. starts a Serializable transaction;
-2. obtains a resource advisory lock using the stable professional calendar when a professional is assigned, otherwise the branch calendar;
-3. marks elapsed active Holds for the resource as expired;
-4. reloads schedule rules, exceptions, blocking Booking items and unexpired Holds;
-5. verifies the selected interval;
-6. inserts the Hold.
-
-The database also has a partial GiST exclusion constraint over active Hold resource/range values. This is a second line of defense if application-level conflict checks are bypassed.
-
-Professional resource IDs are stable across every salon affiliation, so concurrent requests at two salons compete for the same lock and exclusion range.
-
-Serializable retry failures return `BOOKING_CONCURRENCY_RETRY`. A direct slot conflict returns `SLOT_NOT_AVAILABLE`.
+Professional IDs are stable across salon affiliations, so requests at different salons compete for the same lock and range.
 
 ## Expiry worker
 
-The BullMQ worker registers the `booking-hold-expiry` Job Scheduler and generates `booking.holds.expire` jobs every minute. Each run processes up to 500 elapsed active Holds and records:
+The BullMQ Job Scheduler creates `booking.holds.expire` jobs every minute. Each run processes a bounded batch and writes status, system Audit and deduplicated Outbox events. Create/read paths also expire relevant rows lazily, so correctness does not depend only on Worker availability.
 
-- status change to `EXPIRED`;
-- system Audit Log;
-- deduplicated Outbox event.
+## Privacy and events
 
-The creation/read paths also expire relevant rows lazily. Worker delay or downtime therefore does not make an expired Hold valid.
-
-## Audit and outbox
-
-Creation, release and expiry are audited. Creation and worker expiry emit deduplicated Outbox events. No mobile, national ID, raw address or credential is included in Hold event payloads.
+Create, release and expiry are audited. Event payloads exclude mobile, national ID, raw address and credentials.
 
 ## Database invariants
 
-Migration `20260721020000_booking_holds` adds:
+Migrations add:
 
-- `BookingHoldStatus`;
-- `BookingHold` with Quote/Offering/provider/branch/professional/customer foreign keys;
-- positive service and occupied ranges;
-- service interval contained in occupied interval;
+- `BookingHoldStatus` and foreign keys;
+- valid service/occupied ranges;
+- service range inside occupied range;
 - expiry after creation;
 - resource target consistency;
-- customer/idempotency uniqueness;
-- active-resource GiST overlap exclusion;
+- per-customer idempotency uniqueness;
+- one-to-one consumed Booking reference;
+- state/consumption consistency;
+- GiST overlap exclusion for active and consumed allocations;
 - operational indexes.
 
-The migration requires the PostgreSQL `btree_gist` extension. Deployment roles must be permitted to install it, or operations must install the extension before migration deployment.
+`btree_gist` must be available to the migration role or preinstalled.
 
 ## Explicit remaining work
 
-- Hold-to-Booking conversion and consumed state;
-- booking recipient selection and questionnaire validation;
-- multiple services, resources, travel and contiguous availability;
-- provider instant/manual approval and deadline jobs;
-- deposit calculation, mock payment, callbacks and ledger posting;
-- confirmed Booking overlap constraints and rescheduling locks;
-- cancellation, delay, no-show, attendance and dispute workflows;
+- payment-required conversion, mock payment and ledger;
+- provider approve/reject and approval expiry;
+- multiple services, resources, capacity and travel;
+- cancellation/refund/no-show;
+- reschedule allocation swap;
+- attendance/dispute;
 - waitlist and alternatives;
-- Redis acceleration and queue health UI;
-- fresh CI, E2E, runtime concurrency load and failure-injection testing.
+- fresh CI, E2E, load and failure-injection tests.
