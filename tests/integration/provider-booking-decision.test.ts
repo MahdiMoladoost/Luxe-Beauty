@@ -245,13 +245,17 @@ async function fixture(options?: { deadlineOffsetMinute?: number }) {
   })
   holdIds.add(hold.id)
 
-  return { owner, otherOwner, customer, provider, branch, booking, hold }
+  return { owner, otherOwner, customer, provider, branch, offering, booking, hold }
 }
 
 afterEach(async () => {
   if (userIds.size > 0) {
     await prisma.idempotencyRecord.deleteMany({
-      where: { scope: { startsWith: "booking:provider-decision:" } },
+      where: {
+        OR: [...userIds].map((userId) => ({
+          scope: `booking:provider-decision:${userId}`,
+        })),
+      },
     })
   }
   if (bookingIds.size > 0) {
@@ -268,7 +272,9 @@ afterEach(async () => {
   if (bookingIds.size > 0) {
     await prisma.booking.deleteMany({ where: { id: { in: [...bookingIds] } } })
   }
-  if (quoteIds.size > 0) await prisma.serviceQuote.deleteMany({ where: { id: { in: [...quoteIds] } } })
+  if (quoteIds.size > 0) {
+    await prisma.serviceQuote.deleteMany({ where: { id: { in: [...quoteIds] } } })
+  }
   if (recipientIds.size > 0) {
     await prisma.serviceRecipient.deleteMany({ where: { id: { in: [...recipientIds] } } })
   }
@@ -281,11 +287,15 @@ afterEach(async () => {
   if (categoryIds.size > 0) {
     await prisma.serviceCategory.deleteMany({ where: { id: { in: [...categoryIds] } } })
   }
-  if (branchIds.size > 0) await prisma.branch.deleteMany({ where: { id: { in: [...branchIds] } } })
+  if (branchIds.size > 0) {
+    await prisma.branch.deleteMany({ where: { id: { in: [...branchIds] } } })
+  }
   if (providerIds.size > 0) {
     await prisma.providerOrganization.deleteMany({ where: { id: { in: [...providerIds] } } })
   }
-  if (cityIds.size > 0) await prisma.city.deleteMany({ where: { id: { in: [...cityIds] } } })
+  if (cityIds.size > 0) {
+    await prisma.city.deleteMany({ where: { id: { in: [...cityIds] } } })
+  }
   if (provinceIds.size > 0) {
     await prisma.province.deleteMany({ where: { id: { in: [...provinceIds] } } })
   }
@@ -386,6 +396,37 @@ describe("provider booking decisions", () => {
     ).rejects.toMatchObject({ code: "BOOKING_VERSION_CONFLICT" })
   })
 
+  it("revalidates operational eligibility before approval while still allowing rejection", async () => {
+    const { owner, branch, booking, hold } = await fixture()
+    await prisma.branch.update({ where: { id: branch.id }, data: { active: false } })
+
+    await expect(
+      approveProviderBooking(
+        owner,
+        booking.id,
+        { expectedVersion: 1 },
+        `provider-ineligible-${randomUUID()}`,
+        context("ineligible"),
+      ),
+    ).rejects.toMatchObject({ code: "BOOKING_APPROVAL_ELIGIBILITY_FAILED" })
+
+    const rejected = await rejectProviderBooking(
+      owner,
+      booking.id,
+      {
+        expectedVersion: 1,
+        reasonCode: "BRANCH_UNAVAILABLE",
+        reason: "شعبه در این بازه امکان ارائه خدمت ندارد.",
+      },
+      `provider-ineligible-reject-${randomUUID()}`,
+      context("ineligible-reject"),
+    )
+    expect(rejected.booking.status).toBe("REJECTED")
+
+    const allocation = await prisma.bookingHold.findUniqueOrThrow({ where: { id: hold.id } })
+    expect(allocation.status).toBe("RELEASED")
+  })
+
   it("expires a late provider command and releases the allocation", async () => {
     const { owner, booking, hold } = await fixture({ deadlineOffsetMinute: -1 })
     await expect(
@@ -444,8 +485,9 @@ describe("provider booking decisions", () => {
       jobId: `integration-${randomUUID()}`,
       now: new Date(),
       limit: 50,
+      bookingIds: [booking.id],
     })
-    expect(result.expiredCount).toBeGreaterThanOrEqual(1)
+    expect(result.expiredCount).toBe(1)
 
     const persisted = await prisma.booking.findUniqueOrThrow({ where: { id: booking.id } })
     expect(persisted.status).toBe("EXPIRED")
