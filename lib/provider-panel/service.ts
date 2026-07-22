@@ -11,6 +11,7 @@ import {
 } from "@/lib/provider-panel/repository"
 
 const providerIdSchema = z.string().uuid()
+const bookingIdSchema = z.string().uuid()
 const dateOnlySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 const bookingQuerySchema = z.object({
   providerId: providerIdSchema,
@@ -217,4 +218,18 @@ export async function providerBookings(
       sort: input.sort,
     },
   }
+}
+
+export async function providerBookingDetails(
+  principal: SessionPrincipal,
+  providerId: string,
+  bookingId: string,
+) {
+  const provider = await requireOwnedProvider(principal, providerId)
+  const booking = await providerPanelRepository.booking(
+    provider.id,
+    bookingIdSchema.parse(bookingId),
+  )
+  if (!booking) throw new AuthError("BOOKING_NOT_FOUND", "نوبت قابل مدیریت یافت نشد.", 404)
+  return bookingDto(booking)
 }
