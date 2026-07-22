@@ -2,24 +2,25 @@
 
 Target versioned base path: `/api/v1`.
 
-Current operational authentication/RBAC compatibility routes use `/api/auth/*` and `/api/admin/rbac/*` while the remaining versioned marketplace API is implemented. A future versioning migration must preserve a documented compatibility window.
+Current operational authentication/RBAC compatibility routes use `/api/auth/*` and `/api/admin/rbac/*`. A future versioning migration must preserve a documented compatibility window.
 
-Content type: JSON unless an upload/download contract states otherwise.
+Content type is JSON unless an upload/download contract states otherwise.
 
 ## Contract rules
+
 - Validate every input boundary with Zod-compatible schemas and return explicit output DTOs.
 - Normalize Persian/Arabic letters and digits before domain validation where applicable.
 - Never expose ORM objects, credentials, OTP hashes, session hashes or sensitive identity values directly.
 - Use opaque IDs and stable error codes.
-- Cookie-authenticated mutations require same-origin/same-site request checks.
-- Require `Idempotency-Key` for booking holds, booking confirmation, payment creation, callbacks, refunds, wallet credits, and other repeat-sensitive commands.
+- Cookie-authenticated mutations require same-origin/same-site checks.
+- Require `Idempotency-Key` for booking holds, Booking creation, payments, callbacks, refunds, wallet credits and other repeat-sensitive commands.
 - Carry a correlation ID through requests, audit events and async work.
-- Pagination uses opaque cursors for operational lists and explicit page metadata for SEO/public pages.
 - Dates are ISO-8601 UTC values. UI-localized values are presentation concerns.
-- Money fields use integer tomans and are serialized as decimal strings ending in `Toman` in field names.
+- Money is integer toman and serialized as decimal strings in API DTOs.
 - Private URLs are short-lived signed URLs, never permanent public object URLs.
+- Database uniqueness, foreign-key, exclusion and check-constraint failures are mapped to stable errors without exposing SQL details.
 
-## Current response envelopes
+## Response envelopes
 
 Success:
 
@@ -44,61 +45,58 @@ Error:
 }
 ```
 
-Authentication and account-discovery errors do not reveal whether an account exists. OTPs, password hashes, session tokens/hashes, raw IP addresses and national IDs never appear in errors or analytics. Database uniqueness, foreign-key and check-constraint failures are mapped to stable safe errors without exposing SQL details.
+Authentication errors do not reveal whether an account exists. OTPs, passwords, session tokens/hashes, raw IP addresses and national IDs never appear in errors or analytics.
 
 ## Operational authentication and RBAC routes
 
 ### Customer OTP and account
+
 - `POST /api/auth/otp/request`
-  - input: `{ "mobile": "09..." }`
-  - enforces mobile/IP rate windows, resend cooldown and one active challenge per purpose.
-  - development mock mode may include `developmentCode`; production never does.
 - `POST /api/auth/otp/verify`
-  - input: `{ "mobile", "challengeId", "code" }`
-  - consumes the code once, creates/activates the customer, ensures the customer role and sets a secure session cookie.
 - `GET /api/auth/me`
-  - returns the current account/profile/identity status/roles/permissions without sensitive credential material.
 - `PATCH /api/auth/me`
-  - updates normalized first and last name and audits the mutation.
+
+OTP requests enforce mobile/IP windows, resend cooldown and one active challenge per purpose. Development mock mode may include `developmentCode`; production never does.
 
 ### Staff/provider authentication
+
 - `POST /api/auth/staff/login`
-  - input: `{ "mobile", "password" }`
-  - mobile-only; verifies the versioned memory-hard password hash, applies temporary lockout and starts SMS 2FA when required.
 - `POST /api/auth/staff/verify-2fa`
 - `POST /api/auth/password/request-reset`
 - `POST /api/auth/password/reset`
 - `POST /api/auth/password/change`
 
 ### Sessions and devices
+
 - `POST /api/auth/logout`
 - `POST /api/auth/logout-all`
 - `GET /api/auth/sessions`
 - `DELETE /api/auth/sessions/{sessionId}`
-  - ownership is enforced in the transaction; cross-user IDs return not found and are never revoked.
+
+Ownership is enforced in the transaction. Cross-user IDs return not found.
 
 ### Roles and permissions
+
 - `GET /api/admin/rbac/roles` requires `role.read`.
-- `POST /api/admin/rbac/roles` requires `role.manage` and atomically writes role, role-permission links and audit evidence.
+- `POST /api/admin/rbac/roles` requires `role.manage`.
 - `GET /api/admin/rbac/permissions` requires `permission.read`.
-- `POST /api/admin/rbac/permissions` requires `permission.manage` and atomically writes permission and audit evidence.
+- `POST /api/admin/rbac/permissions` requires `permission.manage`.
 
 ## Operational versioned marketplace routes
 
 ### Identity verification
+
 - `GET /api/v1/identity/status`
 - `POST /api/v1/identity/verify`
-- `GET /api/v1/admin/identity/users/{userId}` requires identity review permission and recent step-up authentication for sensitive access.
+- `GET /api/v1/admin/identity/users/{userId}` requires review permission and recent step-up authentication.
 
 ### Providers and verification
+
 - `POST /api/v1/providers`
-  - creates a persisted provider application in draft status and assigns the matching provider role.
 - `GET /api/v1/providers/me`
 - `GET /api/v1/providers/{providerId}`
 - `POST /api/v1/providers/{providerId}/documents`
-  - private multipart upload; validates MIME/size/signature, runs the malware adapter, stores privately and writes audit evidence.
 - `GET /api/v1/provider-documents/{documentId}/content`
-  - owner or authorized reviewer only; reviewer access requires a reason and is audited.
 - `POST /api/v1/providers/{providerId}/submit`
 - `POST /api/v1/providers/{providerId}/appeal`
 - `POST /api/v1/provider-documents/{documentId}/appeal`
@@ -106,92 +104,125 @@ Authentication and account-discovery errors do not reveal whether an account exi
 - `POST /api/v1/admin/providers/{providerId}/review`
 - `POST /api/v1/admin/provider-documents/{documentId}/review`
 
+Private uploads validate MIME, size and signature, run the malware adapter, use private storage and write audit evidence. Reviewer access requires permission and reason.
+
 ### Provider branches
+
 - `GET /api/v1/providers/{providerId}/branches`
 - `POST /api/v1/providers/{providerId}/branches`
-  - creates an inactive, unverified branch after validating city/district/neighborhood hierarchy.
 - `GET /api/v1/providers/{providerId}/branches/{branchId}`
 - `PATCH /api/v1/providers/{providerId}/branches/{branchId}`
-  - requires `expectedUpdatedAt`; stale mutations return `VERSION_CONFLICT`.
-  - `active=true` is rejected until the provider organization is approved.
 - `DELETE /api/v1/providers/{providerId}/branches/{branchId}?expectedUpdatedAt={ISO-8601}`
-  - soft deletes and deactivates the branch while preserving historical references.
 
-The owner cannot set `addressVerified`. Exact-address storage, Neshan integration and delegated branch staff remain open. See `docs/PROVIDER_BRANCHES.md`.
+New branches are inactive and address-unverified. Location hierarchy is validated. Stale mutations return `VERSION_CONFLICT`. Owners cannot set `addressVerified`.
 
 ### Professional profile and bilateral affiliations
+
 - `GET /api/v1/professionals/me`
 - `PUT /api/v1/professionals/me`
 - `GET /api/v1/professional-affiliations`
 - `POST /api/v1/professional-affiliations`
-  - professional request: `{ "organizationId", "branchId?" }`.
-  - provider request: `{ "organizationId", "professionalProfileId", "branchId?", "permissions?" }`.
 - `PATCH /api/v1/professional-affiliations/{affiliationId}`
-  - actions: `ACCEPT`, `REJECT`, `REQUEST_TERMINATION`, `ACCEPT_TERMINATION`, `REJECT_TERMINATION`.
-  - the requester cannot accept their own request; termination also requires counterparty action.
 
-Provider-side authority is owner-only until provider/branch scoped ABAC is implemented. See `docs/PROFESSIONAL_AFFILIATIONS.md`.
+Activation and termination require counterparty action. Provider-side authority remains owner-only until scoped ABAC is implemented.
 
 ### Standard catalog
+
 - `GET /api/v1/catalog/categories`
-  - public; returns active categories with active standard services.
-- `POST /api/v1/catalog/categories`
-  - requires `content.manage`.
-  - input: `{ "parentId?", "nameFa", "nameEn?", "slug" }`.
-- `POST /api/v1/catalog/services`
-  - requires `content.manage`.
-  - input: `{ "categoryId", "titleFa", "titleEn?", "slug", "description?" }`.
+- `POST /api/v1/catalog/categories` requires `content.manage`.
+- `POST /api/v1/catalog/services` requires `content.manage`.
 
 Provider users cannot create arbitrary standard catalog records through Offering endpoints.
 
 ### Provider offerings
-- `GET /api/v1/providers/{providerId}/offerings`
-  - provider-owner scoped list including drafts and inactive records.
-- `POST /api/v1/providers/{providerId}/offerings`
-  - provider must be approved.
-  - validates standard service, branch ownership and active professional affiliation.
-  - supported price models in this slice: `FIXED`, `STARTING_FROM`, `RANGE`, `AFTER_CONSULTATION`.
-  - money inputs are digit-only decimal strings, for example `"650000"` toman.
-- `PATCH /api/v1/providers/{providerId}/offerings/{offeringId}`
-  - requires integer `expectedVersion` in the body; stale writes return `VERSION_CONFLICT`.
-- `DELETE /api/v1/providers/{providerId}/offerings/{offeringId}?expectedVersion={integer}`
-  - soft archive; disables `active` and `published`.
-- `GET /api/v1/offerings/{offeringId}`
-  - public only when Offering, provider, standard service and assigned branch/professional are operational.
 
-`published=true` requires `active=true` and is enforced by PostgreSQL. Publishing also requires `bookingEnabled=true`, an active branch when branch-bound, and an active verified professional when professional-bound.
+- `GET /api/v1/providers/{providerId}/offerings`
+- `POST /api/v1/providers/{providerId}/offerings`
+- `PATCH /api/v1/providers/{providerId}/offerings/{offeringId}`
+- `DELETE /api/v1/providers/{providerId}/offerings/{offeringId}?expectedVersion={integer}`
+- `GET /api/v1/offerings/{offeringId}`
+
+Provider ownership, standard service, branch and active professional affiliation are checked. Supported initial price modes are `FIXED`, `STARTING_FROM`, `RANGE` and `AFTER_CONSULTATION`. `published=true` requires `active=true` and operational provider/target state.
 
 ### Server quote
-- `POST /api/v1/offerings/{offeringId}/quote`
-  - guest or authenticated caller; same-origin mutation check applies.
-  - input: `{ "quantity": 1 }`, maximum 20 and maximum total duration 1,440 minutes.
-  - reloads the Offering, calculates integer-toman money and duration on the server, persists a 15-minute `ServiceQuote`, and snapshots Offering version and rules.
-  - `FIXED` returns `finalPrice=true` and `directlyBookable=true`.
-  - `STARTING_FROM` and `RANGE` return explicit estimates with `directlyBookable=false`.
-  - `AFTER_CONSULTATION` returns no invented price and requires consultation.
 
-Quote expiry enforcement during booking, calculated pricing, package/variant/add-on/location pricing and consultation-to-final-quote are still open.
+- `POST /api/v1/offerings/{offeringId}/quote`
+
+Input: `{ "quantity": 1 }`, maximum 20 and maximum total duration 1,440 minutes. The server reloads the Offering, calculates integer-toman money and duration, persists a 15-minute `ServiceQuote`, and snapshots Offering version and rules.
+
+- `FIXED` is final and directly bookable.
+- `STARTING_FROM` and `RANGE` are estimates.
+- `AFTER_CONSULTATION` has no invented price.
+
+Quote ownership, expiry, amount, duration, quantity and Offering-version consistency are revalidated during Hold and Booking creation.
 
 ### Shared schedule and availability
+
 - `GET /api/v1/availability/schedules?ownerType=PROFESSIONAL|BRANCH&ownerId={uuid}`
-  - owner-only; cross-owner IDs return not found.
 - `PUT /api/v1/availability/schedules`
-  - input includes `ownerType`, `ownerId`, `expectedUpdatedAt` and up to 50 weekly rules.
-  - first write uses `expectedUpdatedAt=null`; stale replacement returns `VERSION_CONFLICT`.
-  - current timezone is explicitly `Asia/Tehran`; active rules on one day may not overlap.
 - `POST /api/v1/availability/exceptions`
-  - creates `CLOSED` or `AVAILABLE` range for an authorized schedule owner.
 - `DELETE /api/v1/availability/exceptions/{exceptionId}`
 - `GET /api/v1/offerings/{offeringId}/availability?from={ISO}&to={ISO}&stepMinute=15&limit=60`
-  - public, maximum range 31 days and maximum 200 slots.
-  - professional-bound Offering uses the stable professional calendar across all affiliations; otherwise branch calendar is used.
-  - combines weekly rules and exceptions, subtracts blocking Booking intervals and past time, and returns UTC slot ranges.
 
-Complete rules, limitations and examples are in `docs/CATALOG_PRICING_AVAILABILITY.md`.
+The initial availability path supports a maximum 31-day range and 200 slots. Professional-bound Offerings use the stable professional calendar across affiliations; otherwise the branch calendar is used.
+
+### Service recipients
+
+- `GET /api/v1/booking-recipients`
+  - returns only non-deleted recipients owned by the current customer.
+- `POST /api/v1/booking-recipients`
+  - same-origin authenticated mutation;
+  - input includes normalized name fields and optional valid date-only birth date, controlled gender code, relation, Iranian mobile and accessibility notes;
+  - writes Audit Log evidence.
+
+### Transactional booking holds
+
+- `POST /api/v1/booking-holds`
+  - requires verified identity, same-origin request and `Idempotency-Key`;
+  - body: `{ "quoteId": "uuid", "startsAt": "ISO-8601 with offset" }`.
+- `GET /api/v1/booking-holds/{holdId}`
+- `DELETE /api/v1/booking-holds/{holdId}`
+
+A Hold is created only for a valid final Quote and available interval. PostgreSQL Serializable transactions, advisory locks and a GiST exclusion constraint protect the stable professional/branch resource. Exact replay returns the same Hold. See `docs/BOOKING_HOLDS.md`.
+
+### Atomic Hold-to-Booking conversion
+
+- `POST /api/v1/bookings`
+  - requires verified identity, same-origin request and `Idempotency-Key`;
+  - body:
+
+```json
+{
+  "holdId": "uuid",
+  "recipientId": "uuid",
+  "legalAcceptance": {
+    "termsVersion": "published-version",
+    "privacyVersion": "published-version",
+    "bookingVersion": "published-version"
+  },
+  "questionnaireAnswers": {}
+}
+```
+
+The command revalidates Hold ownership/state/expiry, Recipient ownership, complete Quote snapshot, Offering/provider/branch/professional eligibility, active affiliation, audience/age rules, required answers and current legal versions.
+
+The client cannot submit price or duration. Booking, BookingItem, immutable snapshots, transitions, Hold consumption, Audit, Outbox and idempotency response are written in one Serializable transaction.
+
+- no-payment `approval=INSTANT` -> `CONFIRMED`;
+- no-payment `approval=MANUAL` -> `AWAITING_PROVIDER_APPROVAL` with a bounded deadline;
+- online/deposit/prepaid policies -> `PAYMENT_FLOW_REQUIRED` until the payment path is implemented.
+
+A consumed Hold remains the authoritative resource allocation. The `ACTIVE` + `CONSUMED` GiST exclusion predicate prevents an allocation gap during conversion.
+
+- `GET /api/v1/bookings/{bookingId}`
+  - customer-owner only; cross-user IDs return `BOOKING_NOT_FOUND`.
+
+See `docs/HOLD_TO_BOOKING.md`.
 
 ## Target endpoint families still open
 
 ### Geography and search
+
 - `GET /api/v1/geography/provinces`
 - `GET /api/v1/geography/cities`
 - `GET /api/v1/geography/districts`
@@ -200,26 +231,24 @@ Complete rules, limitations and examples are in `docs/CATALOG_PRICING_AVAILABILI
 - `GET /api/v1/search/providers`
 - `GET /api/v1/availability/today`
 
-### Provider operations still open
-- branch private-address and verification contracts;
+### Provider operations
+
+- private-address verification;
 - provider staff memberships and scoped role assignments;
 - professional discovery and privacy-safe invitation lookup;
 - service areas, travel rules and resource/capacity configuration.
 
-### Catalog and availability still open
+### Catalog and availability
+
 - category/service edit, deactivate, ordering and admin UI;
-- variants, add-ons, packages and questionnaires;
+- variants, add-ons, packages and full questionnaire definitions;
 - calculated and location-aware pricing;
 - resources, capacity, holidays, leave and travel time;
 - multi-service contiguous availability, alternatives and waitlist;
-- quote expiry jobs, cache invalidation and transactional booking holds.
+- quote-expiry jobs and cache invalidation.
 
-### Booking
-- `POST /api/v1/booking-recipients`
-- `POST /api/v1/booking-holds`
-- `GET /api/v1/booking-holds/{holdId}`
-- `POST /api/v1/bookings`
-- `GET /api/v1/bookings/{bookingId}`
+### Booking lifecycle
+
 - `POST /api/v1/bookings/{bookingId}/provider-approve`
 - `POST /api/v1/bookings/{bookingId}/provider-reject`
 - `POST /api/v1/bookings/{bookingId}/cancel`
@@ -231,37 +260,26 @@ Complete rules, limitations and examples are in `docs/CATALOG_PRICING_AVAILABILI
 - `POST /api/v1/waitlist`
 
 ### Consultation and messaging
-- `POST /api/v1/consultations`
-- `POST /api/v1/consultations/{id}/proposals`
-- `POST /api/v1/conversations`
-- `GET /api/v1/conversations/{id}/messages`
-- `POST /api/v1/conversations/{id}/messages`
-- `POST /api/v1/uploads/initiate`
-- `POST /api/v1/uploads/{uploadId}/complete`
+
+- consultation requests and proposals;
+- conversations and messages;
+- resumable/private upload completion.
 
 ### Payment and ledger
-- `POST /api/v1/payments`
-- `POST /api/v1/payments/{paymentId}/confirm-mock`
-- `POST /api/v1/payment-webhooks/{provider}`
-- `POST /api/v1/refunds`
-- `GET /api/v1/wallet`
-- `GET /api/v1/ledger/transactions`
-- `GET /api/v1/settlements`
+
+- payment creation and mock confirmation;
+- signed callbacks/webhooks;
+- refunds and reconciliation;
+- wallet, ledger and settlement reads.
 
 ### Reviews and support
-- `POST /api/v1/reviews`
-- `POST /api/v1/reviews/{reviewId}/response`
-- `POST /api/v1/reviews/{reviewId}/report`
-- `POST /api/v1/support/tickets`
-- `POST /api/v1/complaints`
-- `GET /api/v1/disputes/{id}`
-- `POST /api/v1/disputes/{id}/evidence`
-- `POST /api/v1/disputes/{id}/appeal`
 
-### Administration
-Admin endpoints use the same application services and server-side permission policies, including users, providers, verification, bookings, finance, plans, SMS, content, geography, policies, feature flags, reports, audit, queue health, service health, roles, permissions, and global settings.
+- verified reviews, responses and reports;
+- support tickets and complaints;
+- dispute evidence and appeal.
 
 ## Command response pattern
-Commands return the changed resource summary, current version, and permitted next actions. They do not imply completion of asynchronous external delivery.
 
-OpenAPI generation is planned from validated schemas. Any breaking contract change requires a versioned endpoint or an explicit migration period.
+Commands return the changed resource summary, current version and permitted next actions. They do not imply completion of asynchronous external delivery.
+
+OpenAPI generation is planned from validated schemas. Breaking changes require a versioned endpoint or an explicit migration period.
