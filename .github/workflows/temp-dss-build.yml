@@ -1,0 +1,27 @@
+name: Temporary DSS6 Build
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'temporary-dss-build/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-dss:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install --upgrade pip pydsstools==3.1.0 numpy pandas
+      - run: python temporary-dss-build/generate_dss.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Golestan-820504014-DSS6
+          path: out/*
+          if-no-files-found: error
+          retention-days: 1
