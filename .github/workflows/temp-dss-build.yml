@@ -11,17 +11,18 @@ permissions:
 
 jobs:
   build-dss:
-    runs-on: ubuntu-22.04
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
       - run: python -m pip install --upgrade pip pydsstools==3.1.0 numpy pandas
-      - name: Generate DSS6 files
+      - name: Generate and validate DSS6 files
+        shell: pwsh
         run: |
-          sed -i '/pdc.y_labels/d' temporary-dss-build/generate_dss.py
-          python temporary-dss-build/generate_dss.py
+          (Get-Content temporary-dss-build/generate_dss.py) | Where-Object { $_ -notmatch 'pdc\.y_labels' } | Set-Content temporary-dss-build/generate_dss_fixed.py
+          python temporary-dss-build/generate_dss_fixed.py
       - uses: actions/upload-artifact@v4
         with:
           name: Golestan-820504014-DSS6
